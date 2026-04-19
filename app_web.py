@@ -46,7 +46,7 @@ def buat_pdf_web(data, dokumen):
             c.line(x_status + 1.5 * cm, yy + 0.12 * cm, x_status + 3.8 * cm, yy + 0.12 * cm)
         else:
             # CORET "ADA"
-            c.line(x_status - 0.1 * cm, yy + 0.12 * cm, x_status + 1.1 * cm, yy + 0.12 * cm)
+            c.line(x_status - 0.1 * cm, yy + 0.12 * cm, x_status + 1 * cm, yy + 0.12 * cm)
         yy -= 0.65 * cm
 
     # BARIS 54 (TTD)
