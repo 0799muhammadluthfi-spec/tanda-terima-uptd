@@ -5,7 +5,6 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.units import cm
 from io import BytesIO
 from streamlit_gsheets import GSheetsConnection
-import time
 
 # --- KONFIGURASI HALAMAN ---
 st.set_page_config(page_title="UPTD PASAR KANDANGAN", layout="wide")
@@ -25,13 +24,14 @@ def format_tgl_indo(tgl_input):
     except:
         return str(tgl_input).upper()
 
-# --- FUNGSI CETAK PDF (Tetap Sama) ---
+# --- FUNGSI CETAK PDF (FULL & OVERPRINT) ---
 def buat_pdf_full(data, berkas_list):
     buffer = BytesIO()
     UKURAN_CUSTOM = (22 * cm, 11 * cm)
     c = canvas.Canvas(buffer, pagesize=UKURAN_CUSTOM)
     x_pos, y_pos = 1 * cm, 1 * cm
     lebar_kertas = 22 * cm
+    # HALAMAN 1 (DEPAN)
     c.setLineWidth(1.5); c.rect(x_pos, y_pos, 20*cm, 9*cm)
     c.setLineWidth(1.5); c.rect(x_pos + 0.15*cm, y_pos + 0.15*cm, 19.7*cm, 8.7*cm)
     c.setFont("Helvetica-Bold", 14); c.drawCentredString(lebar_kertas/2, y_pos + 8.1 * cm, "TANDA TERIMA BERKAS PERMOHONAN PERPANJANGAN IZIN TOKO")
@@ -54,6 +54,7 @@ def buat_pdf_full(data, berkas_list):
     c.setFont("Helvetica-Bold", 12); c.drawCentredString(x_pos + 5 * cm, y_pos + 0.5 * cm, f"( {data['Nama_Pengantar_Berkas']} )")
     c.drawCentredString(x_pos + 15 * cm, y_pos + 0.5 * cm, f"( {data['Penerima_Berkas']} )")
     c.showPage()
+    # HALAMAN 2 (BELAKANG)
     c.setLineWidth(1.5); c.rect(x_pos, y_pos, 20*cm, 9*cm)
     c.setLineWidth(1.5); c.rect(x_pos + 0.15*cm, y_pos + 0.15*cm, 19.7*cm, 8.7*cm)
     y_tab = y_pos + 8.85 * cm; tinggi_baris = 1.15 * cm
@@ -82,6 +83,7 @@ def cetak_overprint(tgl_ambil):
 st.sidebar.title("SURAT KEPUTUSAN MENEMPATI TOKO")
 menu = st.sidebar.radio("KEPERLUAN:", ["PENGANTARAN BERKAS", "PENGAMBILAN BERKAS"])
 
+# AMBIL DATA (TTL 60 detik agar stabil)
 @st.cache_data(ttl=60)
 def ambil_data():
     try:
@@ -94,58 +96,55 @@ def ambil_data():
 
 df = ambil_data()
 
-# --- FUNGSI RESET INPUT ---
-def reset_form():
-    st.session_state.nama_toko = ""
-    st.session_state.no_toko = ""
-    st.session_state.nama_pemilik = ""
-    st.session_state.pengantar = ""
-    st.session_state.penerima = ""
-    st.session_state.tgl_p_input = datetime.now().strftime("%d/%m/%Y")
-    st.session_state.tgl_a_input = datetime.now().strftime("%d/%m/%Y")
-
-# Inisialisasi Session State jika belum ada
-if 'nama_toko' not in st.session_state: reset_form()
-
+# --- BAGIAN 1: PENGANTARAN BERKAS ---
 if menu == "PENGANTARAN BERKAS":
-    st.header("📝 PENGANTARAN BERKAS BARU")
+    st.header("📝 FORM PENGANTARAN BERKAS BARU")
     
+    # Hitung No Urut Terakhir
     try:
         nums = pd.to_numeric(df['No'], errors='coerce').dropna()
-        last_no = 0 if nums.empty else nums.max()
+        last_no = 0 if nums.empty else int(nums.max())
     except: last_no = 0
     
-    no_urut = st.text_input("NO. URUT PENDAFTARAN", value=str(int(last_no) + 1)).strip()
+    # Reset form jika diinginkan
+    if st.button("🔄 BERSIHKAN FORM / INPUT BARU"):
+        st.rerun()
+
+    # Layout Input
+    no_urut = st.text_input("NO. URUT PENDAFTARAN", value=str(last_no + 1)).strip()
     
-    # Cek duplikat
+    # Cek Duplikat
     is_duplicate = False
     if not df.empty and no_urut in df['No'].values:
         is_duplicate = True
-        st.warning(f"⚠️ NOMOR {no_urut} SUDAH ADA! JIKA LANJUT, DATA LAMA TERTIMPA.")
+        st.warning(f"⚠️ NOMOR {no_urut} SUDAH TERPAKAI! DATA LAMA AKAN TERTIMPA.")
 
     col1, col2 = st.columns(2)
     with col1:
-        # Gunakan 'key' agar bisa di-reset otomatis
-        raw_tgl_t = st.text_input("TANGGAL PENGANTARAN", value=st.session_state.tgl_p_input, key="tgl_p_field")
+        tgl_skrg = datetime.now().strftime("%d/%m/%Y")
+        raw_tgl_t = st.text_input("TANGGAL PENGANTARAN (DD/MM/YYYY)", value=tgl_skrg)
         tgl_t = format_tgl_indo(raw_tgl_t)
-        if tgl_t != raw_tgl_t:
-            st.session_state.tgl_p_input = tgl_t
-            st.rerun()
+        st.caption(f"FORMAT: {tgl_t}")
         
-        nama_toko = st.text_input("NAMA TOKO", value=st.session_state.nama_toko).upper()
-        no_toko = st.text_input("NOMOR TOKO", value=st.session_state.no_toko).upper()
+        nama_toko = st.text_input("NAMA TOKO").upper()
+        no_toko = st.text_input("NOMOR TOKO").upper()
     with col2:
-        sk = st.text_input("NAMA PEMILIK SESUAI SK", value=st.session_state.nama_pemilik).upper()
-        pengantar = st.text_input("NAMA PENGANTAR BERKAS", value=st.session_state.pengantar).upper()
-        penerima = st.text_input("PETUGAS PENERIMA", value=st.session_state.penerima).upper()
+        sk = st.text_input("NAMA PEMILIK (SESUAI SK)").upper()
+        pengantar = st.text_input("NAMA PENGANTAR BERKAS").upper()
+        penerima = st.text_input("PETUGAS PENERIMA BERKAS").upper()
     
+    st.write("---")
+    st.write("📋 **CEKLIS KELENGKAPAN BERKAS:**")
     t_list = ["SK ASLI MENEMPATI", "PAS FOTO 3X4 (2 LBR)", "FC KTP PEMILIK", "FC KARTU SEWA", "SURAT KUASA", "SURAT KEHILANGAN"]
-    st.write("CEKLIS KELENGKAPAN BERKAS:")
-    sel_berkas = [t for t in t_list if st.checkbox(t)]
+    cols_cek = st.columns(3)
+    sel_berkas = []
+    for i, t in enumerate(t_list):
+        if cols_cek[i % 3].checkbox(t):
+            sel_berkas.append(t)
 
-    if st.button("SIMPAN & CETAK FULL"):
+    if st.button("💾 SIMPAN & CETAK TANDA TERIMA"):
         if not nama_toko or not sk:
-            st.error("❌ NAMA TOKO DAN PEMILIK HARUS DIISI!")
+            st.error("❌ NAMA TOKO DAN PEMILIK TIDAK BOLEH KOSONG!")
         else:
             new_row = {"No": no_urut, "Tanggal_Pengantaran": tgl_t, "Tanggal_Pengambilan": "-", 
                        "Nama_Toko": nama_toko, "No_Toko": no_toko, "Nama_Pemilik_Asli": sk, 
@@ -154,45 +153,44 @@ if menu == "PENGANTARAN BERKAS":
             if is_duplicate: df = df[df['No'] != no_urut]
             df_final = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
             
-            try:
-                conn.update(data=df_final)
-                st.cache_data.clear() # Hapus cache agar data baru terbaca
-                st.success(f"✅ DATA NOMOR {no_urut} BERHASIL DISIMPAN!")
-                
-                # Sediakan tombol download
-                st.download_button("📥 DOWNLOAD PDF SEKARANG", buat_pdf_full(new_row, sel_berkas), f"TANDA_{no_urut}.pdf")
-                
-                # TOMBOL UNTUK RESET & INPUT BARU
-                if st.button("INPUT DATA BARU (RESET FORM)"):
-                    reset_form()
-                    st.rerun()
-            except:
-                st.error("❌ GAGAL MENYIMPAN. COBA LAGI.")
+            conn.update(data=df_final)
+            st.cache_data.clear()
+            st.success("✅ DATA BERHASIL DISIMPAN!")
+            st.download_button("📥 DOWNLOAD PDF TANDA TERIMA", buat_pdf_full(new_row, sel_berkas), f"TANDA_{no_urut}.pdf")
 
+# --- BAGIAN 2: PENGAMBILAN BERKAS ---
 elif menu == "PENGAMBILAN BERKAS":
-    st.header(" PENGAMBILAN BERKAS ")
-    no_cari = st.text_input("CARI NO. URUT PENDAFTARAN").strip()
+    st.header("🏁 PENCARIAN & PENGAMBILAN BERKAS")
+    
+    no_cari = st.text_input("🔍 MASUKKAN NOMOR URUT PENDAFTARAN").strip()
     
     if no_cari:
         hasil = df[df['No'] == no_cari]
         if not hasil.empty:
             data_lama = hasil.iloc[0]
-            st.info(f"DITEMUKAN: {data_lama['Nama_Toko']} - {data_lama['Nama_Pemilik_Asli']}")
             
-            raw_tgl_a = st.text_input("TANGGAL PENGAMBILAN", value=st.session_state.tgl_a_input, key="tgl_a_field")
+            # TAMPILAN DATA YANG DITEMUKAN (BEDA DENGAN FORM INPUT)
+            st.success(f"✅ DATA DITEMUKAN UNTUK NOMOR: {no_cari}")
+            
+            with st.container(border=True):
+                c1, c2 = st.columns(2)
+                c1.write(f"**NAMA TOKO:** {data_lama['Nama_Toko']}")
+                c1.write(f"**NOMOR TOKO:** {data_lama['No_Toko']}")
+                c2.write(f"**PEMILIK:** {data_lama['Nama_Pemilik_Asli']}")
+                c2.write(f"**TGL PENGANTARAN:** {data_lama['Tanggal_Pengantaran']}")
+            
+            st.write("---")
+            # Hanya input tanggal pengambilan yang muncul
+            tgl_skrg_a = datetime.now().strftime("%d/%m/%Y")
+            raw_tgl_a = st.text_input("📝 INPUT TANGGAL PENGAMBILAN", value=tgl_skrg_a)
             tgl_ambil = format_tgl_indo(raw_tgl_a)
-            if tgl_ambil != raw_tgl_a:
-                st.session_state.tgl_a_input = tgl_ambil
-                st.rerun()
+            st.caption(f"FORMAT: {tgl_ambil}")
             
-            if st.button("UPDATE & CETAK TANGGAL"):
+            if st.button("✅ UPDATE TANGGAL & CETAK OVERPRINT"):
                 df.loc[df['No'] == no_cari, 'Tanggal_Pengambilan'] = tgl_ambil
                 conn.update(data=df)
                 st.cache_data.clear()
-                st.success("✅ BERHASIL DIPERBARUI!")
-                st.download_button("📥 DOWNLOAD PDF ", cetak(tgl_ambil), f"UP_{no_cari}.pdf")
-                
-                if st.button("SELESAI / CARI LAGI"):
-                    st.rerun()
+                st.success("✅ BERHASIL! SILAKAN CETAK DI HALAMAN BELAKANG KERTAS.")
+                st.download_button("📥 DOWNLOAD PDF OVERPRINT (1 HALAMAN)", cetak_overprint(tgl_ambil), f"UPDATE_{no_cari}.pdf")
         else:
-            st.error("NOMOR TIDAK DITEMUKAN.")
+            st.error(f"❌ NOMOR URUT '{no_cari}' TIDAK DITEMUKAN DI DATABASE.")
