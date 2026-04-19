@@ -29,16 +29,13 @@ def buat_pdf_full(data):
     c = canvas.Canvas(buffer, pagesize=UKURAN_CUSTOM)
     x_pos, y_pos = 1 * cm, 1 * cm
     lebar_kertas = 22 * cm
-
-    # HALAMAN 1: DEPAN
+    # Halaman 1
     c.setLineWidth(1.5); c.rect(x_pos, y_pos, 20*cm, 9*cm)
     c.setLineWidth(1.5); c.rect(x_pos + 0.15*cm, y_pos + 0.15*cm, 19.7*cm, 8.7*cm)
-    c.setFont("Helvetica-Bold", 14)
-    c.drawCentredString(lebar_kertas/2, y_pos + 8.1 * cm, "TANDA TERIMA BERKAS PERMOHONAN PERPANJANGAN IZIN TOKO")
+    c.setFont("Helvetica-Bold", 14); c.drawCentredString(lebar_kertas/2, y_pos + 8.1 * cm, "TANDA TERIMA BERKAS PERMOHONAN PERPANJANGAN IZIN TOKO")
     c.setLineWidth(1); c.line(x_pos + 0.4*cm, y_pos + 7.85*cm, x_pos + 19.6*cm, y_pos + 7.85*cm)
     c.line(x_pos + 0.4*cm, y_pos + 7.75*cm, x_pos + 19.6*cm, y_pos + 7.75*cm)
     c.setFont("Helvetica-Bold", 11); c.drawString(x_pos + 0.8 * cm, y_pos + 7.1 * cm, "Daftar kelengkapan dokumen permohonan:")
-    
     yy = y_pos + 6.3 * cm
     items = ["SK Asli Menempati", "Pas Foto 3x4 (2 lbr)", "FC KTP Pemilik", "FC Kartu Sewa", "Surat Kuasa", "Surat Kehilangan"]
     berkas_list = str(data['Keterangan']).split(", ")
@@ -46,35 +43,26 @@ def buat_pdf_full(data):
         c.setFont("Helvetica-BoldOblique", 10.5); c.drawString(x_pos + 1 * cm, yy, f"{i}. {item}")
         c.setFont("Helvetica-Bold", 11); x_status = x_pos + 15.2 * cm; c.drawString(x_status, yy, "ADA   /   TIDAK ADA")
         c.setLineWidth(1.5)
-        if item in berkas_list:
-            c.line(x_status + 1.5 * cm, yy + 0.12 * cm, x_status + 3.8 * cm, yy + 0.12 * cm)
-        else:
-            c.line(x_status - 0.1 * cm, yy + 0.12 * cm, x_status + 0.9 * cm, yy + 0.12 * cm)
+        if item in berkas_list: c.line(x_status + 1.5 * cm, yy + 0.12 * cm, x_status + 3.8 * cm, yy + 0.12 * cm)
+        else: c.line(x_status - 0.1 * cm, yy + 0.12 * cm, x_status + 0.9 * cm, yy + 0.12 * cm)
         yy -= 0.65 * cm
-
     c.setLineWidth(1.5); c.line(x_pos + 0.15*cm, y_pos + 2.8 * cm, x_pos + 19.85*cm, y_pos + 2.8 * cm)
     c.line(lebar_kertas/2, y_pos + 0.15*cm, lebar_kertas/2, y_pos + 2.8 * cm)
     c.setFont("Helvetica-Bold", 10); c.drawCentredString(x_pos + 5 * cm, y_pos + 2.3 * cm, "PENGANTAR BERKAS")
     c.drawCentredString(x_pos + 15 * cm, y_pos + 2.3 * cm, "PETUGAS PENERIMA BERKAS")
-    c.setFont("Helvetica-Bold", 12)
-    c.drawCentredString(x_pos + 5 * cm, y_pos + 0.5 * cm, f"( {data['Nama_Pengantar_Berkas']} )")
+    c.setFont("Helvetica-Bold", 12); c.drawCentredString(x_pos + 5 * cm, y_pos + 0.5 * cm, f"( {data['Nama_Pengantar_Berkas']} )")
     c.drawCentredString(x_pos + 15 * cm, y_pos + 0.5 * cm, f"( {data['Penerima_Berkas']} )")
     c.showPage()
-
-    # HALAMAN 2: BELAKANG
+    # Halaman 2
     c.setLineWidth(1.5); c.rect(x_pos, y_pos, 20*cm, 9*cm)
     c.setLineWidth(1.5); c.rect(x_pos + 0.15*cm, y_pos + 0.15*cm, 19.7*cm, 8.7*cm)
     y_tab = y_pos + 8.85 * cm; tinggi_baris = 1.15 * cm
-    
-    # Logika: Jika Tanggal Pengambilan adalah "-", jangan tampilkan apa-apa (Kosongkan)
     tgl_ambil_pdf = "" if data['Tanggal_Pengambilan'] == "-" else data['Tanggal_Pengambilan']
-    
     rows = [("NO. URUT PENDAFTARAN", data['No']), ("TANGGAL TERIMA BERKAS", data['Tanggal_Pengantaran']),
             ("TANGGAL PENGAMBILAN", tgl_ambil_pdf), ("NAMA & NOMOR TOKO / LAPAK", f"{data['Nama_Toko']} - {data['No_Toko']}"),
             ("NAMA PEMILIK (SESUAI SK)", data['Nama_Pemilik_Asli']), ("NAMA PENGANTAR BERKAS", data['Nama_Pengantar_Berkas'])]
     for label, val in rows:
-        c.rect(x_pos + 0.15*cm, y_tab - tinggi_baris, 9.85 * cm, tinggi_baris)
-        c.rect(lebar_kertas/2, y_tab - tinggi_baris, 9.85 * cm, tinggi_baris)
+        c.rect(x_pos + 0.15*cm, y_tab - tinggi_baris, 9.85 * cm, tinggi_baris); c.rect(lebar_kertas/2, y_tab - tinggi_baris, 9.85 * cm, tinggi_baris)
         c.setFont("Helvetica-Bold", 10); c.drawString(x_pos + 0.6 * cm, y_tab - 0.75 * cm, label)
         c.setFont("Helvetica-Bold", 11); c.drawString(lebar_kertas/2 + 0.6 * cm, y_tab - 0.75 * cm, str(val).upper())
         y_tab -= tinggi_baris
@@ -95,19 +83,26 @@ def cetak_overprint(tgl_ambil):
 st.sidebar.title("SURAT KEPUTUSAN MENEMPATI TOKO")
 menu = st.sidebar.radio("KEPERLUAN:", ["PENGANTARAN BERKAS", "PENGAMBILAN BERKAS"])
 
-# Baca Database & Bersihkan No Urut
-df = conn.read()
-if not df.empty:
-    # Memastikan No Urut jadi teks bersih tanpa .0 agar mudah dicari
-    df['No'] = df['No'].astype(str).replace(r'\.0$', '', regex=True).str.strip()
+# PERBAIKAN UTAMA: Gunakan ttl=0 agar data SELALU BARU
+df = conn.read(ttl=0)
 
-# Session State Tanggal
+# Pastikan data No diproses sebagai string murni sejak awal
+if not df.empty:
+    df['No'] = df['No'].astype(str).str.replace(r'\.0$', '', regex=True).str.strip()
+
 if 'tgl_p_input' not in st.session_state: st.session_state.tgl_p_input = datetime.now().strftime("%d/%m/%Y")
 if 'tgl_a_input' not in st.session_state: st.session_state.tgl_a_input = datetime.now().strftime("%d/%m/%Y")
 
 if menu == "PENGANTARAN BERKAS":
     st.header("📝 Pengantaran Berkas Baru")
-    last_no = 0 if df.empty else pd.to_numeric(df['No'], errors='coerce').max()
+    
+    # Ambil nomor terakhir secara akurat dari data live
+    try:
+        last_no = 0 if df.empty else pd.to_numeric(df['No'], errors='coerce').max()
+        if pd.isna(last_no): last_no = 0
+    except:
+        last_no = 0
+    
     no_urut = st.text_input("No. Urut Pendaftaran", value=str(int(last_no) + 1))
     
     col1, col2 = st.columns(2)
@@ -130,20 +125,21 @@ if menu == "PENGANTARAN BERKAS":
 
     if st.button("SIMPAN & CETAK FULL"):
         ket_gabung = ", ".join(sel_berkas)
-        # SINI PERUBAHANNYA: Tanggal Pengambilan tetap "-" di database, tapi nanti kosong di PDF
         new_row = {"No": no_urut, "Tanggal_Pengantaran": tgl_t, "Tanggal_Pengambilan": "-", "Nama_Toko": nama_toko, 
                    "No_Toko": no_toko, "Nama_Pemilik_Asli": sk, "Nama_Pengantar_Berkas": pengantar, "Penerima_Berkas": penerima, "Keterangan": ket_gabung}
-        df_updated = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
-        conn.update(data=df_updated)
-        st.success("Data Berhasil Disimpan!")
-        pdf = buat_pdf_full(new_row)
-        st.download_button("📥 Download PDF Tanda Terima", pdf, f"Tanda_Terima_{no_urut}.pdf", "application/pdf")
+        
+        # PERBAIKAN: Gabungkan data LAMA dengan data BARU agar tidak tertimpa
+        df_full = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+        conn.update(data=df_full)
+        st.success(f"Berhasil! Data Nomor {no_urut} tersimpan di baris baru.")
+        st.download_button("📥 Download PDF Tanda Terima", buat_pdf_full(new_row), f"Tanda_Terima_{no_urut}.pdf", "application/pdf")
 
 elif menu == "PENGAMBILAN BERKAS":
-    st.header("🏁 Pengambilan Berkas (Overprint)")
+    st.header(" Pengambilan Berkas ")
     no_cari = st.text_input("Cari No. Urut Pendaftaran").strip()
     
     if no_cari:
+        # Pencarian sekarang lebih akurat karena data live dan sudah dibersihkan
         hasil = df[df['No'] == no_cari]
         if not hasil.empty:
             data_lama = hasil.iloc[0]
@@ -155,10 +151,5 @@ elif menu == "PENGAMBILAN BERKAS":
                 st.rerun()
             
             if st.button("UPDATE DATA & CETAK TANGGAL"):
-                df.loc[df['No'] == no_cari, 'Tanggal_Pengambilan'] = tgl_ambil
-                conn.update(data=df)
-                st.success("Berhasil Diperbarui!")
-                pdf_over = cetak_overprint(tgl_ambil)
-                st.download_button("📥 Download PDF (Hanya Tanggal)", pdf_over, f"Update_Tgl_{no_cari}.pdf", "application/pdf")
-        else:
-            st.error("Nomor Urut tidak ditemukan.")
+                # Update baris spesifik tanpa merusak baris lain
+                df.loc[df['No']
