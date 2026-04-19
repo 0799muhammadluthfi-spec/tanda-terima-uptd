@@ -134,7 +134,7 @@ if menu == "PENGANTARAN BERKAS":
         st.download_button("📥 Download PDF Tanda Terima", buat_pdf_full(new_row), f"Tanda_Terima_{no_urut}.pdf", "application/pdf")
 
 elif menu == "PENGAMBILAN BERKAS":
-    st.header(" Pengambilan Berkas ")
+    st.header(" PENGAMBILAN BERKAS ")
     no_cari = st.text_input("Cari No. Urut Pendaftaran").strip()
     
     if no_cari:
