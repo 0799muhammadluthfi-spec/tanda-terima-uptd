@@ -30,8 +30,7 @@ def buat_pdf_web(data, dokumen):
     c.setFont("Helvetica-Bold", 11)
     c.drawString(x_pos + 0.8 * cm, y_pos + 7.1 * cm, "Daftar kelengkapan dokumen permohonan:")
 
-    yy = y_pos + 6.3 * cm
-    # BARIS INI (LINE 34) HARUS LURUS DENGAN c.setFont DI ATASNYA
+yy = y_pos + 6.3 * cm
     for i, (item, status) in enumerate(dokumen.items(), 1):
         c.setFont("Helvetica-BoldOblique", 10.5)
         c.drawString(x_pos + 1 * cm, yy, f"{i}. {item}")
@@ -40,11 +39,16 @@ def buat_pdf_web(data, dokumen):
         x_status = x_pos + 15.2 * cm 
         c.drawString(x_status, yy, "ADA   /   TIDAK ADA")
         
-        c.setLineWidth(1.5)
+        c.setLineWidth(1.5) 
         if status == "Ada":
-            c.line(x_status + 2.15 * cm, yy + 0.12 * cm, x_status + 4.2 * cm, yy + 0.12 * cm)
+            # --- CORET "TIDAK ADA" ---
+            # Kita mulai dari 1.9 (lebih ke kiri sedikit) sampai 4.3 (lebih panjang)
+            c.line(x_status + 1.9 * cm, yy + 0.12 * cm, x_status + 4.3 * cm, yy + 0.12 * cm)
         else:
-            c.line(x_status - 0.1 * cm, yy + 0.12 * cm, x_status + 1.0 * cm, yy + 0.12 * cm)
+            # --- CORET "ADA" ---
+            # Mulai dari -0.1 sampai 1.1 agar menutup kata "ADA" dengan sempurna
+            c.line(x_status - 0.1 * cm, yy + 0.12 * cm, x_status + 1.1 * cm, yy + 0.12 * cm)
+        
         yy -= 0.65 * cm
 
     c.setLineWidth(1.5)
