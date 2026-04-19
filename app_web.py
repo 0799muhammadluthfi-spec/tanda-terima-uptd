@@ -135,7 +135,7 @@ if menu == "PENGANTARAN BERKAS":
         st.download_button("📥 Download PDF Tanda Terima", buat_pdf_full(new_row), f"Tanda_Terima_{no_urut}.pdf", "application/pdf")
 
 elif menu == "PENGAMBILAN BERKAS":
-    st.header(" Pengambilan Berkas ")
+    st.header(" PENGAMBILAN BERKAS ")
     no_cari = st.text_input("Cari No. Urut Pendaftaran").strip()
     
     if no_cari:
@@ -152,4 +152,9 @@ elif menu == "PENGAMBILAN BERKAS":
             
             if st.button("UPDATE DATA & CETAK TANGGAL"):
                 # Update baris spesifik tanpa merusak baris lain
-                df.loc[df['No']
+                df.loc[df['No'] == no_cari, 'Tanggal_Pengambilan'] = tgl_ambil
+                conn.update(data=df)
+                st.success("Berhasil! Google Sheets telah diperbarui.")
+                st.download_button("📥 Download PDF Overprint", cetak_overprint(tgl_ambil), f"Update_Tgl_{no_cari}.pdf", "application/pdf")
+        else:
+            st.error(f"Nomor Urut '{no_cari}' tidak ditemukan di Google Sheets. Pastikan data sudah tersimpan.")
