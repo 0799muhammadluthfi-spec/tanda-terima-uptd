@@ -84,4 +84,77 @@ def buat_pdf_full(data):
 
 def cetak_overprint(tgl_ambil):
     buffer = BytesIO()
-    UKURAN_CUSTOM = (22 * cm, 11 *
+    UKURAN_CUSTOM = (22 * cm, 11 * cm)
+    c = canvas.Canvas(buffer, pagesize=UKURAN_CUSTOM)
+    c.showPage() # Halaman 1 Kosong
+    # Halaman 2: Cetak Tanggal Pengambilan saja
+    y_pos_tgl = 1 * cm + 8.85 * cm - (1.15 * cm * 3) + 0.4 * cm
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(11 * cm + 0.6 * cm, y_pos_tgl, tgl_ambil.upper())
+    c.save(); buffer.seek(0)
+    return buffer
+
+# --- INTERFACE UTAMA ---
+st.sidebar.title("MENU UPTD PASAR")
+menu = st.sidebar.radio("Pilih Kegiatan:", ["Input Berkas Baru", "Dashboard Pengambilan (Overprint)"])
+
+# Baca Database dari Google Sheets
+df = conn.read()
+
+if menu == "Input Berkas Baru":
+    st.header("📝 Penerimaan Berkas Baru")
+    
+    # Logika Auto-Number
+    last_no = 0 if df.empty else pd.to_numeric(df['No'], errors='coerce').max()
+    no_urut = st.text_input("No. Urut Pendaftaran", value=str(int(last_no) + 1))
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        tgl_t = st.text_input("Tanggal Pengantaran", value=datetime.now().strftime("%A, %d %B %Y").upper())
+        nama_toko = st.text_input("Nama Toko/Usaha").upper()
+        no_toko = st.text_input("Nomor Toko/Lapak").upper()
+    with col2:
+        sk = st.text_input("Nama Pemilik Sesuai SK").upper()
+        pengantar = st.text_input("Nama Pengantar Berkas").upper()
+        penerima = st.text_input("Petugas Penerima").upper()
+    
+    t_list = ["SK Asli Menempati", "Pas Foto 3x4 (2 lbr)", "FC KTP Pemilik", "FC Kartu Sewa", "Surat Kuasa", "Surat Kehilangan"]
+    st.write("Ceklis Kelengkapan Berkas:")
+    sel_berkas = [t for t in t_list if st.checkbox(t)]
+
+    if st.button("SIMPAN & CETAK FULL"):
+        ket_gabung = ", ".join(sel_berkas)
+        new_row = {
+            "No": no_urut, "Tanggal_Pengantaran": tgl_t, "Tanggal_Pengambilan": "-", 
+            "Nama_Toko": nama_toko, "No_Toko": no_toko, "Nama_Pemilik_Asli": sk, 
+            "Nama_Pengantar_Berkas": pengantar, "Penerima_Berkas": penerima, "Keterangan": ket_gabung
+        }
+        # Update ke Google Sheets
+        df_updated = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+        conn.update(data=df_updated)
+        
+        st.success("Data Berhasil Disimpan ke Google Sheets!")
+        pdf = buat_pdf_full(new_row)
+        st.download_button("📥 Download PDF Tanda Terima", pdf, f"Tanda_Terima_{no_urut}.pdf", "application/pdf")
+
+elif menu == "Dashboard Pengambilan (Overprint)":
+    st.header("🏁 Mode Pengambilan (Overprint)")
+    no_cari = st.text_input("Cari No. Urut Pendaftaran")
+    
+    if no_cari:
+        hasil = df[df['No'].astype(str) == no_cari]
+        if not hasil.empty:
+            data_lama = hasil.iloc[0]
+            st.info(f"Data Ditemukan: {data_lama['Nama_Toko']} (Pemilik: {data_lama['Nama_Pemilik_Asli']})")
+            tgl_ambil = st.text_input("Input Tanggal Pengambilan", value=datetime.now().strftime("%A, %d %B %Y").upper())
+            
+            if st.button("UPDATE DATA & CETAK TANGGAL"):
+                # Update kolom tanggal di DataFrame
+                df.loc[df['No'].astype(str) == no_cari, 'Tanggal_Pengambilan'] = tgl_ambil
+                conn.update(data=df)
+                
+                st.success("Tanggal Pengambilan Berhasil Dicatat!")
+                pdf_over = cetak_overprint(tgl_ambil)
+                st.download_button("📥 Download PDF Overprint (Hanya Tanggal)", pdf_over, f"Update_Tgl_{no_cari}.pdf", "application/pdf")
+        else:
+            st.error("Nomor Urut tidak ditemukan di Database.")
