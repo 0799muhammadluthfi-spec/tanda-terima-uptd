@@ -32,16 +32,19 @@ def buat_pdf_web(data, dokumen):
 
     yy = y_pos + 6.3 * cm
     for i, (item, status) in enumerate(dokumen.items(), 1):
-        c.setFont("Helvetica-BoldOblique", 10.5)
-        c.drawString(x_pos + 1 * cm, yy, f"{i}. {item}")
-        c.setFont("Helvetica-Bold", 11)
-        x_status = x_pos + 14.5 * cm
+       c.setFont("Helvetica-Bold", 11)
+        # 1. x_status dinaikkan ke 15.2 agar posisi teks bergeser ke kanan
+        x_status = x_pos + 15.2 * cm 
         c.drawString(x_status, yy, "ADA   /   TIDAK ADA")
-        c.setLineWidth(1.2)
+        
+        c.setLineWidth(1.5) # Tebal garis seragam 1.5
         if status == "Ada":
-            c.line(x_status + 2.2 * cm, yy + 0.12 * cm, x_status + 4.1 * cm, yy + 0.12 * cm)
+            # 2. Coret "TIDAK ADA" (Angka digeser agar pas menutup teks)
+            c.line(x_status + 2.15 * cm, yy + 0.12 * cm, x_status + 4.2 * cm, yy + 0.12 * cm)
         else:
-            c.line(x_status - 0.05 * cm, yy + 0.12 * cm, x_status + 0.9 * cm, yy + 0.12 * cm)
+            # 3. Coret "ADA" (Angka digeser agar pas menutup teks)
+            c.line(x_status - 0.1 * cm, yy + 0.12 * cm, x_status + 1.0 * cm, yy + 0.12 * cm)
+        
         yy -= 0.65 * cm
 
     c.setLineWidth(1.5)
