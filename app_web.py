@@ -103,7 +103,7 @@ if menu == "PENGANTARAN BERKAS":
         if pd.isna(last_no): last_no = 0
     except: last_no = 0
     
-    no_urut = st.text_input("No. Urut Pendaftaran", value=str(int(last_no) + 1))
+    no_urut = st.text_input("NO. URUT PENDAFTARAN", value=str(int(last_no) + 1))
     
     col1, col2 = st.columns(2)
     with col1:
@@ -135,7 +135,7 @@ if menu == "PENGANTARAN BERKAS":
 
 elif menu == "PENGAMBILAN BERKAS":
     st.header(" PENGAMBILAN BERKAS ")
-    no_cari = st.text_input("Cari No. Urut Pendaftaran").strip()
+    no_cari = st.text_input("CARI NO. URUT PENDAFTARAN").strip()
     
     if no_cari:
         # Mencari di data live yang sudah dibersihkan
@@ -155,6 +155,6 @@ elif menu == "PENGAMBILAN BERKAS":
                 conn.update(data=df)
                 st.success("Berhasil Update! Cetak di halaman belakang kertas.")
                 # PDF ini sekarang hanya 1 halaman (langsung tanggal)
-                st.download_button("📥 Download PDF Overprint (1 Hal)", cetak_overprint(tgl_ambil), f"Update_Tgl_{no_cari}.pdf", "application/pdf")
+                st.download_button("📥 Download PDF Pengambilan (1 Hal)", cetak_overprint(tgl_ambil), f"Update_Tgl_{no_cari}.pdf", "application/pdf")
         else:
             st.error(f"Nomor '{no_cari}' tidak ditemukan. Coba cek lagi di Google Sheets.")
