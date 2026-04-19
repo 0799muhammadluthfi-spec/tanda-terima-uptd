@@ -22,14 +22,15 @@ def format_tgl_indo(tgl_input):
     except:
         return str(tgl_input).upper()
 
-# --- FUNGSI CETAK PDF ---
+# --- FUNGSI CETAK PDF LENGKAP (2 HALAMAN) ---
 def buat_pdf_full(data):
     buffer = BytesIO()
     UKURAN_CUSTOM = (22 * cm, 11 * cm)
     c = canvas.Canvas(buffer, pagesize=UKURAN_CUSTOM)
     x_pos, y_pos = 1 * cm, 1 * cm
     lebar_kertas = 22 * cm
-    # Halaman 1
+    
+    # HALAMAN 1: DEPAN
     c.setLineWidth(1.5); c.rect(x_pos, y_pos, 20*cm, 9*cm)
     c.setLineWidth(1.5); c.rect(x_pos + 0.15*cm, y_pos + 0.15*cm, 19.7*cm, 8.7*cm)
     c.setFont("Helvetica-Bold", 14); c.drawCentredString(lebar_kertas/2, y_pos + 8.1 * cm, "TANDA TERIMA BERKAS PERMOHONAN PERPANJANGAN IZIN TOKO")
@@ -53,7 +54,8 @@ def buat_pdf_full(data):
     c.setFont("Helvetica-Bold", 12); c.drawCentredString(x_pos + 5 * cm, y_pos + 0.5 * cm, f"( {data['Nama_Pengantar_Berkas']} )")
     c.drawCentredString(x_pos + 15 * cm, y_pos + 0.5 * cm, f"( {data['Penerima_Berkas']} )")
     c.showPage()
-    # Halaman 2
+    
+    # HALAMAN 2: BELAKANG
     c.setLineWidth(1.5); c.rect(x_pos, y_pos, 20*cm, 9*cm)
     c.setLineWidth(1.5); c.rect(x_pos + 0.15*cm, y_pos + 0.15*cm, 19.7*cm, 8.7*cm)
     y_tab = y_pos + 8.85 * cm; tinggi_baris = 1.15 * cm
@@ -69,13 +71,16 @@ def buat_pdf_full(data):
     c.save(); buffer.seek(0)
     return buffer
 
+# --- PERBAIKAN: FUNGSI OVERPRINT HANYA 1 HALAMAN ---
 def cetak_overprint(tgl_ambil):
     buffer = BytesIO()
     UKURAN_CUSTOM = (22 * cm, 11 * cm)
     c = canvas.Canvas(buffer, pagesize=UKURAN_CUSTOM)
-    c.showPage()
+    # Halaman 1 langsung berisi tanggal (Tidak ada c.showPage() di awal)
+    # Posisinya tetap di baris ke-3 sesuai layout tabel belakang
     y_pos_tgl = 1 * cm + 8.85 * cm - (1.15 * cm * 3) + 0.4 * cm
-    c.setFont("Helvetica-Bold", 12); c.drawString(11 * cm + 0.6 * cm, y_pos_tgl, tgl_ambil.upper())
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(11 * cm + 0.6 * cm, y_pos_tgl, tgl_ambil.upper())
     c.save(); buffer.seek(0)
     return buffer
 
@@ -83,10 +88,8 @@ def cetak_overprint(tgl_ambil):
 st.sidebar.title("SURAT KEPUTUSAN MENEMPATI TOKO")
 menu = st.sidebar.radio("KEPERLUAN:", ["PENGANTARAN BERKAS", "PENGAMBILAN BERKAS"])
 
-# PERBAIKAN UTAMA: Gunakan ttl=0 agar data SELALU BARU
+# Ambil data LIVE (Tanpa Cache)
 df = conn.read(ttl=0)
-
-# Pastikan data No diproses sebagai string murni sejak awal
 if not df.empty:
     df['No'] = df['No'].astype(str).str.replace(r'\.0$', '', regex=True).str.strip()
 
@@ -95,13 +98,10 @@ if 'tgl_a_input' not in st.session_state: st.session_state.tgl_a_input = datetim
 
 if menu == "PENGANTARAN BERKAS":
     st.header("📝 Pengantaran Berkas Baru")
-    
-    # Ambil nomor terakhir secara akurat dari data live
     try:
         last_no = 0 if df.empty else pd.to_numeric(df['No'], errors='coerce').max()
         if pd.isna(last_no): last_no = 0
-    except:
-        last_no = 0
+    except: last_no = 0
     
     no_urut = st.text_input("No. Urut Pendaftaran", value=str(int(last_no) + 1))
     
@@ -127,23 +127,23 @@ if menu == "PENGANTARAN BERKAS":
         ket_gabung = ", ".join(sel_berkas)
         new_row = {"No": no_urut, "Tanggal_Pengantaran": tgl_t, "Tanggal_Pengambilan": "-", "Nama_Toko": nama_toko, 
                    "No_Toko": no_toko, "Nama_Pemilik_Asli": sk, "Nama_Pengantar_Berkas": pengantar, "Penerima_Berkas": penerima, "Keterangan": ket_gabung}
-        
-        # PERBAIKAN: Gabungkan data LAMA dengan data BARU agar tidak tertimpa
+        # Tambahkan data baru ke data lama agar tidak tertimpa
         df_full = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
         conn.update(data=df_full)
-        st.success(f"Berhasil! Data Nomor {no_urut} tersimpan di baris baru.")
+        st.success(f"Berhasil Tersimpan di Baris Baru!")
         st.download_button("📥 Download PDF Tanda Terima", buat_pdf_full(new_row), f"Tanda_Terima_{no_urut}.pdf", "application/pdf")
 
 elif menu == "PENGAMBILAN BERKAS":
-    st.header(" PENGAMBILAN BERKAS ")
+    st.header("🏁 Pengambilan Berkas (Overprint)")
     no_cari = st.text_input("Cari No. Urut Pendaftaran").strip()
     
     if no_cari:
-        # Pencarian sekarang lebih akurat karena data live dan sudah dibersihkan
+        # Mencari di data live yang sudah dibersihkan
         hasil = df[df['No'] == no_cari]
         if not hasil.empty:
             data_lama = hasil.iloc[0]
             st.info(f"Ditemukan: {data_lama['Nama_Toko']} (Pemilik: {data_lama['Nama_Pemilik_Asli']})")
+            
             raw_tgl_a = st.text_input("TANGGAL PENGAMBILAN", value=st.session_state.tgl_a_input)
             tgl_ambil = format_tgl_indo(raw_tgl_a)
             if tgl_ambil != raw_tgl_a:
@@ -151,10 +151,10 @@ elif menu == "PENGAMBILAN BERKAS":
                 st.rerun()
             
             if st.button("UPDATE DATA & CETAK TANGGAL"):
-                # Update baris spesifik tanpa merusak baris lain
                 df.loc[df['No'] == no_cari, 'Tanggal_Pengambilan'] = tgl_ambil
                 conn.update(data=df)
-                st.success("Berhasil! Google Sheets telah diperbarui.")
-                st.download_button("📥 Download PDF Overprint", cetak_overprint(tgl_ambil), f"Update_Tgl_{no_cari}.pdf", "application/pdf")
+                st.success("Berhasil Update! Cetak di halaman belakang kertas.")
+                # PDF ini sekarang hanya 1 halaman (langsung tanggal)
+                st.download_button("📥 Download PDF Overprint (1 Hal)", cetak_overprint(tgl_ambil), f"Update_Tgl_{no_cari}.pdf", "application/pdf")
         else:
-            st.error(f"Nomor Urut '{no_cari}' tidak ditemukan di Google Sheets. Pastikan data sudah tersimpan.")
+            st.error(f"Nomor '{no_cari}' tidak ditemukan. Coba cek lagi di Google Sheets.")
