@@ -135,7 +135,7 @@ if menu == "PENGANTARAN BERKAS":
     
     st.write("---")
     st.write("📋 **CEKLIS KELENGKAPAN BERKAS:**")
-    t_list = ["SK ASLI MENEMPATI", "PAS FOTO 3X4 (2 LBR)", "FC KTP PEMILIK", "FC KARTU SEWA", "SURAT KUASA", "SURAT KEHILANGAN"]
+    t_list = ["SK ASLI MENEMPATI", "PAS FOTO 3X4 (2 LBR)", "FC KTP PEMILIK", "FC KARTU SEWA", "SURAT KUASA", "SURAT KEHILANGAN (APABILA BERKAS SK HILANG)"]
     cols_cek = st.columns(3)
     sel_berkas = []
     for i, t in enumerate(t_list):
@@ -156,11 +156,11 @@ if menu == "PENGANTARAN BERKAS":
             conn.update(data=df_final)
             st.cache_data.clear()
             st.success("✅ DATA BERHASIL DISIMPAN!")
-            st.download_button("📥 DOWNLOAD PDF TANDA TERIMA", buat_pdf_full(new_row, sel_berkas), f"TANDA_{no_urut}.pdf")
+            st.download_button("📥 DOWNLOAD PDF TANDA TERIMA", buat_pdf_full(new_row, sel_berkas), f"TANDA_{Nama_Pengantar_Berkas}.pdf")
 
 # --- BAGIAN 2: PENGAMBILAN BERKAS ---
 elif menu == "PENGAMBILAN BERKAS":
-    st.header("🏁 PENCARIAN & PENGAMBILAN BERKAS")
+    st.header("PENCARIAN & PENGAMBILAN BERKAS")
     
     no_cari = st.text_input("🔍 MASUKKAN NOMOR URUT PENDAFTARAN").strip()
     
