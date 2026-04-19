@@ -15,12 +15,13 @@ conn = st.connection("gsheets", type=GSheetsConnection)
 # --- FUNGSI KAMUS TANGGAL INDONESIA (LOGIKA EXCEL) ---
 def format_tgl_indo(tgl_input):
     try:
+        # Mencoba membaca berbagai format input (12/2/26, 12-2-2026, dll)
         dt = pd.to_datetime(tgl_input, dayfirst=True)
         hari = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"][dt.weekday()]
-        bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", 
-                 "Juli", "Agustus", "September", "Oktober", "November", "Desember"][dt.month-1]
-        return f"{hari.upper()}, {dt.day} {bulan.upper()} {dt.year}"
+        # Format sesuai permintaan: dddd, dd - mm - yyyy
+        return f"{hari.upper()}, {dt.strftime('%d - %m - %Y')}"
     except:
+        # Jika bukan format tanggal, biarkan apa adanya
         return str(tgl_input).upper()
 
 # --- FUNGSI CETAK PDF ---
@@ -89,13 +90,16 @@ def cetak_overprint(tgl_ambil):
     return buffer
 
 # --- INTERFACE UTAMA ---
-# 1. Ganti Nama Menu Utama
 st.sidebar.title("SURAT KEPUTUSAN MENEMPATI TOKO")
-
-# 2. Ganti Label Radio & Opsi Menu
 menu = st.sidebar.radio("KEPERLUAN:", ["PENGANTARAN BERKAS", "PENGAMBILAN BERKAS"])
 
 df = conn.read()
+
+# Inisialisasi Session State untuk Tanggal agar bisa otomatis berubah
+if 'tgl_p_input' not in st.session_state:
+    st.session_state.tgl_p_input = datetime.now().strftime("%d/%m/%Y")
+if 'tgl_a_input' not in st.session_state:
+    st.session_state.tgl_a_input = datetime.now().strftime("%d/%m/%Y")
 
 if menu == "PENGANTARAN BERKAS":
     st.header("📝 Pengantaran Berkas Baru")
@@ -105,17 +109,20 @@ if menu == "PENGANTARAN BERKAS":
     
     col1, col2 = st.columns(2)
     with col1:
-        raw_tgl_t = st.text_input("Tanggal Pengantaran (Bisa ketik: 12/2/26)", value=datetime.now().strftime("%d/%m/%Y"))
+        # Input Tanggal dengan Fitur Auto-Format (Enter langsung panjang)
+        raw_tgl_t = st.text_input("TANGGAL PENGANTARAN", value=st.session_state.tgl_p_input)
+        # Jika user mengganti isi kotak, langsung format
         tgl_t = format_tgl_indo(raw_tgl_t)
-        st.caption(f"Hasil Format: **{tgl_t}**")
+        if tgl_t != raw_tgl_t:
+            st.session_state.tgl_p_input = tgl_t
+            st.rerun() # Refresh halaman agar teks di kotak berubah
         
-        # 3. Ganti Label Nama & Nomor Toko
         nama_toko = st.text_input("NAMA TOKO").upper()
         no_toko = st.text_input("NOMOR TOKO").upper()
     with col2:
-        sk = st.text_input("Nama Pemilik Sesuai SK").upper()
-        pengantar = st.text_input("Nama Pengantar Berkas").upper()
-        penerima = st.text_input("Petugas Penerima").upper()
+        sk = st.text_input("NAMA PEMILIK SESUAI SK").upper()
+        pengantar = st.text_input("NAMA PENGANTAR BERKAS").upper()
+        penerima = st.text_input("PETUGAS PENERIMA").upper()
     
     t_list = ["SK Asli Menempati", "Pas Foto 3x4 (2 lbr)", "FC KTP Pemilik", "FC Kartu Sewa", "Surat Kuasa", "Surat Kehilangan"]
     st.write("Ceklis Kelengkapan Berkas:")
@@ -141,9 +148,12 @@ elif menu == "PENGAMBILAN BERKAS":
             data_lama = hasil.iloc[0]
             st.info(f"Ditemukan: {data_lama['Nama_Toko']} (Pemilik: {data_lama['Nama_Pemilik_Asli']})")
             
-            raw_tgl_a = st.text_input("Input Tanggal Pengambilan (Bisa ketik: 12/2/26)", value=datetime.now().strftime("%d/%m/%Y"))
+            # Auto-Format Tanggal di Menu Pengambilan
+            raw_tgl_a = st.text_input("TANGGAL PENGAMBILAN", value=st.session_state.tgl_a_input)
             tgl_ambil = format_tgl_indo(raw_tgl_a)
-            st.caption(f"Hasil Format: **{tgl_ambil}**")
+            if tgl_ambil != raw_tgl_a:
+                st.session_state.tgl_a_input = tgl_ambil
+                st.rerun()
             
             if st.button("UPDATE DATA & CETAK TANGGAL"):
                 df.loc[df['No'].astype(str) == no_cari, 'Tanggal_Pengambilan'] = tgl_ambil
