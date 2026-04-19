@@ -12,16 +12,14 @@ st.set_page_config(page_title="UPTD Pasar Kandangan", layout="wide")
 # --- KONEKSI GOOGLE SHEETS ---
 conn = st.connection("gsheets", type=GSheetsConnection)
 
-# --- FUNGSI KAMUS TANGGAL INDONESIA (LOGIKA EXCEL) ---
+# --- FUNGSI KAMUS TANGGAL INDONESIA ---
 def format_tgl_indo(tgl_input):
+    if not tgl_input or tgl_input == "-": return ""
     try:
-        # Mencoba membaca berbagai format input (12/2/26, 12-2-2026, dll)
         dt = pd.to_datetime(tgl_input, dayfirst=True)
         hari = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"][dt.weekday()]
-        # Format sesuai permintaan: dddd, dd - mm - yyyy
         return f"{hari.upper()}, {dt.strftime('%d - %m - %Y')}"
     except:
-        # Jika bukan format tanggal, biarkan apa adanya
         return str(tgl_input).upper()
 
 # --- FUNGSI CETAK PDF ---
@@ -67,8 +65,12 @@ def buat_pdf_full(data):
     c.setLineWidth(1.5); c.rect(x_pos, y_pos, 20*cm, 9*cm)
     c.setLineWidth(1.5); c.rect(x_pos + 0.15*cm, y_pos + 0.15*cm, 19.7*cm, 8.7*cm)
     y_tab = y_pos + 8.85 * cm; tinggi_baris = 1.15 * cm
+    
+    # Logika: Jika Tanggal Pengambilan adalah "-", jangan tampilkan apa-apa (Kosongkan)
+    tgl_ambil_pdf = "" if data['Tanggal_Pengambilan'] == "-" else data['Tanggal_Pengambilan']
+    
     rows = [("NO. URUT PENDAFTARAN", data['No']), ("TANGGAL TERIMA BERKAS", data['Tanggal_Pengantaran']),
-            ("TANGGAL PENGAMBILAN", data['Tanggal_Pengambilan']), ("NAMA & NOMOR TOKO / LAPAK", f"{data['Nama_Toko']} - {data['No_Toko']}"),
+            ("TANGGAL PENGAMBILAN", tgl_ambil_pdf), ("NAMA & NOMOR TOKO / LAPAK", f"{data['Nama_Toko']} - {data['No_Toko']}"),
             ("NAMA PEMILIK (SESUAI SK)", data['Nama_Pemilik_Asli']), ("NAMA PENGANTAR BERKAS", data['Nama_Pengantar_Berkas'])]
     for label, val in rows:
         c.rect(x_pos + 0.15*cm, y_tab - tinggi_baris, 9.85 * cm, tinggi_baris)
@@ -93,30 +95,28 @@ def cetak_overprint(tgl_ambil):
 st.sidebar.title("SURAT KEPUTUSAN MENEMPATI TOKO")
 menu = st.sidebar.radio("KEPERLUAN:", ["PENGANTARAN BERKAS", "PENGAMBILAN BERKAS"])
 
+# Baca Database & Bersihkan No Urut
 df = conn.read()
+if not df.empty:
+    # Memastikan No Urut jadi teks bersih tanpa .0 agar mudah dicari
+    df['No'] = df['No'].astype(str).replace(r'\.0$', '', regex=True).str.strip()
 
-# Inisialisasi Session State untuk Tanggal agar bisa otomatis berubah
-if 'tgl_p_input' not in st.session_state:
-    st.session_state.tgl_p_input = datetime.now().strftime("%d/%m/%Y")
-if 'tgl_a_input' not in st.session_state:
-    st.session_state.tgl_a_input = datetime.now().strftime("%d/%m/%Y")
+# Session State Tanggal
+if 'tgl_p_input' not in st.session_state: st.session_state.tgl_p_input = datetime.now().strftime("%d/%m/%Y")
+if 'tgl_a_input' not in st.session_state: st.session_state.tgl_a_input = datetime.now().strftime("%d/%m/%Y")
 
 if menu == "PENGANTARAN BERKAS":
     st.header("📝 Pengantaran Berkas Baru")
-    
     last_no = 0 if df.empty else pd.to_numeric(df['No'], errors='coerce').max()
     no_urut = st.text_input("No. Urut Pendaftaran", value=str(int(last_no) + 1))
     
     col1, col2 = st.columns(2)
     with col1:
-        # Input Tanggal dengan Fitur Auto-Format (Enter langsung panjang)
         raw_tgl_t = st.text_input("TANGGAL PENGANTARAN", value=st.session_state.tgl_p_input)
-        # Jika user mengganti isi kotak, langsung format
         tgl_t = format_tgl_indo(raw_tgl_t)
         if tgl_t != raw_tgl_t:
             st.session_state.tgl_p_input = tgl_t
-            st.rerun() # Refresh halaman agar teks di kotak berubah
-        
+            st.rerun()
         nama_toko = st.text_input("NAMA TOKO").upper()
         no_toko = st.text_input("NOMOR TOKO").upper()
     with col2:
@@ -130,6 +130,7 @@ if menu == "PENGANTARAN BERKAS":
 
     if st.button("SIMPAN & CETAK FULL"):
         ket_gabung = ", ".join(sel_berkas)
+        # SINI PERUBAHANNYA: Tanggal Pengambilan tetap "-" di database, tapi nanti kosong di PDF
         new_row = {"No": no_urut, "Tanggal_Pengantaran": tgl_t, "Tanggal_Pengambilan": "-", "Nama_Toko": nama_toko, 
                    "No_Toko": no_toko, "Nama_Pemilik_Asli": sk, "Nama_Pengantar_Berkas": pengantar, "Penerima_Berkas": penerima, "Keterangan": ket_gabung}
         df_updated = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
@@ -140,15 +141,13 @@ if menu == "PENGANTARAN BERKAS":
 
 elif menu == "PENGAMBILAN BERKAS":
     st.header("🏁 Pengambilan Berkas (Overprint)")
-    no_cari = st.text_input("Cari No. Urut Pendaftaran")
+    no_cari = st.text_input("Cari No. Urut Pendaftaran").strip()
     
     if no_cari:
-        hasil = df[df['No'].astype(str) == no_cari]
+        hasil = df[df['No'] == no_cari]
         if not hasil.empty:
             data_lama = hasil.iloc[0]
             st.info(f"Ditemukan: {data_lama['Nama_Toko']} (Pemilik: {data_lama['Nama_Pemilik_Asli']})")
-            
-            # Auto-Format Tanggal di Menu Pengambilan
             raw_tgl_a = st.text_input("TANGGAL PENGAMBILAN", value=st.session_state.tgl_a_input)
             tgl_ambil = format_tgl_indo(raw_tgl_a)
             if tgl_ambil != raw_tgl_a:
@@ -156,7 +155,7 @@ elif menu == "PENGAMBILAN BERKAS":
                 st.rerun()
             
             if st.button("UPDATE DATA & CETAK TANGGAL"):
-                df.loc[df['No'].astype(str) == no_cari, 'Tanggal_Pengambilan'] = tgl_ambil
+                df.loc[df['No'] == no_cari, 'Tanggal_Pengambilan'] = tgl_ambil
                 conn.update(data=df)
                 st.success("Berhasil Diperbarui!")
                 pdf_over = cetak_overprint(tgl_ambil)
