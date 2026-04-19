@@ -25,39 +25,45 @@ def format_tgl_indo(tgl_input):
         return str(tgl_input).upper()
 
 # --- FUNGSI CETAK PDF LENGKAP ---
-def buat_pdf_full(data):
+def buat_pdf_full(data, berkas_list):
     buffer = BytesIO()
     UKURAN_CUSTOM = (22 * cm, 11 * cm)
     c = canvas.Canvas(buffer, pagesize=UKURAN_CUSTOM)
     x_pos, y_pos = 1 * cm, 1 * cm
     lebar_kertas = 22 * cm
     
-    # HALAMAN 1
+    # HALAMAN 1 (DEPAN)
     c.setLineWidth(1.5); c.rect(x_pos, y_pos, 20*cm, 9*cm)
     c.setLineWidth(1.5); c.rect(x_pos + 0.15*cm, y_pos + 0.15*cm, 19.7*cm, 8.7*cm)
     c.setFont("Helvetica-Bold", 14); c.drawCentredString(lebar_kertas/2, y_pos + 8.1 * cm, "TANDA TERIMA BERKAS PERMOHONAN PERPANJANGAN IZIN TOKO")
     c.setLineWidth(1); c.line(x_pos + 0.4*cm, y_pos + 7.85*cm, x_pos + 19.6*cm, y_pos + 7.85*cm)
     c.line(x_pos + 0.4*cm, y_pos + 7.75*cm, x_pos + 19.6*cm, y_pos + 7.75*cm)
+    
     c.setFont("Helvetica-Bold", 11); c.drawString(x_pos + 0.8 * cm, y_pos + 7.1 * cm, "DAFTAR KELENGKAPAN DOKUMEN PERMOHONAN:")
     yy = y_pos + 6.3 * cm
     items = ["SK ASLI MENEMPATI", "PAS FOTO 3X4 (2 LBR)", "FC KTP PEMILIK", "FC KARTU SEWA", "SURAT KUASA", "SURAT KEHILANGAN"]
-    berkas_list = str(data['Keterangan']).split(", ")
+    
     for i, item in enumerate(items, 1):
         c.setFont("Helvetica-BoldOblique", 10.5); c.drawString(x_pos + 1 * cm, yy, f"{i}. {item}")
         c.setFont("Helvetica-Bold", 11); x_status = x_pos + 15.2 * cm; c.drawString(x_status, yy, "ADA   /   TIDAK ADA")
         c.setLineWidth(1.5)
-        if item in berkas_list: c.line(x_status + 1.5 * cm, yy + 0.12 * cm, x_status + 3.8 * cm, yy + 0.12 * cm)
-        else: c.line(x_status - 0.1 * cm, yy + 0.12 * cm, x_status + 0.9 * cm, yy + 0.12 * cm)
+        # LOGIKA CORET BERDASARKAN CEKLIS DI APLIKASI
+        if item in berkas_list:
+            c.line(x_status + 1.5 * cm, yy + 0.12 * cm, x_status + 3.8 * cm, yy + 0.12 * cm)
+        else:
+            c.line(x_status - 0.1 * cm, yy + 0.12 * cm, x_status + 0.9 * cm, yy + 0.12 * cm)
         yy -= 0.65 * cm
+
     c.setLineWidth(1.5); c.line(x_pos + 0.15*cm, y_pos + 2.8 * cm, x_pos + 19.85*cm, y_pos + 2.8 * cm)
     c.line(lebar_kertas/2, y_pos + 0.15*cm, lebar_kertas/2, y_pos + 2.8 * cm)
     c.setFont("Helvetica-Bold", 10); c.drawCentredString(x_pos + 5 * cm, y_pos + 2.3 * cm, "PENGANTAR BERKAS")
     c.drawCentredString(x_pos + 15 * cm, y_pos + 2.3 * cm, "PETUGAS PENERIMA BERKAS")
-    c.setFont("Helvetica-Bold", 12); c.drawCentredString(x_pos + 5 * cm, y_pos + 0.5 * cm, f"( {data['Nama_Pengantar_Berkas']} )")
+    c.setFont("Helvetica-Bold", 12)
+    c.drawCentredString(x_pos + 5 * cm, y_pos + 0.5 * cm, f"( {data['Nama_Pengantar_Berkas']} )")
     c.drawCentredString(x_pos + 15 * cm, y_pos + 0.5 * cm, f"( {data['Penerima_Berkas']} )")
     c.showPage()
     
-    # HALAMAN 2
+    # HALAMAN 2 (BELAKANG)
     c.setLineWidth(1.5); c.rect(x_pos, y_pos, 20*cm, 9*cm)
     c.setLineWidth(1.5); c.rect(x_pos + 0.15*cm, y_pos + 0.15*cm, 19.7*cm, 8.7*cm)
     y_tab = y_pos + 8.85 * cm; tinggi_baris = 1.15 * cm
@@ -104,11 +110,10 @@ if menu == "PENGANTARAN BERKAS":
     
     no_urut = st.text_input("NO. URUT PENDAFTARAN", value=str(int(last_no) + 1)).strip()
     
-    # --- LOGIKA HIMBAUAN NOMOR GANDA ---
     is_duplicate = False
     if not df.empty and no_urut in df['No'].values:
         is_duplicate = True
-        st.warning(f"⚠️ PERINGATAN: NOMOR URUT {no_urut} SUDAH BERISI DATA! JIKA ANDA LANJUT, DATA LAMA AKAN TERTIMPA.")
+        st.warning(f"⚠️ PERINGATAN: NOMOR URUT {no_urut} SUDAH ADA! DATA LAMA AKAN TERTIMPA.")
 
     col1, col2 = st.columns(2)
     with col1:
@@ -125,30 +130,30 @@ if menu == "PENGANTARAN BERKAS":
         penerima = st.text_input("PETUGAS PENERIMA").upper()
     
     t_list = ["SK ASLI MENEMPATI", "PAS FOTO 3X4 (2 LBR)", "FC KTP PEMILIK", "FC KARTU SEWA", "SURAT KUASA", "SURAT KEHILANGAN"]
-    st.write("CEKLIS KELENGKAPAN BERKAS:")
+    st.write("CEKLIS KELENGKAPAN BERKAS (TIDAK AKAN MASUK KE EXCEL):")
     sel_berkas = [t for t in t_list if st.checkbox(t)]
 
     btn_label = "TIMPA DATA & CETAK FULL" if is_duplicate else "SIMPAN & CETAK FULL"
     if st.button(btn_label):
-        ket_gabung = ", ".join(sel_berkas)
-        new_row = {"No": no_urut, "Tanggal_Pengantaran": tgl_t, "Tanggal_Pengambilan": "-", "Nama_Toko": nama_toko, 
-                   "No_Toko": no_toko, "Nama_Pemilik_Asli": sk, "Nama_Pengantar_Berkas": pengantar, "Penerima_Berkas": penerima, "Keterangan": ket_gabung}
+        # DATA UNTUK GOOGLE SHEETS (TANPA KETERANGAN)
+        new_row = {"No": no_urut, "Tanggal_Pengantaran": tgl_t, "Tanggal_Pengambilan": "-", 
+                   "Nama_Toko": nama_toko, "No_Toko": no_toko, "Nama_Pemilik_Asli": sk, 
+                   "Nama_Pengantar_Berkas": pengantar, "Penerima_Berkas": penerima}
         
         if is_duplicate:
-            # TIMPA DATA LAMA
             for col in new_row:
                 df.loc[df['No'] == no_urut, col] = new_row[col]
             df_final = df
         else:
-            # TAMBAH BARIS BARU
             df_final = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
             
         conn.update(data=df_final)
-        st.success("DATA BERHASIL DIPERBARUI!" if is_duplicate else "DATA BERHASIL DISIMPAN!")
-        st.download_button("📥 DOWNLOAD PDF TANDA TERIMA", buat_pdf_full(new_row), f"TANDA_TERIMA_{no_urut}.pdf", "application/pdf")
+        st.success("BERHASIL! DATA TERSIMPAN TANPA KOLOM KETERANGAN.")
+        # PDF TETAP PAKAI CEKLIS (KITA KIRIM SEL_BERKAS KE FUNGSI PDF)
+        st.download_button("📥 DOWNLOAD PDF TANDA TERIMA", buat_pdf_full(new_row, sel_berkas), f"TANDA_TERIMA_{no_urut}.pdf", "application/pdf")
 
 elif menu == "PENGAMBILAN BERKAS":
-    st.header("🏁 PENGAMBILAN BERKAS (OVERPRINT)")
+    st.header(" PENGAMBILAN BERKAS ")
     no_cari = st.text_input("CARI NO. URUT PENDAFTARAN").strip()
     
     if no_cari:
@@ -166,7 +171,7 @@ elif menu == "PENGAMBILAN BERKAS":
             if st.button("UPDATE DATA & CETAK TANGGAL"):
                 df.loc[df['No'] == no_cari, 'Tanggal_Pengambilan'] = tgl_ambil
                 conn.update(data=df)
-                st.success("BERHASIL DIPERBARUI! CETAK DI HALAMAN BELAKANG KERTAS.")
-                st.download_button("📥 DOWNLOAD PDF OVERPRINT", cetak_overprint(tgl_ambil), f"UPDATE_TGL_{no_cari}.pdf", "application/pdf")
+                st.success("STATUS PENGAMBILAN DIPERBARUI!")
+                st.download_button("📥 DOWNLOAD PDF DAN CETAK", cetak_overprint(tgl_ambil), f"UPDATE_TGL_{no_cari}.pdf", "application/pdf")
         else:
-            st.error(f"NOMOR URUT '{no_cari}' TIDAK DITEMUKAN. SILAKAN CEK KEMBALI.")
+            st.error(f"NOMOR URUT '{no_cari}' TIDAK DITEMUKAN.")
