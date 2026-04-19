@@ -156,7 +156,7 @@ if menu == "PENGANTARAN BERKAS":
             conn.update(data=df_final)
             st.cache_data.clear()
             st.success("✅ DATA BERHASIL DISIMPAN!")
-            st.download_button("📥 DOWNLOAD PDF TANDA TERIMA", buat_pdf_full(new_row, sel_berkas), f"TANDA_{Nama_Pengantar_Berkas}.pdf")
+            st.download_button("📥 DOWNLOAD PDF TANDA TERIMA", buat_pdf_full(new_row, sel_berkas), f"TANDA_{no_urut}.pdf")
 
 # --- BAGIAN 2: PENGAMBILAN BERKAS ---
 elif menu == "PENGAMBILAN BERKAS":
