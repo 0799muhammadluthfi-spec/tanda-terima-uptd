@@ -191,6 +191,6 @@ elif menu == "PENGAMBILAN BERKAS":
                 conn.update(data=df)
                 st.cache_data.clear()
                 st.success("✅ BERHASIL! SILAKAN CETAK DI HALAMAN BELAKANG KERTAS.")
-                st.download_button("📥 DOWNLOAD PDF OVERPRINT (1 HALAMAN)", cetak(tgl_ambil), f"UPDATE_{no_cari}.pdf")
+                st.download_button("📥 DOWNLOAD PDF OVERPRINT (1 HALAMAN)", cetak_overprint(tgl_ambil), f"UPDATE_{no_cari}.pdf")
         else:
             st.error(f"❌ NOMOR URUT '{no_cari}' TIDAK DITEMUKAN DI DATABASE.")
