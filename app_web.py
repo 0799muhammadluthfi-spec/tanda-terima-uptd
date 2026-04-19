@@ -31,7 +31,7 @@ def buat_pdf_web(data, dokumen):
     c.drawString(x_pos + 0.8 * cm, y_pos + 7.1 * cm, "Daftar kelengkapan dokumen permohonan:")
 
 yy = y_pos + 6.3 * cm
-for i, (item, status) in enumerate(dokumen.items(), 1):
+    for i, (item, status) in enumerate(dokumen.items(), 1):
         c.setFont("Helvetica-BoldOblique", 10.5)
         c.drawString(x_pos + 1 * cm, yy, f"{i}. {item}")
         
