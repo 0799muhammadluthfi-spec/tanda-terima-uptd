@@ -83,7 +83,7 @@ st.sidebar.title("SURAT KEPUTUSAN MENEMPATI TOKO")
 menu = st.sidebar.radio("KEPERLUAN:", ["PENGANTARAN BERKAS", "PENGAMBILAN BERKAS"])
 
 # PERBAIKAN: Fungsi baca data yang lebih sabar (Anti-Crash)
-@st.cache_data(ttl=2) # Cache 2 detik agar tidak spamming API Google
+@st.cache_data(ttl=60) # Cache 60 detik agar tidak spamming API Google
 def ambil_data():
     try:
         raw = conn.read(ttl=2)
