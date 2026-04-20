@@ -99,7 +99,7 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
         y_strike = yy + 0.11 * cm 
         if item in berkas_list:
             # Coret TIDAK ADA (Panjang sudah diperpendek)
-            c.line(x_status + 1.4 * cm, y_strike, x_status + 3.3 * cm, y_strike)
+            c.line(x_status + 1.4 * cm, y_strike, x_status + 3.4 * cm, y_strike)
         else:
             # Coret ADA
             c.line(x_status - 0.1 * cm, y_strike, x_status + 0.8 * cm, y_strike)
