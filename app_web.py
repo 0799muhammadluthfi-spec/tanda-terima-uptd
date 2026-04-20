@@ -555,9 +555,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-File "/mount/src/tanda-terima-uptd/app_web.py", line 490
-          elif menu_aktif == "KONFIRMASI":
-          ^
-SyntaxError: 'elif' block follows an 'else' block
