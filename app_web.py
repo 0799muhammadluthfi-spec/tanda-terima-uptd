@@ -18,9 +18,9 @@ def cetak_tanda_terima_parkir(data):
     lebar_kertas = 21.5 * cm
     tinggi_box = 6.0 * cm
     margin_samping = 1.0 * cm
-    lebar_tabel = lebar_kertas - (2 * margin_samping) # Lebar tabel menyesuaikan kertas
+    lebar_tabel = lebar_kertas - (2 * margin_samping)
     
-    # Posisi Vertikal (Kita turunkan sedikit dari paling atas supaya tidak terpotong printer)
+    # Posisi Vertikal
     y_top = 32 * cm 
     y_bottom = y_top - tinggi_box
     
@@ -37,43 +37,49 @@ def cetak_tanda_terima_parkir(data):
     c.setFont("Helvetica-Bold", 10)
     c.drawCentredString(center_x, y_top - 1.3 * cm, "TANDA TERIMA SETORAN PARKIR (MPP)")
     
-    # 3. Data Identitas (Atas Tabel)
+    # 3. Format Tanggal (dddd, dd - mm - yyyy)
+    # Kita asumsikan data['Tanggal'] masuk dalam format dd-mm-yyyy dari form
+    try:
+        tgl_obj = datetime.strptime(data['Tanggal'], "%d-%m-%Y")
+        # Daftar hari dalam Bahasa Indonesia
+        hari_indo = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
+        nama_hari = hari_indo[tgl_obj.weekday()]
+        tgl_format = tgl_obj.strftime("%d - %m - %Y")
+        tgl_final = f"{nama_hari}, {tgl_format}"
+    except:
+        tgl_final = data['Tanggal'] # Fallback jika format salah
+
+    # 4. Data Identitas (Atas Tabel)
     c.setFont("Helvetica", 10)
-    c.drawString(margin_samping + 0.5*cm, y_top - 2.1 * cm, f"TANGGAL : {data['Tanggal']}")
+    c.drawString(margin_samping + 0.5*cm, y_top - 2.1 * cm, f"TANGGAL : {tgl_final}")
     c.drawRightString(lebar_kertas - margin_samping - 0.5*cm, y_top - 2.1 * cm, f"NAMA : {data['Nama_Petugas']}")
 
-    # 4. TABEL DATA
+    # 5. TABEL DATA
     y_tab = y_top - 2.5 * cm
-    t_row = 0.7 * cm # Tinggi baris tabel
+    t_row = 0.8 * cm # Tinggi baris tabel sedikit lebih longgar
     
     # Header Tabel
     c.setLineWidth(1)
     c.rect(margin_samping + 0.5*cm, y_tab - t_row, lebar_tabel - 1*cm, t_row)
     c.setFont("Helvetica-Bold", 9)
-    c.drawString(margin_samping + 1*cm, y_tab - 0.5*cm, "JENIS KENDARAAN")
-    c.drawCentredString(center_x + 2*cm, y_tab - 0.5*cm, "RINCIAN KARCIS")
-    c.drawRightString(lebar_kertas - margin_samping - 1*cm, y_tab - 0.5*cm, "KETERANGAN")
+    c.drawString(margin_samping + 1*cm, y_tab - 0.55*cm, "JENIS KENDARAAN")
+    c.drawCentredString(center_x + 2*cm, y_tab - 0.55*cm, "RINCIAN KARCIS")
+    c.drawRightString(lebar_kertas - margin_samping - 1*cm, y_tab - 0.55*cm, "KETERANGAN")
     
     # Baris R2
     y_r2 = y_tab - (2 * t_row)
     c.rect(margin_samping + 0.5*cm, y_r2, lebar_tabel - 1*cm, t_row)
-    c.setFont("Helvetica", 9)
-    c.drawString(margin_samping + 1*cm, y_r2 + 0.2*cm, "RODA 2 (MOTOR)")
-    c.drawCentredString(center_x + 2*cm, y_r2 + 0.2*cm, f"{data['MPP_Roda_R2']} Lembar")
-    c.drawRightString(lebar_kertas - margin_samping - 1*cm, y_r2 + 0.2*cm, "MPP")
+    c.setFont("Helvetica", 10)
+    c.drawString(margin_samping + 1*cm, y_r2 + 0.25*cm, "RODA 2 (MOTOR)")
+    c.drawCentredString(center_x + 2*cm, y_r2 + 0.25*cm, f"{data['MPP_Roda_R2']} Lembar")
+    c.drawRightString(lebar_kertas - margin_samping - 1*cm, y_r2 + 0.25*cm, "MPP")
 
     # Baris R4
     y_r4 = y_tab - (3 * t_row)
     c.rect(margin_samping + 0.5*cm, y_r4, lebar_tabel - 1*cm, t_row)
-    c.drawString(margin_samping + 1*cm, y_r4 + 0.2*cm, "RODA 4 (MOBIL)")
-    c.drawCentredString(center_x + 2*cm, y_r4 + 0.2*cm, f"{data['MPP_Roda_R4']} Lembar")
-    c.drawRightString(lebar_kertas - margin_samping - 1*cm, y_r4 + 0.2*cm, "MPP")
-    
-    # 5. Footer Info
-    c.setFont("Helvetica-Oblique", 7)
-    tgl_cetak = datetime.now().strftime("%d/%m/%Y %H:%M")
-    c.drawString(margin_samping + 0.5*cm, y_bottom + 0.3 * cm, f"ID: PRK-{data['No']}")
-    c.drawRightString(lebar_kertas - margin_samping - 0.5*cm, y_bottom + 0.3 * cm, f"Dicetak pada: {tgl_cetak} WITA")
+    c.drawString(margin_samping + 1*cm, y_r4 + 0.25*cm, "RODA 4 (MOBIL)")
+    c.drawCentredString(center_x + 2*cm, y_r4 + 0.25*cm, f"{data['MPP_Roda_R4']} Lembar")
+    c.drawRightString(lebar_kertas - margin_samping - 1*cm, y_r4 + 0.25*cm, "MPP")
     
     c.showPage()
     c.save()
