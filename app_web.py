@@ -397,26 +397,44 @@ def halaman_parkir():
                         st.success(f"✅ Rekap dikirim! (Khusus R2 otomatis: {ks_r2}, Khusus R4: {ks_r4})")
                         st.rerun()
 
-    elif menu_parkir == "KONFIRMASI PENERIMAAN":
+elif menu_parkir == "KONFIRMASI PENERIMAAN":
         st.subheader("✅ Verifikasi Karcis Masuk")
         
-        # Pengaman jika file Excel belum ditambahkan kolom Status_Terima
+        # Pengaman jika kolom belum ada
         if "Status_Terima" not in df_parkir.columns:
-            df_parkir["Status_Terima"] = "SUDAH" 
+            df_parkir["Status_Terima"] = "BELUM" 
             
-        # Hanya tampilkan yang statusnya masih "BELUM"
         df_pending = df_parkir[df_parkir["Status_Terima"] == "BELUM"]
         
         if df_pending.empty:
             st.info("Semua rekap sudah dikonfirmasi. Tidak ada antrean.")
         else:
             for index, row in df_pending.iterrows():
-                with st.expander(f"📦 Nomor: {row['No']} - {row['Nama_Petugas']} ({row['Tanggal']})"):
-                    st.write(f"**Total R2:** {row['Total_Karcis_R2']} Lembar | **Total R4:** {row['Total_Karcis_R4']} Lembar")
-                    if st.button(f"KONFIRMASI PENERIMAAN #{row['No']}", type="primary", key=f"btn_{row['No']}"):
+                # Judul kotak ekspander
+                with st.expander(f"📦 Rekap Nomor: {row['No']} - {row['Nama_Petugas']} ({row['Tanggal']})"):
+                    
+                    # Membuat 2 kolom untuk memisahkan R2 dan R4
+                    col_r2, col_r4 = st.columns(2)
+                    
+                    with col_r2:
+                        st.markdown("#### 🏍️ RODA 2 (MOTOR)")
+                        st.write(f"• **Khusus:** {row['Khusus_Roda_R2']} lbr")
+                        st.write(f"• **MPP:** {row['MPP_Roda_R2']} lbr")
+                        st.write(f"**TOTAL R2: {row['Total_Karcis_R2']}**")
+                    
+                    with col_r4:
+                        st.markdown("#### 🚗 RODA 4 (MOBIL)")
+                        st.write(f"• **Khusus:** {row['Khusus_Roda_R4']} lbr")
+                        st.write(f"• **MPP:** {row['MPP_Roda_R4']} lbr")
+                        st.write(f"**TOTAL R4: {row['Total_Karcis_R4']}**")
+                    
+                    st.divider()
+                    
+                    # Tombol Konfirmasi
+                    if st.button(f"KONFIRMASI PENERIMAAN #{row['No']}", type="primary", key=f"btn_{row['No']}", use_container_width=True):
                         df_parkir.loc[df_parkir["No"] == row["No"], "Status_Terima"] = "SUDAH"
                         if safe_update("DATA_PARKIR", df_parkir):
-                            st.success(f"✅ Rekap #{row['No']} Telah Diterima!")
+                            st.success(f"✅ Data {row['Nama_Petugas']} Berhasil Dikonfirmasi!")
                             st.rerun()
 
     # Tampilkan tabel history di bawah
