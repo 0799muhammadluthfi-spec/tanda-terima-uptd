@@ -345,17 +345,12 @@ def halaman_pengambilan():
 # ==========================================
 # 6. MODUL PARKIR
 # ==========================================
-def halaman_parkir():
-    st.header("🚗 MANAJEMEN PARKIR UPTD")
-    
-    # Sub-menu di dalam modul Parkir
-    menu_parkir = st.radio("PILIH AKSI PARKIR:", ["INPUT REKAP HARIAN", "KONFIRMASI PENERIMAAN"], horizontal=True)
-    
+def halaman_parkir(menu_aktif):
+    st.header(f"🚗 MODUL {menu_aktif}")
     df_parkir = load_data("DATA_PARKIR")
 
-    if menu_parkir == "INPUT REKAP HARIAN":
+    if menu_aktif == "INPUT REKAP":
         st.subheader("📝 Form Rekap Setoran Karcis")
-        
         with st.form("form_rekap_parkir", clear_on_submit=True):
             col1, col2 = st.columns(2)
             with col1:
@@ -364,112 +359,61 @@ def halaman_parkir():
                 pk_r2 = st.number_input("PENGAMBILAN KARCIS R2", min_value=0)
                 pk_r4 = st.number_input("PENGAMBILAN KARCIS R4", min_value=0)
             with col2:
-                # Yang diinput petugas sekarang adalah Total dan MPP
                 tot_r2 = st.number_input("TOTAL KARCIS R2", min_value=0)
                 tot_r4 = st.number_input("TOTAL KARCIS R4", min_value=0)
                 mpp_r2 = st.number_input("MPP RODA R2", min_value=0)
                 mpp_r4 = st.number_input("MPP RODA R4", min_value=0)
             
-            # Hitung otomatis KARCIS KHUSUS sesuai kondisi lapangan
             ks_r2 = tot_r2 - mpp_r2
             ks_r4 = tot_r4 - mpp_r4
             
             if st.form_submit_button("💾 KIRIM REKAP", type="primary"):
                 if ks_r2 < 0 or ks_r4 < 0:
-                    st.error("❌ Gagal! Total Karcis tidak boleh lebih kecil dari jumlah MPP.")
+                    st.error("❌ Gagal! Total tidak boleh lebih kecil dari MPP.")
                 else:
                     new_row = {
-                        "No": get_next_no(df_parkir),
-                        "Tanggal": tgl,
-                        "Nama_Petugas": nama,
-                        "Pengambilan_Karcis_R2": pk_r2,
-                        "Pengambilan_Karcis_R4": pk_r4,
-                        "Khusus_Roda_R2": ks_r2,
-                        "Khusus_Roda_R4": ks_r4,
-                        "MPP_Roda_R2": mpp_r2,
-                        "MPP_Roda_R4": mpp_r4,
-                        "Total_Karcis_R2": tot_r2,
-                        "Total_Karcis_R4": tot_r4,
-                        "Status_Terima": "BELUM"
+                        "No": get_next_no(df_parkir), "Tanggal": tgl, "Nama_Petugas": nama,
+                        "Pengambilan_Karcis_R2": pk_r2, "Pengambilan_Karcis_R4": pk_r4,
+                        "Khusus_Roda_R2": ks_r2, "Khusus_Roda_R4": ks_r4,
+                        "MPP_Roda_R2": mpp_r2, "MPP_Roda_R4": mpp_r4,
+                        "Total_Karcis_R2": tot_r2, "Total_Karcis_R4": tot_r4,
+                        "Status_Khusus": "BELUM", "Status_MPP": "BELUM"
                     }
                     df_up = pd.concat([df_parkir, pd.DataFrame([new_row])], ignore_index=True)
                     if safe_update("DATA_PARKIR", df_up):
-                        st.success(f"✅ Rekap dikirim! (Khusus R2 otomatis: {ks_r2}, Khusus R4: {ks_r4})")
+                        st.success("✅ Berhasil Disimpan!")
                         st.rerun()
 
-    elif menu_parkir == "KONFIRMASI PENERIMAAN":
-        st.subheader("✅ Verifikasi Karcis Masuk")
-        
-        # Pengaman kolom status baru
+    elif menu_aktif == "KONFIRMASI":
+        st.subheader("✅ Verifikasi Penerimaan Karcis")
         for col in ["Status_Khusus", "Status_MPP"]:
-            if col not in df_parkir.columns:
-                df_parkir[col] = "BELUM"
+            if col not in df_parkir.columns: df_parkir[col] = "BELUM"
             
-        # Tampilkan data yang salah satu statusnya masih "BELUM"
         df_pending = df_parkir[(df_parkir["Status_Khusus"] == "BELUM") | (df_parkir["Status_MPP"] == "BELUM")]
         
         if df_pending.empty:
-            st.info("Semua rekap sudah dikonfirmasi.")
+            st.info("Tidak ada antrean konfirmasi.")
         else:
-            for index, row in df_pending.iterrows():
-                with st.expander(f"📦 Rekap Nomor: {row['No']} - {row['Nama_Petugas']} ({row['Tanggal']})"):
-                    col_k, col_m = st.columns(2)
-                    
-                    # --- BAGIAN KHUSUS ---
-                    with col_k:
-                        st.markdown("### 🎫 KARCIS KHUSUS")
+            for index, row in df_pending.sort_values(by="No").iterrows():
+                with st.expander(f"📦 Nomor: {row['No']} - {row['Nama_Petugas']}"):
+                    ck, cm = st.columns(2)
+                    with ck:
+                        st.markdown("### 🎫 KHUSUS")
                         st.write(f"R2: {row['Khusus_Roda_R2']} | R4: {row['Khusus_Roda_R4']}")
                         if row["Status_Khusus"] == "BELUM":
-                            if st.button(f"TERIMA KHUSUS #{row['No']}", type="primary", key=f"kh_{row['No']}"):
+                            if st.button(f"TERIMA KHUSUS #{row['No']}", key=f"kh_{row['No']}", type="primary"):
                                 df_parkir.loc[df_parkir["No"] == row["No"], "Status_Khusus"] = "SUDAH"
-                                if safe_update("DATA_PARKIR", df_parkir):
-                                    st.success("Karcis Khusus Diterima!")
-                                    st.rerun()
-                        else:
-                            st.success("✅ Terverifikasi")
-
-                    # --- BAGIAN MPP ---
-                    with col_m:
-                        st.markdown("### 🏢 KARCIS MPP")
+                                if safe_update("DATA_PARKIR", df_parkir): st.rerun()
+                        else: st.success("✅ KHUSUS OKE")
+                    with cm:
+                        st.markdown("### 🏢 MPP")
                         st.write(f"R2: {row['MPP_Roda_R2']} | R4: {row['MPP_Roda_R4']}")
                         if row["Status_MPP"] == "BELUM":
-                            if st.button(f"TERIMA MPP #{row['No']}", type="primary", key=f"mpp_{row['No']}"):
+                            if st.button(f"TERIMA MPP #{row['No']}", key=f"mpp_{row['No']}", type="primary"):
                                 df_parkir.loc[df_parkir["No"] == row["No"], "Status_MPP"] = "SUDAH"
-                                if safe_update("DATA_PARKIR", df_parkir):
-                                    st.success("Karcis MPP Diterima!")
-                                    st.rerun()
-                        else:
-                            st.success("✅ Terverifikasi")
+                                if safe_update("DATA_PARKIR", df_parkir): st.rerun()
+                        else: st.success("✅ MPP OKE")
 
-    # Tampilkan tabel history di bawah
     st.divider()
-    st.subheader("📊 LOG SELURUH REKAP PARKIR")
     if not df_parkir.empty:
-        # Menampilkan tabel dan diurutkan agar yang terbaru ada di atas
         st.dataframe(df_parkir.sort_values(by="No", ascending=False), use_container_width=True, hide_index=True)
-
-# ==========================================
-# 7. MAIN APP
-# ==========================================
-def main():
-    with st.sidebar:
-        st.title("🏪 UPTD PASAR")
-        modul = st.selectbox("PILIH MODUL:", ["SK TOKO", "PARKIR"])
-        
-        # Menu dinamis: Kalau pilih PARKIR, muncul pilihan INPUT & KONFIRMASI
-        if modul == "SK TOKO":
-            menu = st.radio("MENU SK:", ["PENGANTARAN", "PENGAMBILAN"])
-        else:
-            menu = st.radio("MENU PARKIR:", ["INPUT REKAP", "KONFIRMASI"])
-    
-    if modul == "SK TOKO":
-        if menu == "PENGANTARAN": 
-            halaman_pengantaran()
-        else: 
-            halaman_pengambilan()
-    else:
-        # PENTING: Kita kirim pilihan menu ke fungsi halaman_parkir
-        halaman_parkir(menu)
-
-if __name__ == "__main__":
-    main()
