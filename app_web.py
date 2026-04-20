@@ -292,32 +292,80 @@ def halaman_parkir(menu):
                 
                 tr2_str = str(tr2) if tr2 > 0 else "0"
                 tr4_str = str(tr4) if tr4 > 0 else "0"
-                
-                df_p.loc[idx, ["Total_Karcis_R2", "MPP_Roda_R2", "Sisa_Stok_R2", "Khusus_Roda_R2"]] = [tr2_str, str(mr2), str(sn2), str(tr2-mr2)]
-                df_p.loc[idx, ["Total_Karcis_R4", "MPP_Roda_R4", "Sisa_Stok_R4", "Khusus_Roda_R4"]] = [tr4_str, str(mr4), str(sn4), str(tr4-mr4)]
-                
-                if str(df_p.loc[idx, "Status_Cetak"]).strip() != "SUDAH":
+
+                # --- CEK APAKAH DATA SUDAH PERNAH DIISI ---
+                karcis_r2_sekarang = str(df_p.loc[idx, "Total_Karcis_R2"]).strip()
+                sudah_diisi = karcis_r2_sekarang not in ["-", "nan", ""]
+
+                data_baru = {
+                    "tr2_str": tr2_str, "mr2_str": str(mr2), "sn2_str": str(sn2), "kh2_str": str(tr2-mr2),
+                    "tr4_str": tr4_str, "mr4_str": str(mr4), "sn4_str": str(sn4), "kh4_str": str(tr4-mr4)
+                }
+
+                if sudah_diisi:
+                    # Tahan proses dan munculkan peringatan
+                    st.session_state["pending_parkir"] = data_baru
+                    st.session_state["pending_idx"] = idx
+                    st.session_state["show_confirm_parkir"] = True
+                else:
+                    # Proses langsung simpan
+                    df_p.loc[idx, ["Total_Karcis_R2", "MPP_Roda_R2", "Sisa_Stok_R2", "Khusus_Roda_R2"]] = [data_baru["tr2_str"], data_baru["mr2_str"], data_baru["sn2_str"], data_baru["kh2_str"]]
+                    df_p.loc[idx, ["Total_Karcis_R4", "MPP_Roda_R4", "Sisa_Stok_R4", "Khusus_Roda_R4"]] = [data_baru["tr4_str"], data_baru["mr4_str"], data_baru["sn4_str"], data_baru["kh4_str"]]
                     df_p.loc[idx, ["Status_Khusus", "Status_MPP", "Status_Cetak"]] = ["BELUM", "BELUM", "BELUM"]
+                    
+                    if 'Tgl_Temp' in df_p.columns: df_p = df_p.drop(columns=['Tgl_Temp'])
+                    if safe_update("DATA_PARKIR", df_p): st.success("✅ Berhasil Diupdate!"); st.rerun()
+
+        # --- BLOK PERINGATAN TIMPA DATA (Muncul di bawah form) ---
+        if st.session_state.get("show_confirm_parkir"):
+            st.warning(f"⚠️ Data setoran untuk tanggal **{tgl_input_user}** sudah pernah diisi! Yakin ingin menimpanya?")
+            col_c1, col_c2 = st.columns(2)
+            if col_c1.button("✅ YA, TIMPA DATA", type="primary", key="btn_timpa_parkir"):
+                d = st.session_state["pending_parkir"]
+                p_idx = st.session_state["pending_idx"]
+                
+                df_p.loc[p_idx, ["Total_Karcis_R2", "MPP_Roda_R2", "Sisa_Stok_R2", "Khusus_Roda_R2"]] = [d["tr2_str"], d["mr2_str"], d["sn2_str"], d["kh2_str"]]
+                df_p.loc[p_idx, ["Total_Karcis_R4", "MPP_Roda_R4", "Sisa_Stok_R4", "Khusus_Roda_R4"]] = [d["tr4_str"], d["mr4_str"], d["sn4_str"], d["kh4_str"]]
+                
+                # Reset status konfirmasi jika ditimpa
+                if str(df_p.loc[p_idx, "Status_Cetak"]).strip() != "SUDAH":
+                    df_p.loc[p_idx, ["Status_Khusus", "Status_MPP", "Status_Cetak"]] = ["BELUM", "BELUM", "BELUM"]
                 
                 if 'Tgl_Temp' in df_p.columns: df_p = df_p.drop(columns=['Tgl_Temp'])
-                if safe_update("DATA_PARKIR", df_p): st.success("✅ Berhasil Diupdate!"); st.rerun()
+                if safe_update("DATA_PARKIR", df_p): 
+                    st.session_state["show_confirm_parkir"] = False
+                    st.success("✅ Berhasil Ditimpa!")
+                    st.rerun()
+            
+            if col_c2.button("❌ BATAL", key="btn_batal_parkir"):
+                st.session_state["show_confirm_parkir"] = False
+                st.rerun()
 
     elif menu == "INPUT STOK":
         st.subheader("📦 UPDATE PENGAMBILAN KARCIS BARU")
         st.info(f"Mengisi stok baru untuk petugas: **{nama_p}**")
-        with st.form("form_stok_baru"):
+        with st.form("form_stok_baru", clear_on_submit=True):
             c1, c2 = st.columns(2)
             with c1: pk2 = st.number_input("PENGAMBILAN BARU R2", min_value=0)
             with c2: pk4 = st.number_input("PENGAMBILAN BARU R4", min_value=0)
-            if st.form_submit_button("➕ TAMBAH STOK", type="primary"):
+            
+            # --- PENAMBAHAN TOMBOL RESET DI SINI ---
+            cb1, cb2 = st.columns(2)
+            with cb1: 
+                subm_stok = st.form_submit_button("➕ TAMBAH STOK", type="primary", use_container_width=True)
+            with cb2: 
+                reset_stok = st.form_submit_button("🔄 RESET FORM", use_container_width=True)
+            
+            if reset_stok:
+                st.rerun()
+
+            if subm_stok:
                 df_p.loc[idx, ["Pengambilan_Karcis_R2", "Pengambilan_Karcis_R4"]] = [str(pk2), str(pk4)]
                 if 'Tgl_Temp' in df_p.columns: df_p = df_p.drop(columns=['Tgl_Temp'])
                 if safe_update("DATA_PARKIR", df_p): st.success("✅ Stok Berhasil Ditambahkan!"); st.rerun()
 
     elif menu == "KONFIRMASI":
-        
         # FILTER ANTI HANTU: Hanya tampilkan jika Total Karcis terdeteksi sebagai ANGKA
-        # Jika isian karcis dihapus di Sheets, nilainya tidak akan terbaca sebagai angka
         kondisi_angka_r2 = df_p["Total_Karcis_R2"].str.isnumeric()
         kondisi_angka_r4 = df_p["Total_Karcis_R4"].str.isnumeric()
         df_pen = df_p[kondisi_angka_r2 | kondisi_angka_r4].copy()
