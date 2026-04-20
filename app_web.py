@@ -898,8 +898,10 @@ def halaman_pengambilan_sk():
     no_cari = st.text_input("🔍 CARI NOMOR URUT:").strip()
 
     if no_cari:
-        st.write("Kamu ketik:", repr(no_cari))          # ← debug
-        st.write("Isi kolom No:", df_m["No"].tolist())  # ← debug
+    st.write("Kamu ketik:", repr(no_cari))
+    st.write("Isi kolom No:", df_m["No"].tolist())
+    st.write("Normalisasi input:", repr(normalisasi_no(no_cari)))
+    st.write("Normalisasi kolom No:", df_m["No"].apply(normalisasi_no).tolist())
 
         no_cari_norm = normalisasi_no(no_cari)
         mask_no = df_m["No"].apply(normalisasi_no) == no_cari_norm
