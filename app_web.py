@@ -918,7 +918,7 @@ def halaman_pengambilan_sk():
                     file_name=f"AMBIL_{no_cari_norm}.pdf"
                 )
             else:
-                st.warning(f"🏪 Toko: {data['Nama_Toko']}")
+                st.warning(f"{data['Nama_Pemilik_Asli']}")
                 tgl_a = st.text_input(
                     "📅 TANGGAL AMBIL:",
                     value=datetime.now().strftime("%d-%m-%Y"),
