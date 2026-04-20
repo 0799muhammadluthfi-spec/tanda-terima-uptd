@@ -444,7 +444,7 @@ def halaman_parkir(menu_aktif):
     st.header(f"🚗 {menu_aktif}")
     df_parkir = load_data("DATA_PARKIR")
 
-    if menu_aktif == "INPUT REKAP":
+   if menu_aktif == "INPUT REKAP":
         st.subheader("📝 FORM REKAP SETORAN")
         # Input tanggal untuk mencari jadwal di spreadsheet
         tgl_input = st.text_input("MASUKKAN TANGGAL (CONTOH: 20-04-2026)", value=datetime.now().strftime("%d-%m-%Y"))
@@ -455,11 +455,19 @@ def halaman_parkir(menu_aktif):
         if not baris_cocok.empty:
             idx = baris_cocok.index[0]
             nama_ptgs = baris_cocok.iloc[0]["Nama_Petugas"]
-            st.success(f"👤 PETUGAS: **{nama_ptgs}** | 📅 **{format_tgl_hari_indo(tgl_input)}**")
+            st.success(f"👤 PETUGAS: **{nama_ptgs}** | 📅 **{tgl_input}**")
             
-            # AMBIL SISA KEMARIN dari baris sebelumnya (idx - 1)
-            sisa_r2_lama = df_parkir.iloc[idx - 1]["Sisa_Stok_R2"] if idx > 0 else 0
-            sisa_r4_lama = df_parkir.iloc[idx - 1]["Sisa_Stok_R4"] if idx > 0 else 0
+            # AMBIL SISA KEMARIN DENGAN NAMA KOLOM YANG BENAR
+            try:
+                sisa_r2_lama = int(float(df_parkir.iloc[idx - 1].get("Sisa_Karcis_r2", 0))) if idx > 0 else 0
+            except:
+                sisa_r2_lama = 0
+                
+            try:
+                sisa_r4_lama = int(float(df_parkir.iloc[idx - 1].get("Sisa_Karcis_r4", 0))) if idx > 0 else 0
+            except:
+                sisa_r4_lama = 0
+                
             st.info(f"📊 SISA KEMARIN: R2={sisa_r2_lama} | R4={sisa_r4_lama}")
 
             with st.form("form_parkir"):
@@ -478,9 +486,9 @@ def halaman_parkir(menu_aktif):
                     sisa_n_r2 = (pk_r2 + sisa_r2_lama) - tot_r2
                     sisa_n_r4 = (pk_r4 + sisa_r4_lama) - tot_r4
                     
-                    # Simpan hasil ke baris yang sudah ada (idx)
-                    df_parkir.loc[idx, ["Pengambilan_Karcis_R2", "Total_Karcis_R2", "MPP_Roda_R2", "Sisa_Stok_R2", "Khusus_Roda_R2"]] = [pk_r2, tot_r2, mpp_r2, sisa_n_r2, tot_r2-mpp_r2]
-                    df_parkir.loc[idx, ["Pengambilan_Karcis_R4", "Total_Karcis_R4", "MPP_Roda_R4", "Sisa_Stok_R4", "Khusus_Roda_R4"]] = [pk_r4, tot_r4, mpp_r4, sisa_n_r4, tot_r4-mpp_r4]
+                    # Simpan hasil ke baris yang sudah ada (idx) - MENGGUNAKAN NAMA KOLOM BARU
+                    df_parkir.loc[idx, ["Pengambilan_Karcis_R2", "Total_Karcis_R2", "MPP_Roda_R2", "Sisa_Karcis_r2", "Khusus_Roda_R2"]] = [pk_r2, tot_r2, mpp_r2, sisa_n_r2, tot_r2-mpp_r2]
+                    df_parkir.loc[idx, ["Pengambilan_Karcis_R4", "Total_Karcis_R4", "MPP_Roda_R4", "Sisa_Karcis_r4", "Khusus_Roda_R4"]] = [pk_r4, tot_r4, mpp_r4, sisa_n_r4, tot_r4-mpp_r4]
                     df_parkir.loc[idx, ["Status_Khusus", "Status_MPP"]] = ["BELUM", "BELUM"]
                     
                     if safe_update("DATA_PARKIR", df_parkir):
