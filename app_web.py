@@ -7,6 +7,66 @@ from io import BytesIO
 from streamlit_gsheets import GSheetsConnection
 
 # ==========================================
+# 1. FUNGSI KHUSUS CETAK PARKIR (PORTRAIT)
+# ========================================== 
+def cetak_tanda_terima_parkir(data):
+    buffer = BytesIO()
+    # Tetap gunakan ukuran custom, tapi tanpa perintah landscape
+    custom_size = (13.6 * cm, 7 * cm)
+    c = canvas.Canvas(buffer, pagesize=custom_size)
+    
+    # Garis Bingkai Luar (Tanda Potong)
+    c.setDash(1, 2)
+    c.setLineWidth(0.5)
+    c.rect(0.2*cm, 0.2*cm, 13.2*cm, 6.6*cm)
+    c.setDash()
+    
+    # Header - Rata Tengah
+    c.setFont("Helvetica-Bold", 10)
+    c.drawCentredString(6.8 * cm, 6.0 * cm, "UPTD PENGELOLAAN PASAR KANDANGAN")
+    c.setFont("Helvetica-Bold", 8)
+    c.drawCentredString(6.8 * cm, 5.5 * cm, "TANDA TERIMA SETORAN PARKIR (MPP)")
+    
+    # Garis Pembatas Header
+    c.setLineWidth(1)
+    c.line(1*cm, 5.3*cm, 12.6*cm, 5.3*cm)
+    
+    # Isi Data
+    c.setFont("Helvetica", 9)
+    y_awal = 4.3 * cm
+    x_label = 1.5 * cm
+    x_titik = 4.5 * cm
+    x_value = 4.8 * cm
+    
+    # Daftar data yang akan ditampilkan
+    items = [
+        ("TANGGAL", data['Tanggal']),
+        ("NAMA PETUGAS", data['Nama_Petugas']),
+        ("JENIS KARCIS", "KARCIS MPP"),
+        ("RODA 2 (R2)", f"{data['MPP_Roda_R2']} Lembar"),
+        ("RODA 4 (R4)", f"{data['MPP_Roda_R4']} Lembar")
+    ]
+    
+    for label, value in items:
+        c.setFont("Helvetica", 9)
+        c.drawString(x_label, y_awal, label)
+        c.drawString(x_titik, y_awal, ":")
+        c.setFont("Helvetica-Bold", 9)
+        c.drawString(x_value, y_awal, str(value))
+        y_awal -= 0.6 * cm # Jarak antar baris
+        
+    # Footer Kecil
+    c.setFont("Helvetica-Oblique", 7)
+    tgl_cetak = datetime.now().strftime("%d/%m/%Y %H:%M")
+    c.drawString(1.5 * cm, 0.5 * cm, f"ID: PRK-{data['No']}")
+    c.drawRightString(12.1 * cm, 0.5 * cm, f"Dicetak pada: {tgl_cetak} WITA")
+    
+    c.showPage()
+    c.save()
+    buffer.seek(0)
+    return buffer
+
+# ==========================================
 # 1. KONFIGURASI
 # ==========================================
 st.set_page_config(
@@ -386,7 +446,6 @@ def halaman_parkir(menu_aktif):
 
     elif menu_aktif == "KONFIRMASI":
         st.subheader("✅ Verifikasi Penerimaan Karcis")
-        # Pastikan kolom status ada agar tidak error putih
         for col in ["Status_Khusus", "Status_MPP"]:
             if col not in df_parkir.columns: df_parkir[col] = "BELUM"
             
@@ -402,25 +461,36 @@ def halaman_parkir(menu_aktif):
                         st.markdown("### 🎫 KHUSUS")
                         st.write(f"R2: {row['Khusus_Roda_R2']} | R4: {row['Khusus_Roda_R4']}")
                         if row["Status_Khusus"] == "BELUM":
-                            if st.button(f"TERIMA KHUSUS #{row['No']}", key=f"kh_{row['No']}", type="primary"):
+                            if st.button(f"TERIMA KHUSUS #{row['No']}", key=f"kh_{row['No']}", type="primary", use_container_width=True):
                                 df_parkir.loc[df_parkir["No"] == row["No"], "Status_Khusus"] = "SUDAH"
                                 if safe_update("DATA_PARKIR", df_parkir): st.rerun()
-                        else: st.success("✅ KHUSUS OKE")
+                        else: 
+                            st.success("✅ KHUSUS OKE")
 
                     with cm:
                         st.markdown("### 🏢 MPP")
                         st.write(f"R2: {row['MPP_Roda_R2']} | R4: {row['MPP_Roda_R4']}")
                         if row["Status_MPP"] == "BELUM":
-                            if st.button(f"TERIMA MPP #{row['No']}", key=f"mpp_{row['No']}", type="primary"):
+                            if st.button(f"TERIMA MPP #{row['No']}", key=f"mpp_{row['No']}", type="primary", use_container_width=True):
                                 df_parkir.loc[df_parkir["No"] == row["No"], "Status_MPP"] = "SUDAH"
                                 if safe_update("DATA_PARKIR", df_parkir): st.rerun()
-                        else: st.success("✅ MPP OKE")
+                        else: 
+                            st.success("✅ MPP OKE")
+                            pdf_file = cetak_tanda_terima_parkir(row)
+                            st.download_button(
+                                label="🖨️ CETAK TANDA TERIMA (MPP)",
+                                data=pdf_file,
+                                file_name=f"TANDA_TERIMA_MPP_{row['Nama_Petugas']}.pdf",
+                                mime="application/pdf",
+                                key=f"print_mpp_{row['No']}",
+                                use_container_width=True
+                            )
 
+    # Tabel Riwayat (Posisinya sejajar dengan IF menu_aktif paling atas)
     st.divider()
     st.subheader("📊 LOG REKAP PARKIR")
     if not df_parkir.empty:
         st.dataframe(df_parkir.sort_values(by="No", ascending=False), use_container_width=True, hide_index=True)
-
 # ==========================================
 # 7. MAIN APP
 # ==========================================
