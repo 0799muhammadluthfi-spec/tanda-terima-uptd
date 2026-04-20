@@ -240,19 +240,52 @@ st.markdown("""
         color: #94a3b8 !important;
     }
 
-    /* RADIO OPTIONS */
+    /* RADIO OPTIONS - PILL STYLE TANPA LINGKARAN */
+    [data-testid="stSidebar"] .stRadio [role="radiogroup"] {
+        gap: 4px !important;
+    }
+    [data-testid="stSidebar"] .stRadio [role="radiogroup"] label {
+        display: flex !important;
+        align-items: center !important;
+        padding: 8px 14px !important;
+        margin: 2px 0 !important;
+        border-radius: 8px !important;
+        transition: all 0.15s ease !important;
+        cursor: pointer !important;
+    }
+    /* Sembunyikan lingkaran radio */
+    [data-testid="stSidebar"] .stRadio [role="radiogroup"] label > div:first-child {
+        display: none !important;
+    }
     [data-testid="stSidebar"] .stRadio [role="radiogroup"] label p,
     [data-testid="stSidebar"] .stRadio [role="radiogroup"] label span {
         font-family: 'Inter', sans-serif !important;
         font-size: 0.86rem !important;
         font-weight: 500 !important;
-        color: #e2e8f0 !important;
+        color: #94a3b8 !important;
         letter-spacing: 0 !important;
         text-transform: none !important;
+        transition: all 0.15s ease !important;
+    }
+    /* Hover */
+    [data-testid="stSidebar"] .stRadio [role="radiogroup"] label:hover {
+        background: rgba(255,255,255,0.06) !important;
     }
     [data-testid="stSidebar"] .stRadio [role="radiogroup"] label:hover p,
     [data-testid="stSidebar"] .stRadio [role="radiogroup"] label:hover span {
+        color: #e2e8f0 !important;
+    }
+    /* Aktif / Terpilih */
+    [data-testid="stSidebar"] .stRadio [role="radiogroup"] label[data-checked="true"],
+    [data-testid="stSidebar"] .stRadio [role="radiogroup"] label:has(input:checked) {
+        background: rgba(96,165,250,0.15) !important;
+    }
+    [data-testid="stSidebar"] .stRadio [role="radiogroup"] label[data-checked="true"] p,
+    [data-testid="stSidebar"] .stRadio [role="radiogroup"] label[data-checked="true"] span,
+    [data-testid="stSidebar"] .stRadio [role="radiogroup"] label:has(input:checked) p,
+    [data-testid="stSidebar"] .stRadio [role="radiogroup"] label:has(input:checked) span {
         color: #60a5fa !important;
+        font-weight: 700 !important;
     }
 
     [data-testid="stSidebar"] hr {
