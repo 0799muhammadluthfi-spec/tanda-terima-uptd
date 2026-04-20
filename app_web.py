@@ -49,11 +49,9 @@ if "logo_b64" not in st.session_state:
 # ==========================================
 st.markdown("""
 <style>
-    /* ===== FONT IMPORT ===== */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-    /* ===== PAKSA LIGHT MODE ===== */
     .stApp,
     [data-testid="stAppViewContainer"],
     [data-testid="stMainBlockContainer"],
@@ -62,9 +60,6 @@ st.markdown("""
         color-scheme: light !important;
     }
 
-    /* ==============================================
-       HIDE ELEMENT STREAMLIT YANG AMAN
-       ============================================== */
     #MainMenu { display: none !important; }
     footer { display: none !important; }
     .stAppDeployButton { display: none !important; }
@@ -72,9 +67,7 @@ st.markdown("""
     [data-testid="stStatusWidget"] { display: none !important; }
     button[title="View fullscreen"] { display: none !important; }
 
-    /* ==============================================
-       TOMBOL MINIMIZE SIDEBAR - PAKSA PUTIH
-       ============================================== */
+    /* TOMBOL MINIMIZE SIDEBAR */
     [data-testid="stSidebar"] button[kind="header"],
     [data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"],
     [data-testid="stSidebar"] button[aria-label*="sidebar"],
@@ -112,7 +105,6 @@ st.markdown("""
         -webkit-text-fill-color: #ffffff !important;
     }
 
-    /* Tombol munculkan sidebar saat sidebar tertutup */
     [data-testid="collapsedControl"],
     [data-testid="collapsedControl"] > button,
     [data-testid="stSidebarCollapsedControl"],
@@ -143,9 +135,7 @@ st.markdown("""
         -webkit-text-fill-color: #111827 !important;
     }
 
-    /* ==============================================
-       KUNCI UTAMA: LINDUNGI SEMUA ICON FONT
-       ============================================== */
+    /* ICON FONT PROTECTION */
     [data-testid="stExpanderToggleIcon"],
     [data-testid="stExpanderToggleIcon"] *,
     [data-testid="collapsedControl"] *,
@@ -167,9 +157,7 @@ st.markdown("""
         font-family: 'Material Symbols Rounded', 'Material Icons', system-ui, sans-serif !important;
     }
 
-    /* ============================================
-       SIDEBAR
-       ============================================ */
+    /* SIDEBAR */
     [data-testid="stSidebar"] {
         background: linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #0f172a 100%) !important;
         border-right: 1px solid rgba(255,255,255,0.05) !important;
@@ -179,7 +167,6 @@ st.markdown("""
         background: transparent !important;
     }
 
-    /* Sidebar font */
     [data-testid="stSidebar"] label,
     [data-testid="stSidebar"] p,
     [data-testid="stSidebar"] h1,
@@ -197,43 +184,49 @@ st.markdown("""
     }
 
     /* ============================================
-       SIDEBAR NAVIGATION - TOMBOL MODUL & SUBMENU
-       Ukuran SAMA untuk aktif & tidak aktif
+       SIDEBAR NAVIGATION - UKURAN SERAGAM
+       Tidak ada perubahan ukuran saat aktif/tidak
        ============================================ */
 
-    /* Semua tombol di sidebar - ukuran seragam */
+    /* Hapus semua margin/gap antar tombol */
+    [data-testid="stSidebar"] .stButton {
+        margin-bottom: 0px !important;
+        margin-top: 0px !important;
+    }
+
+    /* BASE: Semua tombol sidebar UKURAN IDENTIK */
     [data-testid="stSidebar"] .stButton > button {
         width: 100% !important;
         font-family: 'Inter', sans-serif !important;
         font-size: 0.78rem !important;
-        font-weight: 700 !important;
-        letter-spacing: 0.04em !important;
-        text-transform: uppercase !important;
-        padding: 12px 16px !important;
-        margin-bottom: 2px !important;
-        border-radius: 10px !important;
-        transition: all 0.15s ease !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.03em !important;
+        padding: 10px 16px !important;
+        margin: 1px 0 !important;
+        border-radius: 8px !important;
         text-align: left !important;
         justify-content: flex-start !important;
+        transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
+        /* KUNCI: tidak ada transition pada padding/font-size/margin */
     }
 
-    /* Tombol TIDAK AKTIF (secondary) */
+    /* TIDAK AKTIF */
     [data-testid="stSidebar"] .stButton > button[kind="secondary"] {
-        background: rgba(255,255,255,0.04) !important;
-        border: 1px solid rgba(255,255,255,0.08) !important;
+        background: transparent !important;
+        border: 1px solid rgba(255,255,255,0.06) !important;
         color: #94a3b8 !important;
     }
 
     [data-testid="stSidebar"] .stButton > button[kind="secondary"]:hover {
-        background: rgba(255,255,255,0.08) !important;
-        color: #e2e8f0 !important;
-        border-color: rgba(255,255,255,0.15) !important;
+        background: rgba(255,255,255,0.06) !important;
+        color: #cbd5e1 !important;
+        border-color: rgba(255,255,255,0.1) !important;
     }
 
-    /* Tombol AKTIF (primary) - UKURAN SAMA, hanya beda warna */
+    /* AKTIF - hanya beda warna, ukuran SAMA */
     [data-testid="stSidebar"] .stButton > button[kind="primary"] {
         background: rgba(96,165,250,0.12) !important;
-        border: 1px solid rgba(96,165,250,0.25) !important;
+        border: 1px solid rgba(96,165,250,0.2) !important;
         color: #60a5fa !important;
     }
 
@@ -242,16 +235,39 @@ st.markdown("""
         color: #93bbfc !important;
     }
 
-    /* Font dalam tombol sidebar */
+    /* Font dalam tombol - PAKSA SAMA */
     [data-testid="stSidebar"] .stButton > button p,
     [data-testid="stSidebar"] .stButton > button span {
         font-family: 'Inter', sans-serif !important;
         font-size: 0.78rem !important;
-        font-weight: 700 !important;
+        font-weight: 600 !important;
+        transition: color 0.15s ease !important;
     }
 
     /* ============================================
-       MAIN CONTENT FONT
+       SUB-MENU ANIMATION
+       ============================================ */
+    .submenu-container {
+        overflow: hidden;
+        animation: slideDown 0.2s ease-out forwards;
+        transform-origin: top;
+    }
+
+    @keyframes slideDown {
+        from {
+            max-height: 0;
+            opacity: 0;
+            transform: translateY(-6px);
+        }
+        to {
+            max-height: 300px;
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ============================================
+       MAIN CONTENT
        ============================================ */
     .main h1, .main h2, .main h3,
     .main p, .main li, .main td, .main th,
@@ -969,7 +985,6 @@ def halaman_welcome():
 # 7. MAIN RUNNER
 # ==========================================
 def main():
-    # Inisialisasi session state navigasi — KOSONG saat pertama kali
     if "modul_aktif" not in st.session_state:
         st.session_state["modul_aktif"] = None
     if "menu_aktif" not in st.session_state:
@@ -1010,7 +1025,7 @@ def main():
         """, unsafe_allow_html=True)
 
         # ==========================================
-        # NAVIGASI ACCORDION - SK TOKO
+        # SK TOKO
         # ==========================================
         is_sk = st.session_state["modul_aktif"] == "SK TOKO"
 
@@ -1021,7 +1036,6 @@ def main():
             use_container_width=True
         ):
             if is_sk:
-                # Klik lagi = tutup (kembali ke welcome)
                 st.session_state["modul_aktif"] = None
                 st.session_state["menu_aktif"] = None
             else:
@@ -1029,37 +1043,23 @@ def main():
                 st.session_state["menu_aktif"] = "PENGANTARAN"
             st.rerun()
 
-        # Sub-menu SK TOKO
         if is_sk:
-            menu_sk = ["PENGANTARAN", "PENGAMBILAN"]
-            for m in menu_sk:
+            st.markdown('<div class="submenu-container">', unsafe_allow_html=True)
+            for m in ["PENGANTARAN", "PENGAMBILAN"]:
                 aktif = st.session_state["menu_aktif"] == m
-
-                if aktif:
-                    st.markdown(f"""
-                    <div style="
-                        background: rgba(96,165,250,0.15);
-                        border-radius: 8px;
-                        padding: 8px 12px 8px 24px;
-                        margin: 2px 0;
-                        cursor: default;
-                    ">
-                        <p style="font-family:'Inter',sans-serif; font-size:0.82rem; font-weight:700;
-                                  color:#60a5fa !important; margin:0; line-height:1.3;">
-                            ▹ {m}
-                        </p>
-                    </div>
-                    """, unsafe_allow_html=True)
-                else:
-                    if st.button(f"▸ {m}", key=f"btn_sk_{m}", use_container_width=True):
+                if st.button(
+                    f"   ▹ {m}" if aktif else f"   ▸ {m}",
+                    key=f"btn_sk_{m}",
+                    type="primary" if aktif else "secondary",
+                    use_container_width=True
+                ):
+                    if not aktif:
                         st.session_state["menu_aktif"] = m
                         st.rerun()
-
-        # Spacer
-        st.markdown("<div style='height:6px;'></div>", unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
 
         # ==========================================
-        # NAVIGASI ACCORDION - PARKIR
+        # PARKIR
         # ==========================================
         is_parkir = st.session_state["modul_aktif"] == "PARKIR"
 
@@ -1070,7 +1070,6 @@ def main():
             use_container_width=True
         ):
             if is_parkir:
-                # Klik lagi = tutup (kembali ke welcome)
                 st.session_state["modul_aktif"] = None
                 st.session_state["menu_aktif"] = None
             else:
@@ -1078,31 +1077,20 @@ def main():
                 st.session_state["menu_aktif"] = "INPUT REKAP"
             st.rerun()
 
-        # Sub-menu PARKIR
         if is_parkir:
-            menu_parkir = ["INPUT REKAP", "INPUT STOK", "KONFIRMASI"]
-            for m in menu_parkir:
+            st.markdown('<div class="submenu-container">', unsafe_allow_html=True)
+            for m in ["INPUT REKAP", "INPUT STOK", "KONFIRMASI"]:
                 aktif = st.session_state["menu_aktif"] == m
-
-                if aktif:
-                    st.markdown(f"""
-                    <div style="
-                        background: rgba(96,165,250,0.15);
-                        border-radius: 8px;
-                        padding: 8px 12px 8px 24px;
-                        margin: 2px 0;
-                        cursor: default;
-                    ">
-                        <p style="font-family:'Inter',sans-serif; font-size:0.82rem; font-weight:700;
-                                  color:#60a5fa !important; margin:0; line-height:1.3;">
-                            ▹ {m}
-                        </p>
-                    </div>
-                    """, unsafe_allow_html=True)
-                else:
-                    if st.button(f"▸ {m}", key=f"btn_parkir_{m}", use_container_width=True):
+                if st.button(
+                    f"   ▹ {m}" if aktif else f"   ▸ {m}",
+                    key=f"btn_parkir_{m}",
+                    type="primary" if aktif else "secondary",
+                    use_container_width=True
+                ):
+                    if not aktif:
                         st.session_state["menu_aktif"] = m
                         st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
 
         # Footer
         st.markdown("""
