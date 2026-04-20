@@ -25,6 +25,13 @@ def load_data(worksheet: str) -> pd.DataFrame:
         df = conn.read(worksheet=worksheet, ttl=0)
         df = df.astype(str).replace(r'\.0$', '', regex=True).replace("nan", "-").replace("None", "-")
         
+        # --- PEMBERSIH BARIS KOSONG OTOMATIS (AGAR DATA HANTU HILANG) ---
+        if "No" in df.columns:
+            df = df[(df["No"] != "-") & (df["No"].str.strip() != "")]
+        if "Tanggal" in df.columns:
+            df = df[(df["Tanggal"] != "-") & (df["Tanggal"].str.strip() != "")]
+        # ----------------------------------------------------------------
+
         if worksheet == "DATA_PARKIR" and not df.empty:
             if "Status_Cetak" not in df.columns:
                 df["Status_Cetak"] = "BELUM"
@@ -44,7 +51,7 @@ def get_next_no(df: pd.DataFrame, col: str = "No") -> int:
 def safe_update(worksheet: str, data: pd.DataFrame) -> bool:
     try:
         conn.update(worksheet=worksheet, data=data)
-        st.cache_data.clear()
+        st.cache_data.clear() # Ini aman dipakai di sini saat save data
         return True
     except Exception as e:
         st.error(f"Gagal menyimpan: {e}")
@@ -138,7 +145,11 @@ def cetak_overprint(tgl_ambil: str) -> BytesIO:
 # 4. MODUL SK TOKO
 # ==========================================
 def halaman_pengantaran():
-    st.header("📝 INPUT PENGANTARAN BERKAS")
+    # Header & Tombol Refresh Pojok
+    c_title, c_btn = st.columns([0.85, 0.15])
+    c_title.header("📝 INPUT PENGANTARAN BERKAS")
+    if c_btn.button("🔄 Refresh", key="r_ant", use_container_width=True): st.rerun()
+    
     df_sk = load_data("DATA_SK")
     col_stat1, col_stat2, col_stat3 = st.columns(3)
     total = len(df_sk) if not df_sk.empty else 0
@@ -182,7 +193,12 @@ def halaman_pengantaran():
     if not df_sk.empty: st.dataframe(df_sk.sort_values(by="No", ascending=False), use_container_width=True, hide_index=True)
 
 def halaman_pengambilan_sk():
-    st.header("PENGAMBILAN BERKAS SK"); df_m = load_data("DATA_SK")
+    # Header & Tombol Refresh Pojok
+    c_title, c_btn = st.columns([0.85, 0.15])
+    c_title.header("PENGAMBILAN BERKAS SK")
+    if c_btn.button("🔄 Refresh", key="r_amb", use_container_width=True): st.rerun()
+    
+    df_m = load_data("DATA_SK")
     if df_m.empty: return
     df_b = df_m[df_m["Tanggal_Pengambilan"] == "-"]; no_cari = st.text_input("🔍 CARI NOMOR URUT:").strip()
     if no_cari:
@@ -204,9 +220,12 @@ def halaman_pengambilan_sk():
 # 5. MODUL PARKIR
 # ==========================================
 def halaman_parkir(menu):
-    st.header(f"🚗 {menu}"); df_p = load_data("DATA_PARKIR")
+    # Header & Tombol Refresh Pojok
+    c_title, c_btn = st.columns([0.85, 0.15])
+    c_title.header(f"🚗 {menu}")
+    if c_btn.button("🔄 Refresh", key="r_prk", use_container_width=True): st.rerun()
 
-    # Ambil tanggal HARI INI
+    df_p = load_data("DATA_PARKIR")
     hari_ini = datetime.now().date()
 
     tgl_input_user = st.text_input("🔍 MASUKKAN TANGGAL", value=datetime.now().strftime("%d-%m-%Y"))
@@ -291,8 +310,7 @@ def halaman_parkir(menu):
                 if safe_update("DATA_PARKIR", df_p): st.success("✅ Stok Berhasil Ditambahkan!"); st.rerun()
 
     elif menu == "KONFIRMASI":
-        
-        # 1. Bersihkan Data Dasar
+        # Pastikan data yang kosong murni tidak ikut masuk
         df_pen = df_p[
             (df_p["Total_Karcis_R2"] != "-") & 
             (df_p["Total_Karcis_R2"] != "nan") & 
@@ -302,14 +320,8 @@ def halaman_parkir(menu):
         if df_pen.empty: 
             st.info("TIDAK ADA DATA KONFIRMASI.")
         else:
-            # Pastikan kolom Tgl_Temp ada untuk logika filter hari
             df_pen['Tgl_Temp'] = pd.to_datetime(df_pen['Tanggal'], dayfirst=True, errors='coerce').dt.date
             
-            # --- LOGIKA HILANG OTOMATIS (FILTER CERDAS) ---
-            # Simpan baris JIKA:
-            # (1) Belum Lunas (ada yang belum SUDAH)
-            # ATAU
-            # (2) Sudah Lunas TAPI Tanggalnya adalah Hari Ini (biar masih bisa di-print)
             df_terfilter = df_pen[
                 (df_pen["Status_Khusus"].str.strip() != "SUDAH") |
                 (df_pen["Status_MPP"].str.strip() != "SUDAH") |
@@ -373,11 +385,7 @@ def main():
         st.title("🗂️ UPTD PASAR")
         modul = st.selectbox("PILIH MODUL:", ["SK TOKO", "PARKIR"])
         
-        st.divider()
-        if st.button("🔄 REFRESH DATA SPREADSHEET", use_container_width=True):
-            st.cache_data.clear()
-            st.rerun()
-        st.divider()
+        # TOMBOL REFRESH DI SIDEBAR DIHAPUS, DIPINDAH KE ATAS
         
         if modul == "SK TOKO": menu = st.radio("MENU SK:", ["PENGANTARAN", "PENGAMBILAN"])
         else: menu = st.radio("MENU PARKIR:", ["INPUT REKAP", "INPUT STOK", "KONFIRMASI"])
