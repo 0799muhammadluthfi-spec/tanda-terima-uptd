@@ -11,36 +11,46 @@ from streamlit_gsheets import GSheetsConnection
 # ========================================== 
 def cetak_tanda_terima_parkir(data):
     buffer = BytesIO()
-    # UKURAN F4 PORTRAIT
+    # UKURAN F4 PORTRAIT (21.5cm x 33cm)
     c = canvas.Canvas(buffer, pagesize=(21.5 * cm, 33 * cm))
     
     # PENGATURAN DIMENSI
     lebar_kertas = 21.5 * cm
-    tinggi_box = 6.5 * cm # Saya tambah sedikit tingginya agar lebih lega
+    tinggi_box = 6.5 * cm
     margin_samping = 1.0 * cm
     lebar_tabel = lebar_kertas - (2 * margin_samping)
     
-    # POSISI VERTIKAL
-    y_top = 32 * cm 
+    # POSISI VERTIKAL (Margin atas dibuat 1cm agar simetris)
+    y_kertas_atas = 33 * cm
+    margin_atas = 1.0 * cm
+    y_top = y_kertas_atas - margin_atas
     y_bottom = y_top - tinggi_box
     
-    # 1. BINGKAI LUAR TEGAS (GARIS UTUH)
+    # 1. BINGKAI LUAR BOX (GARIS UTUH)
     c.setLineWidth(1.5)
     c.rect(margin_samping, y_bottom, lebar_tabel, tinggi_box)
     
-    # 2. HEADER - HURUF BESAR & DIPERBESAR
+    # 2. GARIS POTONG DI BAWAH BOX (PUTUS-PUTUS)
+    # Jaraknya disamakan dengan margin atas (1cm di bawah box)
+    y_garis_potong = y_bottom - 1.0 * cm
+    c.setDash(1, 3)
+    c.setLineWidth(0.5)
+    c.line(0, y_garis_potong, lebar_kertas, y_garis_potong)
+    c.setDash() # Kembalikan ke garis utuh
+    
+    # 3. HEADER - HURUF BESAR SEMUA
     center_x = lebar_kertas / 2
-    c.setFont("Helvetica-Bold", 14) # Judul diperbesar ke 14
+    c.setFont("Helvetica-Bold", 14)
     c.drawCentredString(center_x, y_top - 1.0 * cm, "UPTD PENGELOLAAN PASAR KANDANGAN")
     
     c.setFont("Helvetica-Bold", 11)
     c.drawCentredString(center_x, y_top - 1.6 * cm, "TANDA TERIMA SETORAN PARKIR (MPP)")
     
-    # GARIS BAWAH JUDUL (DOUBLE LINE ATAU TEBAL)
+    # GARIS BAWAH JUDUL
     c.setLineWidth(1.5)
     c.line(margin_samping + 1*cm, y_top - 1.9 * cm, lebar_kertas - margin_samping - 1*cm, y_top - 1.9 * cm)
     
-    # 3. FORMAT TANGGAL (HURUF BESAR)
+    # 4. FORMAT TANGGAL
     try:
         tgl_obj = datetime.strptime(data['Tanggal'], "%d-%m-%Y")
         hari_indo = ["SENIN", "SELASA", "RABU", "KAMIS", "JUMAT", "SABTU", "MINGGU"]
@@ -50,12 +60,12 @@ def cetak_tanda_terima_parkir(data):
     except:
         tgl_final = data['Tanggal'].upper()
 
-    # 4. DATA IDENTITAS
+    # 5. DATA IDENTITAS
     c.setFont("Helvetica-Bold", 10)
     c.drawString(margin_samping + 0.5*cm, y_top - 2.5 * cm, f"TANGGAL : {tgl_final}")
     c.drawRightString(lebar_kertas - margin_samping - 0.5*cm, y_top - 2.5 * cm, f"NAMA : {data['Nama_Petugas'].upper()}")
 
-    # 5. TABEL DATA (HURUF BESAR SEMUA)
+    # 6. TABEL DATA
     y_tab = y_top - 3.0 * cm
     t_row = 0.9 * cm
     
@@ -70,7 +80,6 @@ def cetak_tanda_terima_parkir(data):
     # Baris RODA 2
     y_r2 = y_tab - (2 * t_row)
     c.rect(margin_samping + 0.5*cm, y_r2, lebar_tabel - 1*cm, t_row)
-    c.setFont("Helvetica-Bold", 10)
     c.drawString(margin_samping + 1*cm, y_r2 + 0.3*cm, "RODA 2 (MOTOR)")
     c.drawCentredString(center_x + 2*cm, y_r2 + 0.3*cm, f"{data['MPP_Roda_R2']} LEMBAR")
     c.drawRightString(lebar_kertas - margin_samping - 1*cm, y_r2 + 0.3*cm, "MPP")
