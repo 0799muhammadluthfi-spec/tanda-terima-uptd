@@ -263,30 +263,31 @@ st.markdown("""
         box-sizing: border-box !important;
     }
 
-    /* RADIO OPTIONS - PILL STYLE TANPA LINGKARAN */
+    /* RADIO OPTIONS - MINIMAL CLEAN TANPA LINGKARAN */
     [data-testid="stSidebar"] .stRadio [role="radiogroup"] {
         display: flex !important;
         flex-direction: column !important;
-        align-items: center !important;
         gap: 6px !important;
+        width: 100% !important;
     }
 
     [data-testid="stSidebar"] .stRadio [role="radiogroup"] > label {
-        display: inline-flex !important;
+        display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        width: auto !important;
-        max-width: calc(100% - 20px) !important;
-        padding: 8px 14px !important;
-        margin: 0 auto !important;
+        width: calc(100% - 16px) !important;
+        max-width: calc(100% - 16px) !important;
+        margin: 0 8px !important;
+        padding: 8px 10px !important;
         border-radius: 10px !important;
+        box-sizing: border-box !important;
+        text-align: center !important;
         transition: all 0.15s ease !important;
         cursor: pointer !important;
-        text-align: center !important;
-        box-sizing: border-box !important;
+        overflow: hidden !important;
     }
 
-    /* Hapus total ruang lingkaran radio */
+    /* Hilangkan lingkaran radio + ruangnya */
     [data-testid="stSidebar"] .stRadio [role="radiogroup"] > label > div:first-child {
         display: none !important;
         width: 0 !important;
@@ -294,11 +295,12 @@ st.markdown("""
         max-width: 0 !important;
         margin: 0 !important;
         padding: 0 !important;
+        flex: 0 0 0 !important;
     }
 
-    /* Isi teks */
+    /* Area teks */
     [data-testid="stSidebar"] .stRadio [role="radiogroup"] > label > div:last-child {
-        width: auto !important;
+        width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
         text-align: center !important;
@@ -312,10 +314,11 @@ st.markdown("""
         color: #cbd5e1 !important;
         letter-spacing: 0 !important;
         text-transform: none !important;
-        transition: all 0.15s ease !important;
         text-align: center !important;
         margin: 0 !important;
-        white-space: nowrap !important;
+        width: 100% !important;
+        display: block !important;
+        line-height: 1.2 !important;
     }
 
     /* Hover */
@@ -328,7 +331,7 @@ st.markdown("""
         color: #e2e8f0 !important;
     }
 
-    /* Aktif / Terpilih */
+    /* Aktif / terpilih */
     [data-testid="stSidebar"] .stRadio [role="radiogroup"] > label[data-checked="true"],
     [data-testid="stSidebar"] .stRadio [role="radiogroup"] > label:has(input:checked) {
         background: rgba(96,165,250,0.15) !important;
