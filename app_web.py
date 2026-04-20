@@ -444,7 +444,7 @@ def halaman_parkir(menu_aktif):
     st.header(f"🚗 {menu_aktif}")
     df_parkir = load_data("DATA_PARKIR")
 
-   if menu_aktif == "INPUT REKAP":
+    if menu_aktif == "INPUT REKAP":
         st.subheader("📝 FORM REKAP SETORAN")
         # Input tanggal untuk mencari jadwal di spreadsheet
         tgl_input = st.text_input("MASUKKAN TANGGAL (CONTOH: 20-04-2026)", value=datetime.now().strftime("%d-%m-%Y"))
@@ -516,37 +516,7 @@ def halaman_parkir(menu_aktif):
                         st.write(f"R2: {row['Khusus_Roda_R2']} | R4: {row['Khusus_Roda_R4']}")
                         if row["Status_Khusus"] == "BELUM":
                             if st.button(f"TERIMA KHUSUS #{row['No']}", key=f"kh_{row['No']}", type="primary", use_container_width=True):
-                                df_parkir.loc[df_parkir["No"] == row["No"], "Status_Khusus"] = "SUDAH"
-                                if safe_update("DATA_PARKIR", df_parkir): 
-                                    st.rerun()
-                        else: 
-                            st.success("✅ KHUSUS OKE")
-
-                    with cm:
-                        st.markdown("### 🏢 MPP")
-                        st.write(f"R2: {row['MPP_Roda_R2']} | R4: {row['MPP_Roda_R4']}")
-                        if row["Status_MPP"] == "BELUM":
-                            if st.button(f"TERIMA MPP #{row['No']}", key=f"mpp_{row['No']}", type="primary", use_container_width=True):
-                                df_parkir.loc[df_parkir["No"] == row["No"], "Status_MPP"] = "SUDAH"
-                                if safe_update("DATA_PARKIR", df_parkir): 
-                                    st.rerun()
-                        else: 
-                            st.success("✅ MPP OKE")
-                            pdf_file = cetak_tanda_terima_parkir(row)
-                            st.download_button(
-                                label="🖨️ CETAK TANDA TERIMA (MPP)",
-                                data=pdf_file,
-                                file_name=f"TANDA_TERIMA_MPP_{row['Nama_Petugas']}.pdf",
-                                mime="application/pdf",
-                                key=f"print_mpp_{row['No']}",
-                                use_container_width=True
-                            )
-
-    # Tabel Riwayat 
-    st.divider()
-    st.subheader("📊 LOG REKAP PARKIR")
-    if not df_parkir.empty:
-        st.dataframe(df_parkir.sort_values(by="No", ascending=False), use_container_width=True, hide_index=True)
+                                df_parkir.loc[df_parkir["No"] == row["No"], "Status_Khusus"] =
 
 # ==========================================
 # 7. MAIN APP
