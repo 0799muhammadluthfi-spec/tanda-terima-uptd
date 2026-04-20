@@ -446,16 +446,33 @@ def halaman_parkir(menu_aktif):
 
     if menu_aktif == "INPUT REKAP":
         st.subheader("📝 FORM REKAP SETORAN")
-        # Input tanggal untuk mencari jadwal di spreadsheet
-        tgl_input = st.text_input("MASUKKAN TANGGAL (CONTOH: 20-04-2026)", value=datetime.now().strftime("%d-%m-%Y"))
         
-        # Mencari baris yang tanggalnya cocok
-        baris_cocok = df_parkir[df_parkir["Tanggal"].astype(str) == tgl_input]
+        # --- LOGIKA TANGGAL PINTAR ---
+        raw_tgl = st.text_input("MASUKKAN TANGGAL (Bisa 1/1/26 atau 01-01-2026)", value=datetime.now().strftime("%d-%m-%Y"))
         
+        tgl_bersih = raw_tgl.replace("/", "-").strip()
+        try:
+            # Cek apakah tahunnya 2 digit (misal: 26) atau 4 digit (2026)
+            if len(tgl_bersih.split("-")[-1]) == 2:
+                tgl_obj = datetime.strptime(tgl_bersih, "%d-%m-%y")
+            else:
+                tgl_obj = datetime.strptime(tgl_bersih, "%d-%m-%Y")
+                
+            # Variasi format untuk dicocokkan dengan Google Sheets
+            tgl_std = tgl_obj.strftime("%d-%m-%Y") # contoh: 01-01-2026
+            tgl_alt = f"{tgl_obj.day}-{tgl_obj.month}-{tgl_obj.year}" # contoh: 1-1-2026
+        except:
+            tgl_std = tgl_bersih
+            tgl_alt = tgl_bersih
+
+        # Mencari baris yang tanggalnya cocok dengan format 01-01-2026 ATAU 1-1-2026
+        baris_cocok = df_parkir[(df_parkir["Tanggal"].astype(str) == tgl_std) | (df_parkir["Tanggal"].astype(str) == tgl_alt)]
+        # -----------------------------
+
         if not baris_cocok.empty:
             idx = baris_cocok.index[0]
             nama_ptgs = baris_cocok.iloc[0]["Nama_Petugas"]
-            st.success(f"👤 PETUGAS: **{nama_ptgs}** | 📅 **{tgl_input}**")
+            st.success(f"👤 PETUGAS: **{nama_ptgs}** | 📅 **{tgl_std}**")
             
             # AMBIL SISA KEMARIN DENGAN NAMA KOLOM YANG BENAR
             try:
@@ -486,9 +503,9 @@ def halaman_parkir(menu_aktif):
                     sisa_n_r2 = (pk_r2 + sisa_r2_lama) - tot_r2
                     sisa_n_r4 = (pk_r4 + sisa_r4_lama) - tot_r4
                     
-                    # Simpan hasil ke baris yang sudah ada (idx) - MENGGUNAKAN NAMA KOLOM BARU
-                    df_parkir.loc[idx, ["Pengambilan_Karcis_R2", "Total_Karcis_R2", "MPP_Roda_R2", "Sisa_Karcis_r2", "Khusus_Roda_R2"]] = [pk_r2, tot_r2, mpp_r2, sisa_n_r2, tot_r2-mpp_r2]
-                    df_parkir.loc[idx, ["Pengambilan_Karcis_R4", "Total_Karcis_R4", "MPP_Roda_R4", "Sisa_Karcis_r4", "Khusus_Roda_R4"]] = [pk_r4, tot_r4, mpp_r4, sisa_n_r4, tot_r4-mpp_r4]
+                    # Simpan hasil ke baris yang sudah ada (idx) - MENGGUNAKAN NAMA KOLOM BARU DAN FORMAT STRING (str)
+                    df_parkir.loc[idx, ["Pengambilan_Karcis_R2", "Total_Karcis_R2", "MPP_Roda_R2", "Sisa_Karcis_r2", "Khusus_Roda_R2"]] = [str(pk_r2), str(tot_r2), str(mpp_r2), str(sisa_n_r2), str(tot_r2-mpp_r2)]
+                    df_parkir.loc[idx, ["Pengambilan_Karcis_R4", "Total_Karcis_R4", "MPP_Roda_R4", "Sisa_Karcis_r4", "Khusus_Roda_R4"]] = [str(pk_r4), str(tot_r4), str(mpp_r4), str(sisa_n_r4), str(tot_r4-mpp_r4)]
                     df_parkir.loc[idx, ["Status_Khusus", "Status_MPP"]] = ["BELUM", "BELUM"]
                     
                     if safe_update("DATA_PARKIR", df_parkir):
@@ -549,25 +566,63 @@ def halaman_parkir(menu_aktif):
         st.dataframe(df_parkir.sort_values(by="No", ascending=False), use_container_width=True, hide_index=True)
 
 # ==========================================
-# 7. MAIN APP
+# 7. MAIN APP DENGAN LAYAR SAMBUTAN
 # ==========================================
 def main():
-    with st.sidebar:
-        st.title("🏪 UPTD PASAR")
-        modul = st.selectbox("PILIH MODUL:", ["SK TOKO", "PARKIR"])
+    # Menggunakan Session State agar halaman sambutan hanya muncul sekali
+    if "sudah_masuk" not in st.session_state:
+        st.session_state["sudah_masuk"] = False
+
+    # JIKA BELUM MASUK (TAMPILAN SPLASH SCREEN)
+    if not st.session_state["sudah_masuk"]:
+        st.write("<br><br>", unsafe_allow_html=True) # Memberi jarak dari atas
+        
+        # Membuat kolom agar posisi logo dan tulisan berada persis di tengah layar
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            # Menampilkan Logo HSS dari link internet resmi Wikipedia
+            st.image("https://upload.wikimedia.org/wikipedia/commons/e/e1/Lambang_Kabupaten_Hulu_Sungai_Selatan.png", use_container_width=True)
+            
+            # Tulisan Sambutan
+            st.markdown("""
+                <h2 style='text-align: center; margin-top: 10px;'>Selamat Datang</h2>
+                <h1 style='text-align: center; color: #4CAF50;'>M. Luthfi Renaldi</h1>
+                <p style='text-align: center; color: gray;'>Sistem Informasi Pelayanan UPTD Pasar Kandangan</p>
+            """, unsafe_allow_html=True)
+            
+            st.write("<br>", unsafe_allow_html=True)
+            
+            # Tombol untuk masuk ke Dashboard
+            if st.button("🚀 MASUK KE DASHBOARD", use_container_width=True, type="primary"):
+                st.session_state["sudah_masuk"] = True
+                st.rerun()
+
+    # JIKA SUDAH MASUK (TAMPILAN APLIKASI UTAMA/DASHBOARD)
+    else:
+        with st.sidebar:
+            # Menambahkan Logo HSS Kecil di Sidebar
+            col_logo, col_judul = st.columns([1, 3])
+            with col_logo:
+                st.image("https://upload.wikimedia.org/wikipedia/commons/e/e1/Lambang_Kabupaten_Hulu_Sungai_Selatan.png")
+            with col_judul:
+                st.markdown("<h3 style='margin-top: 0px;'>UPTD PASAR</h3>", unsafe_allow_html=True)
+            
+            st.divider()
+            
+            modul = st.selectbox("PILIH MODUL:", ["SK TOKO", "PARKIR"])
+            
+            if modul == "SK TOKO":
+                menu = st.radio("MENU SK:", ["PENGANTARAN", "PENGAMBILAN"])
+            else:
+                menu = st.radio("MENU PARKIR:", ["INPUT REKAP", "KONFIRMASI"])
         
         if modul == "SK TOKO":
-            menu = st.radio("MENU SK:", ["PENGANTARAN", "PENGAMBILAN"])
+            if menu == "PENGANTARAN": 
+                halaman_pengantaran()
+            else: 
+                halaman_pengambilan()
         else:
-            menu = st.radio("MENU PARKIR:", ["INPUT REKAP", "KONFIRMASI"])
-    
-    if modul == "SK TOKO":
-        if menu == "PENGANTARAN": 
-            halaman_pengantaran()
-        else: 
-            halaman_pengambilan()
-    else:
-        halaman_parkir(menu)
+            halaman_parkir(menu)
 
 if __name__ == "__main__":
     main()
