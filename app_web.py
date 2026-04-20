@@ -492,7 +492,16 @@ st.markdown("""
 
     .main .block-container {
         animation: fadeIn 0.3s ease-out;
-        max-width: 1100px;
+        max-width: 80%;
+        margin: 0 auto;
+    }
+
+    @media (max-width: 768px) {
+        .main .block-container {
+            max-width: 100%;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
     }
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(4px); }
