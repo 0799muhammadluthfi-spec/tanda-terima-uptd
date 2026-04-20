@@ -909,7 +909,7 @@ def halaman_parkir(menu):
             ]
             if not df_isi.empty:
                 last = df_isi.sort_values(by="Tanggal", ascending=False).head(1)
-                kolom = ["Total_Karcis_R2", "Total_Karcis_R4", "MPP_Roda_R2", "MPP_Roda_R4"]
+                kolom = ["Tanggal", "Nama_Petugas", "Total_Karcis_R2", "Total_Karcis_R4", "MPP_Roda_R2", "MPP_Roda_R4"]
                 st.dataframe(last[kolom], hide_index=True, use_container_width=True)
             else:
                 st.info("Belum ada data yang diinput.")
@@ -921,7 +921,7 @@ def halaman_parkir(menu):
             ]
             if not df_isi.empty:
                 last = df_isi.sort_values(by="Tanggal", ascending=False).head(1)
-                kolom = ["Pengambilan_Karcis_R2", "Pengambilan_Karcis_R4"]
+                kolom = ["Tanggal", "Nama_Petugas", "Pengambilan_Karcis_R2", "Pengambilan_Karcis_R4"]
                 st.dataframe(last[kolom], hide_index=True, use_container_width=True)
             else:
                 st.info("Belum ada data yang diinput.")
@@ -934,7 +934,7 @@ def halaman_parkir(menu):
             ]
             if not df_isi.empty:
                 last = df_isi.sort_values(by="Tanggal", ascending=False).head(1)
-                kolom = ["Status_Khusus", "Status_MPP", "Status_Cetak"]
+                kolom = ["Tanggal", "Nama_Petugas", "Status_Khusus", "Status_MPP", "Status_Cetak"]
                 st.dataframe(last[kolom], hide_index=True, use_container_width=True)
             else:
                 st.info("Belum ada data yang diinput.")
