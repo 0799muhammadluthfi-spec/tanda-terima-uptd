@@ -745,6 +745,22 @@ def format_tgl_hari_indo(tgl_str):
     except:
         return str(tgl_str).upper()
 
+def normalisasi_no(val):
+    try:
+        txt = str(val).strip().replace("\u00a0", "")
+        if txt in ["", "-", "nan", "None", "null", "NaN", "<NA>"]:
+            return ""
+
+        if txt.endswith(".0"):
+            txt = txt[:-2]
+
+        if txt.isdigit():
+            txt = str(int(txt))
+
+        return txt
+    except:
+        return ""
+
 # ==========================================
 # 3. FUNGSI PDF (SK TOKO & PARKIR)
 # ==========================================
@@ -847,7 +863,7 @@ def halaman_pengantaran():
         if st.form_submit_button("💾 SIMPAN DATA", type="primary"):
             if not no_urut.strip() or not nama_toko or not nama_pemilik: st.error("❌ Data Wajib Diisi!")
             else:
-                is_exist = not df_sk.empty and no_urut.strip() in df_sk["No"].str.strip().values
+                is_exist = not df_sk.empty and normalisasi_no(no_urut) in df_sk["No"].apply(normalisasi_no).values
                 new_row = {"No": no_urut.strip(), "Tanggal_Pengantaran": tgl_terima, "Tanggal_Pengambilan": "-", "Nama_Toko": nama_toko, "No_Toko": no_toko, "Nama_Pemilik_Asli": nama_pemilik, "Nama_Pengantar_Berkas": nama_pengantar, "Penerima_Berkas": nama_penerima}
                 if is_exist: st.session_state["pending_sk"] = new_row; st.session_state["show_confirm_sk"] = True
                 else:
@@ -876,8 +892,10 @@ def halaman_pengambilan_sk():
     if df_m.empty: return
     df_b = df_m[(df_m["Tanggal_Pengambilan"] == "-") & (df_m["No"] != "-")]
     no_cari = st.text_input("🔍 CARI NOMOR URUT:").strip()
-    if no_cari:
-        hasil = df_m[df_m["No"].str.strip() == no_cari]
+if no_cari:
+    no_cari_norm = normalisasi_no(no_cari)
+    mask_no = df_m["No"].apply(normalisasi_no) == no_cari_norm
+    hasil = df_m[mask_no]
         if not hasil.empty:
             data = hasil.iloc[0]; sudah = data["Tanggal_Pengambilan"] != "-"
             if sudah:
@@ -886,7 +904,7 @@ def halaman_pengambilan_sk():
             else:
                 st.warning(f"🏪 Toko: {data['Nama_Toko']}"); tgl_a = st.text_input("📅 TANGGAL AMBIL:", value=datetime.now().strftime("%d-%m-%Y"))
                 if st.button("✅ KONFIRMASI PENGAMBILAN"):
-                    df_m.loc[df_m["No"].str.strip() == no_cari, "Tanggal_Pengambilan"] = tgl_a
+                    df_m.loc[mask_no, "Tanggal_Pengambilan"] = tgl_a
                     if safe_update("DATA_SK", df_m): st.success("Berhasil!"); st.rerun()
         else: st.error("❌ Nomor Urut tidak terdaftar.")
     st.divider(); st.subheader(f"📊 BELUM DIAMBIL ({len(df_b)})"); st.dataframe(df_b.sort_values(by="No", ascending=True), use_container_width=True, hide_index=True)
