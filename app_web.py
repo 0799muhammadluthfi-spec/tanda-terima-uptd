@@ -895,10 +895,10 @@ def halaman_pengambilan_sk():
 
     df_b = df_m[(df_m["Tanggal_Pengambilan"] == "-") & (df_m["No"] != "-")]
     no_cari = st.text_input("🔍 CARI NOMOR URUT:").strip()
+
     if no_cari:
-        no_cari_norm = normalisasi_no(no_cari)
-        mask_no = df_m["No"].apply(normalisasi_no) == no_cari_norm
-        hasil = df_m[mask_no]
+    st.write("Kamu ketik:", repr(no_cari))
+    st.write("Isi kolom No di DATA_SK:", df_m["No"].tolist())
 
         if not hasil.empty:
             data = hasil.iloc[0]
