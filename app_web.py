@@ -240,46 +240,25 @@ st.markdown("""
         color: #94a3b8 !important;
     }
 
-    /* RADIO OPTIONS - PILL STYLE TANPA LINGKARAN */
-    [data-testid="stSidebar"] .stRadio [role="radiogroup"] {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        gap: 6px !important;
-    }
-
-    [data-testid="stSidebar"] .stRadio [role="radiogroup"] > label {
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        width: 170px !important;
-        min-width: 170px !important;
-        margin: 0 auto !important;
-        padding: 9px 16px !important;
-        border-radius: 10px !important;
-        transition: all 0.15s ease !important;
-        cursor: pointer !important;
-        text-align: center !important;
-        box-sizing: border-box !important;
-    }
-
     /* RADIO OPTIONS - MINIMAL CLEAN TANPA LINGKARAN */
     [data-testid="stSidebar"] .stRadio [role="radiogroup"] {
         display: flex !important;
         flex-direction: column !important;
-        gap: 6px !important;
+        gap: 4px !important;
         width: 100% !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
     }
 
     [data-testid="stSidebar"] .stRadio [role="radiogroup"] > label {
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        width: calc(100% - 16px) !important;
-        max-width: calc(100% - 16px) !important;
-        margin: 0 8px !important;
-        padding: 8px 10px !important;
-        border-radius: 10px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 8px 8px !important;
+        border-radius: 8px !important;
         box-sizing: border-box !important;
         text-align: center !important;
         transition: all 0.15s ease !important;
@@ -304,12 +283,13 @@ st.markdown("""
         margin: 0 !important;
         padding: 0 !important;
         text-align: center !important;
+        overflow: hidden !important;
     }
 
     [data-testid="stSidebar"] .stRadio [role="radiogroup"] > label > div:last-child p,
     [data-testid="stSidebar"] .stRadio [role="radiogroup"] > label > div:last-child span {
         font-family: 'Inter', sans-serif !important;
-        font-size: 0.86rem !important;
+        font-size: 0.82rem !important;
         font-weight: 500 !important;
         color: #cbd5e1 !important;
         letter-spacing: 0 !important;
@@ -319,6 +299,9 @@ st.markdown("""
         width: 100% !important;
         display: block !important;
         line-height: 1.2 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
     }
 
     /* Hover */
