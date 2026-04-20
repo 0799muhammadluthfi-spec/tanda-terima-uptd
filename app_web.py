@@ -443,40 +443,49 @@ def halaman_parkir(menu_aktif):
     st.header(f"🚗 {menu_aktif}")
     df_parkir = load_data("DATA_PARKIR")
 
-    if menu_aktif == "INPUT REKAP":
-        st.subheader("📝 Form Rekap Setoran Karcis")
-        with st.form("form_rekap_parkir", clear_on_submit=True):
-            col1, col2 = st.columns(2)
-            with col1:
-                tgl = st.text_input("TANGGAL", value=datetime.now().strftime("%d-%m-%Y"))
-                nama = st.text_input("NAMA PETUGAS").upper()
-                pk_r2 = st.number_input("PENGAMBILAN KARCIS R2", min_value=0)
-                pk_r4 = st.number_input("PENGAMBILAN KARCIS R4", min_value=0)
-            with col2:
-                tot_r2 = st.number_input("TOTAL KARCIS R2", min_value=0)
-                tot_r4 = st.number_input("TOTAL KARCIS R4", min_value=0)
-                mpp_r2 = st.number_input("MPP RODA R2", min_value=0)
-                mpp_r4 = st.number_input("MPP RODA R4", min_value=0)
+if menu_aktif == "INPUT REKAP":
+        st.subheader("📝 FORM REKAP SETORAN")
+        # Input tanggal untuk mencari jadwal di spreadsheet
+        tgl_input = st.text_input("MASUKKAN TANGGAL (CONTOH: 20-04-2026)", value=datetime.now().strftime("%d-%m-%Y"))
+        
+        # Mencari baris yang tanggalnya cocok
+        baris_cocok = df_parkir[df_parkir["Tanggal"].astype(str) == tgl_input]
+        
+        if not baris_cocok.empty:
+            idx = baris_cocok.index[0]
+            nama_ptgs = baris_cocok.iloc[0]["Nama_Petugas"]
+            st.success(f"👤 PETUGAS: **{nama_ptgs}** | 📅 **{format_tgl_indo(tgl_input)}**")
             
-            ks_r2 = tot_r2 - mpp_r2
-            ks_r4 = tot_r4 - mpp_r4
-            
-            if st.form_submit_button("💾 KIRIM REKAP", type="primary"):
-                if ks_r2 < 0 or ks_r4 < 0:
-                    st.error("❌ Gagal! Total tidak boleh lebih kecil dari MPP.")
-                else:
-                    new_row = {
-                        "No": get_next_no(df_parkir), "Tanggal": tgl, "Nama_Petugas": nama,
-                        "Pengambilan_Karcis_R2": pk_r2, "Pengambilan_Karcis_R4": pk_r4,
-                        "Khusus_Roda_R2": ks_r2, "Khusus_Roda_R4": ks_r4,
-                        "MPP_Roda_R2": mpp_r2, "MPP_Roda_R4": mpp_r4,
-                        "Total_Karcis_R2": tot_r2, "Total_Karcis_R4": tot_r4,
-                        "Status_Khusus": "BELUM", "Status_MPP": "BELUM"
-                    }
-                    df_up = pd.concat([df_parkir, pd.DataFrame([new_row])], ignore_index=True)
-                    if safe_update("DATA_PARKIR", df_up):
-                        st.success("✅ Berhasil Disimpan!")
-                        st.rerun()
+            # AMBIL SISA KEMARIN dari baris sebelumnya (idx - 1)
+            sisa_r2_lama = df_parkir.iloc[idx - 1]["Sisa_Stok_R2"] if idx > 0 else 0
+            sisa_r4_lama = df_parkir.iloc[idx - 1]["Sisa_Stok_R4"] if idx > 0 else 0
+            st.info(f"📊 SISA KEMARIN: R2={sisa_r2_lama} | R4={sisa_r4_lama}")
+
+            with st.form("form_parkir"):
+                c1, c2 = st.columns(2)
+                with c1:
+                    pk_r2 = st.number_input("AMBIL BARU R2", min_value=0)
+                    tot_r2 = st.number_input("TERJUAL R2 (REKAP)", min_value=0)
+                    mpp_r2 = st.number_input("MPP R2", min_value=0)
+                with c2:
+                    pk_r4 = st.number_input("AMBIL BARU R4", min_value=0)
+                    tot_r4 = st.number_input("TERJUAL R4 (REKAP)", min_value=0)
+                    mpp_r4 = st.number_input("MPP R4", min_value=0)
+
+                if st.form_submit_button("💾 UPDATE DATA", type="primary"):
+                    # RUMUS: (Baru + Sisa Lama) - Terjual
+                    sisa_n_r2 = (pk_r2 + sisa_r2_lama) - tot_r2
+                    sisa_n_r4 = (pk_r4 + sisa_r4_lama) - tot_r4
+                    
+                    # Simpan hasil ke baris yang sudah ada (idx)
+                    df_parkir.loc[idx, ["Pengambilan_Karcis_R2", "Total_Karcis_R2", "MPP_Roda_R2", "Sisa_Stok_R2", "Khusus_Roda_R2"]] = [pk_r2, tot_r2, mpp_r2, sisa_n_r2, tot_r2-mpp_r2]
+                    df_parkir.loc[idx, ["Pengambilan_Karcis_R4", "Total_Karcis_R4", "MPP_Roda_R4", "Sisa_Stok_R4", "Khusus_Roda_R4"]] = [pk_r4, tot_r4, mpp_r4, sisa_n_r4, tot_r4-mpp_r4]
+                    df_parkir.loc[idx, ["Status_Khusus", "Status_MPP"]] = ["BELUM", "BELUM"]
+                    
+                    if safe_update("DATA_PARKIR", df_parkir):
+                        st.success("✅ BERHASIL DIUPDATE!"); st.rerun()
+        else:
+            st.warning("⚠️ TANGGAL TIDAK DITEMUKAN DI JADWAL SPREADSHEET.")
 
     elif menu_aktif == "KONFIRMASI":
         st.subheader("✅ Verifikasi Penerimaan Karcis")
