@@ -58,7 +58,7 @@ def cetak_tanda_terima_parkir(data):
     c.drawCentredString(center_x, y_top - 0.5 * cm, "UPTD PENGELOLAAN PASAR KANDANGAN")
     
     c.setFont("Helvetica-Bold", 6)
-    c.drawCentredString(center_x, y_top - 0.9 * cm, "TANDA TERIMA SETORAN PARKIR (MPP)")
+    c.drawCentredString(center_x, y_top - 0.9 * cm, "TANDA TERIMA KARCIS PARKIR (MPP)")
     
     c.setLineWidth(0.8)
     c.line(x_awal + 0.3*cm, y_top - 1.1 * cm, x_awal + lebar_box - 0.3*cm, y_top - 1.1 * cm)
