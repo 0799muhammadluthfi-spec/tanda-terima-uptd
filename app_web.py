@@ -198,16 +198,18 @@ st.markdown("""
     [data-testid="stSidebar"] .stButton > button {
         width: 100% !important;
         font-family: 'Inter', sans-serif !important;
-        font-size: 0.78rem !important;
+        font-size: 0.72rem !important;
         font-weight: 600 !important;
-        letter-spacing: 0.03em !important;
-        padding: 10px 16px !important;
+        letter-spacing: 0.02em !important;
+        padding: 8px 12px !important;
         margin: 1px 0 !important;
         border-radius: 8px !important;
         text-align: left !important;
         justify-content: flex-start !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
         transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
-        /* KUNCI: tidak ada transition pada padding/font-size/margin */
     }
 
     /* TIDAK AKTIF */
@@ -235,13 +237,16 @@ st.markdown("""
         color: #93bbfc !important;
     }
 
-    /* Font dalam tombol - PAKSA SAMA */
+    /* Font dalam tombol sidebar */
     [data-testid="stSidebar"] .stButton > button p,
     [data-testid="stSidebar"] .stButton > button span {
         font-family: 'Inter', sans-serif !important;
-        font-size: 0.78rem !important;
+        font-size: 0.72rem !important;
         font-weight: 600 !important;
         transition: color 0.15s ease !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
     }
 
     /* ============================================
