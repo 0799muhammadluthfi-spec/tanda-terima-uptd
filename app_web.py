@@ -972,38 +972,179 @@ def halaman_parkir(menu):
 def halaman_welcome():
     logo_b64 = st.session_state.get("logo_b64")
 
-    st.markdown("<div style='height: 60px;'></div>", unsafe_allow_html=True)
-
+    logo_html = ""
     if logo_b64:
-        st.markdown(f"""
-        <div style="text-align:center; padding:20px 0;">
-            <img src="data:image/png;base64,{logo_b64}" width="120" height="auto"
-                 style="display:inline-block; filter:drop-shadow(0 4px 12px rgba(0,0,0,0.15));">
-        </div>
-        """, unsafe_allow_html=True)
+        logo_html = f'<img src="data:image/png;base64,{logo_b64}" width="140" height="auto" style="display:inline-block;">'
     else:
-        st.markdown("""
-        <div style="text-align:center; padding:20px 0;">
-            <div style="font-size:5rem; line-height:1;">🏛️</div>
-        </div>
-        """, unsafe_allow_html=True)
+        logo_html = '<div style="font-size:6rem; line-height:1;">🏛️</div>'
 
-    st.markdown("""
-    <div style="text-align:center; padding:10px 0 30px 0;">
-        <h1 style="font-family:'Inter',sans-serif; font-size:2rem; font-weight:800;
-                   color:#0f172a; letter-spacing:-0.03em; margin:0 0 8px 0;">
-            UPTD PENGELOLAAN PASAR KANDANGAN
-        </h1>
-        <p style="font-family:'Inter',sans-serif; font-size:1rem; font-weight:500;
-                  color:#64748b; margin:0 0 6px 0;">
-            Kabupaten Hulu Sungai Selatan
-        </p>
-        <div style="width:80px; height:3px; background:linear-gradient(90deg,#3b82f6,#60a5fa);
-                    margin:16px auto; border-radius:2px;"></div>
-        <p style="font-family:'Inter',sans-serif; font-size:0.9rem; font-weight:400;
-                  color:#94a3b8; margin:16px 0 0 0;">
-            Silakan pilih modul pada menu di sebelah kiri untuk memulai.
-        </p>
+    st.markdown(f"""
+    <style>
+        /* ===== WELCOME ANIMATIONS ===== */
+        .welcome-wrapper {{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 70vh;
+            text-align: center;
+            padding: 20px;
+        }}
+
+        .welcome-logo {{
+            animation: logoEntry 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            opacity: 0;
+            filter: drop-shadow(0 8px 24px rgba(0,0,0,0.12));
+        }}
+
+        @keyframes logoEntry {{
+            0% {{
+                opacity: 0;
+                transform: scale(0.3) translateY(30px);
+                filter: blur(8px) drop-shadow(0 8px 24px rgba(0,0,0,0.12));
+            }}
+            50% {{
+                opacity: 1;
+                filter: blur(0px) drop-shadow(0 8px 24px rgba(0,0,0,0.12));
+            }}
+            70% {{
+                transform: scale(1.08) translateY(-5px);
+            }}
+            100% {{
+                opacity: 1;
+                transform: scale(1) translateY(0);
+                filter: blur(0px) drop-shadow(0 8px 24px rgba(0,0,0,0.12));
+            }}
+        }}
+
+        .welcome-title {{
+            animation: textSlideUp 0.8s ease-out 0.4s forwards;
+            opacity: 0;
+            font-family: 'Inter', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.03em;
+            margin: 24px 0 0 0;
+            line-height: 1.2;
+        }}
+
+        .welcome-subtitle {{
+            animation: textSlideUp 0.8s ease-out 0.6s forwards;
+            opacity: 0;
+            font-family: 'Inter', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: #64748b;
+            margin: 8px 0 0 0;
+        }}
+
+        .welcome-line {{
+            animation: lineExpand 0.6s ease-out 0.8s forwards;
+            opacity: 0;
+            width: 0px;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #60a5fa, #93c5fd);
+            margin: 20px auto;
+            border-radius: 2px;
+        }}
+
+        @keyframes lineExpand {{
+            from {{
+                opacity: 0;
+                width: 0px;
+            }}
+            to {{
+                opacity: 1;
+                width: 100px;
+            }}
+        }}
+
+        .welcome-hint {{
+            animation: textSlideUp 0.8s ease-out 1.0s forwards;
+            opacity: 0;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 400;
+            color: #94a3b8;
+            margin: 8px 0 0 0;
+        }}
+
+        .welcome-credit {{
+            animation: creditFloat 0.8s ease-out 1.3s forwards;
+            opacity: 0;
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }}
+
+        .welcome-credit-label {{
+            font-family: 'Inter', sans-serif;
+            font-size: 0.65rem;
+            font-weight: 400;
+            color: #94a3b8;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin: 0 0 4px 0;
+        }}
+
+        .welcome-credit-name {{
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #475569;
+            letter-spacing: 0.01em;
+            margin: 0;
+        }}
+
+        @keyframes textSlideUp {{
+            from {{
+                opacity: 0;
+                transform: translateY(20px);
+                filter: blur(4px);
+            }}
+            to {{
+                opacity: 1;
+                transform: translateY(0);
+                filter: blur(0px);
+            }}
+        }}
+
+        @keyframes creditFloat {{
+            from {{
+                opacity: 0;
+                transform: translateY(15px);
+            }}
+            to {{
+                opacity: 1;
+                transform: translateY(0);
+            }}
+        }}
+
+        /* Pulse halus pada logo setelah muncul */
+        .welcome-logo {{
+            animation: logoEntry 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+                       logoPulse 3s ease-in-out 2s infinite;
+        }}
+
+        @keyframes logoPulse {{
+            0%, 100% {{ transform: scale(1); }}
+            50% {{ transform: scale(1.03); }}
+        }}
+    </style>
+
+    <div class="welcome-wrapper">
+        <div class="welcome-logo">
+            {logo_html}
+        </div>
+        <p class="welcome-title">UPTD PENGELOLAAN<br>PASAR KANDANGAN</p>
+        <p class="welcome-subtitle">Kabupaten Hulu Sungai Selatan</p>
+        <div class="welcome-line"></div>
+        <p class="welcome-hint">Silakan pilih modul pada menu di sebelah kiri untuk memulai</p>
+        <div class="welcome-credit">
+            <p class="welcome-credit-label">Developed by</p>
+            <p class="welcome-credit-name">M. Luthfi Renaldi</p>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
