@@ -11,75 +11,76 @@ from streamlit_gsheets import GSheetsConnection
 # ========================================== 
 def cetak_tanda_terima_parkir(data):
     buffer = BytesIO()
-    # Gunakan ukuran F4 standar (Portrait)
+    # UKURAN F4 PORTRAIT
     c = canvas.Canvas(buffer, pagesize=(21.5 * cm, 33 * cm))
     
-    # PENGATURAN DIMENSI (Tinggi 6cm, Lebar Full Kertas)
+    # PENGATURAN DIMENSI
     lebar_kertas = 21.5 * cm
-    tinggi_box = 6.0 * cm
+    tinggi_box = 6.5 * cm # Saya tambah sedikit tingginya agar lebih lega
     margin_samping = 1.0 * cm
     lebar_tabel = lebar_kertas - (2 * margin_samping)
     
-    # Posisi Vertikal
+    # POSISI VERTIKAL
     y_top = 32 * cm 
     y_bottom = y_top - tinggi_box
     
-    # 1. Bingkai Luar (Tanda Potong Full Lebar)
-    c.setDash(1, 2)
-    c.setLineWidth(0.5)
+    # 1. BINGKAI LUAR TEGAS (GARIS UTUH)
+    c.setLineWidth(1.5)
     c.rect(margin_samping, y_bottom, lebar_tabel, tinggi_box)
-    c.setDash()
     
-    # 2. Header
+    # 2. HEADER - HURUF BESAR & DIPERBESAR
     center_x = lebar_kertas / 2
-    c.setFont("Helvetica-Bold", 12)
-    c.drawCentredString(center_x, y_top - 0.8 * cm, "UPTD PENGELOLAAN PASAR KANDANGAN")
-    c.setFont("Helvetica-Bold", 10)
-    c.drawCentredString(center_x, y_top - 1.3 * cm, "TANDA TERIMA SETORAN PARKIR (MPP)")
+    c.setFont("Helvetica-Bold", 14) # Judul diperbesar ke 14
+    c.drawCentredString(center_x, y_top - 1.0 * cm, "UPTD PENGELOLAAN PASAR KANDANGAN")
     
-    # 3. Format Tanggal (dddd, dd - mm - yyyy)
-    # Kita asumsikan data['Tanggal'] masuk dalam format dd-mm-yyyy dari form
+    c.setFont("Helvetica-Bold", 11)
+    c.drawCentredString(center_x, y_top - 1.6 * cm, "TANDA TERIMA SETORAN PARKIR (MPP)")
+    
+    # GARIS BAWAH JUDUL (DOUBLE LINE ATAU TEBAL)
+    c.setLineWidth(1.5)
+    c.line(margin_samping + 1*cm, y_top - 1.9 * cm, lebar_kertas - margin_samping - 1*cm, y_top - 1.9 * cm)
+    
+    # 3. FORMAT TANGGAL (HURUF BESAR)
     try:
         tgl_obj = datetime.strptime(data['Tanggal'], "%d-%m-%Y")
-        # Daftar hari dalam Bahasa Indonesia
-        hari_indo = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
+        hari_indo = ["SENIN", "SELASA", "RABU", "KAMIS", "JUMAT", "SABTU", "MINGGU"]
         nama_hari = hari_indo[tgl_obj.weekday()]
         tgl_format = tgl_obj.strftime("%d - %m - %Y")
         tgl_final = f"{nama_hari}, {tgl_format}"
     except:
-        tgl_final = data['Tanggal'] # Fallback jika format salah
+        tgl_final = data['Tanggal'].upper()
 
-    # 4. Data Identitas (Atas Tabel)
-    c.setFont("Helvetica", 10)
-    c.drawString(margin_samping + 0.5*cm, y_top - 2.1 * cm, f"TANGGAL : {tgl_final}")
-    c.drawRightString(lebar_kertas - margin_samping - 0.5*cm, y_top - 2.1 * cm, f"NAMA : {data['Nama_Petugas']}")
+    # 4. DATA IDENTITAS
+    c.setFont("Helvetica-Bold", 10)
+    c.drawString(margin_samping + 0.5*cm, y_top - 2.5 * cm, f"TANGGAL : {tgl_final}")
+    c.drawRightString(lebar_kertas - margin_samping - 0.5*cm, y_top - 2.5 * cm, f"NAMA : {data['Nama_Petugas'].upper()}")
 
-    # 5. TABEL DATA
-    y_tab = y_top - 2.5 * cm
-    t_row = 0.8 * cm # Tinggi baris tabel sedikit lebih longgar
+    # 5. TABEL DATA (HURUF BESAR SEMUA)
+    y_tab = y_top - 3.0 * cm
+    t_row = 0.9 * cm
     
     # Header Tabel
     c.setLineWidth(1)
     c.rect(margin_samping + 0.5*cm, y_tab - t_row, lebar_tabel - 1*cm, t_row)
-    c.setFont("Helvetica-Bold", 9)
-    c.drawString(margin_samping + 1*cm, y_tab - 0.55*cm, "JENIS KENDARAAN")
-    c.drawCentredString(center_x + 2*cm, y_tab - 0.55*cm, "RINCIAN KARCIS")
-    c.drawRightString(lebar_kertas - margin_samping - 1*cm, y_tab - 0.55*cm, "KETERANGAN")
+    c.setFont("Helvetica-Bold", 10)
+    c.drawString(margin_samping + 1*cm, y_tab - 0.6*cm, "JENIS KENDARAAN")
+    c.drawCentredString(center_x + 2*cm, y_tab - 0.6*cm, "RINCIAN KARCIS")
+    c.drawRightString(lebar_kertas - margin_samping - 1*cm, y_tab - 0.6*cm, "KETERANGAN")
     
-    # Baris R2
+    # Baris RODA 2
     y_r2 = y_tab - (2 * t_row)
     c.rect(margin_samping + 0.5*cm, y_r2, lebar_tabel - 1*cm, t_row)
-    c.setFont("Helvetica", 10)
-    c.drawString(margin_samping + 1*cm, y_r2 + 0.25*cm, "RODA 2 (MOTOR)")
-    c.drawCentredString(center_x + 2*cm, y_r2 + 0.25*cm, f"{data['MPP_Roda_R2']} Lembar")
-    c.drawRightString(lebar_kertas - margin_samping - 1*cm, y_r2 + 0.25*cm, "MPP")
+    c.setFont("Helvetica-Bold", 10)
+    c.drawString(margin_samping + 1*cm, y_r2 + 0.3*cm, "RODA 2 (MOTOR)")
+    c.drawCentredString(center_x + 2*cm, y_r2 + 0.3*cm, f"{data['MPP_Roda_R2']} LEMBAR")
+    c.drawRightString(lebar_kertas - margin_samping - 1*cm, y_r2 + 0.3*cm, "MPP")
 
-    # Baris R4
+    # Baris RODA 4
     y_r4 = y_tab - (3 * t_row)
     c.rect(margin_samping + 0.5*cm, y_r4, lebar_tabel - 1*cm, t_row)
-    c.drawString(margin_samping + 1*cm, y_r4 + 0.25*cm, "RODA 4 (MOBIL)")
-    c.drawCentredString(center_x + 2*cm, y_r4 + 0.25*cm, f"{data['MPP_Roda_R4']} Lembar")
-    c.drawRightString(lebar_kertas - margin_samping - 1*cm, y_r4 + 0.25*cm, "MPP")
+    c.drawString(margin_samping + 1*cm, y_r4 + 0.3*cm, "RODA 4 (MOBIL)")
+    c.drawCentredString(center_x + 2*cm, y_r4 + 0.3*cm, f"{data['MPP_Roda_R4']} LEMBAR")
+    c.drawRightString(lebar_kertas - margin_samping - 1*cm, y_r4 + 0.3*cm, "MPP")
     
     c.showPage()
     c.save()
