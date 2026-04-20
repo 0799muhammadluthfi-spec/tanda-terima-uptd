@@ -12,32 +12,36 @@ from streamlit_gsheets import GSheetsConnection
 def cetak_tanda_terima_parkir(data):
     buffer = BytesIO()
     # UKURAN F4 PORTRAIT (21.5cm x 33cm)
-    c = canvas.Canvas(buffer, pagesize=(21.5 * cm, 33 * cm))
+    lebar_kertas = 21.5 * cm
+    c = canvas.Canvas(buffer, pagesize=(lebar_kertas, 33 * cm))
     
-    # PENGATURAN DIMENSI BARU (KECIL)
+    # PENGATURAN DIMENSI MIKRO
     lebar_box = 6.8 * cm
     tinggi_box = 4.6 * cm
-    margin_kertas_samping = 1.0 * cm # Jarak dari pinggir kertas kiri
+    
+    # HITUNG POSISI TENGAH (CENTER)
+    # Titik X agar box berada di tengah kertas
+    x_awal = (lebar_kertas - lebar_box) / 2
+    center_x = lebar_kertas / 2
     
     # POSISI VERTIKAL (Margin atas 1cm)
     y_top = 32 * cm 
     y_bottom = y_top - tinggi_box
     
-    # 1. BINGKAI LUAR BOX (GARIS UTUH)
+    # 1. BINGKAI LUAR BOX (TENGAH)
     c.setLineWidth(1.2)
-    c.rect(margin_kertas_samping, y_bottom, lebar_box, tinggi_box)
+    c.rect(x_awal, y_bottom, lebar_box, tinggi_box)
     
-    # 2. GARIS POTONG DI BAWAH BOX (PUTUS-PUTUS)
+    # 2. GARIS POTONG DI BAWAH BOX (PUTUS-PUTUS FULL LEBAR)
     y_garis_potong = y_bottom - 1.0 * cm
     c.setDash(1, 3)
     c.setLineWidth(0.5)
-    c.line(0, y_garis_potong, 21.5 * cm, y_garis_potong)
+    c.line(0, y_garis_potong, lebar_kertas, y_garis_potong)
     c.setDash() 
     
-    # 3. LOGIKA OTOMATIS TANGGAL (Pendeteksi Format 16/4/26 atau 16-04-2026)
-    tgl_input = data['Tanggal'].replace('/', '-') # Ubah / jadi - agar mudah dibaca sistem
+    # 3. LOGIKA OTOMATIS TANGGAL
+    tgl_input = data['Tanggal'].replace('/', '-')
     try:
-        # Cek jika formatnya singkat seperti 16-4-26
         if len(tgl_input.split('-')[-1]) == 2:
             tgl_obj = datetime.strptime(tgl_input, "%d-%m-%y")
         else:
@@ -49,9 +53,7 @@ def cetak_tanda_terima_parkir(data):
     except:
         tgl_final = data['Tanggal'].upper()
 
-    # 4. HEADER (UKURAN FONT DISESUAIKAN KARENA KOTAK KECIL)
-    center_x = margin_kertas_samping + (lebar_box / 2)
-    
+    # 4. HEADER (DI TENGAH BOX)
     c.setFont("Helvetica-Bold", 7)
     c.drawCentredString(center_x, y_top - 0.5 * cm, "UPTD PENGELOLAAN PASAR KANDANGAN")
     
@@ -59,24 +61,24 @@ def cetak_tanda_terima_parkir(data):
     c.drawCentredString(center_x, y_top - 0.9 * cm, "TANDA TERIMA SETORAN PARKIR (MPP)")
     
     c.setLineWidth(0.8)
-    c.line(margin_kertas_samping + 0.3*cm, y_top - 1.1 * cm, margin_kertas_samping + lebar_box - 0.3*cm, y_top - 1.1 * cm)
+    c.line(x_awal + 0.3*cm, y_top - 1.1 * cm, x_awal + lebar_box - 0.3*cm, y_top - 1.1 * cm)
     
     # 5. DATA IDENTITAS
     c.setFont("Helvetica-Bold", 6)
-    c.drawString(margin_kertas_samping + 0.3*cm, y_top - 1.5 * cm, f"TGL : {tgl_final}")
-    c.drawString(margin_kertas_samping + 0.3*cm, y_top - 1.9 * cm, f"NAMA : {data['Nama_Petugas'].upper()}")
+    c.drawString(x_awal + 0.3*cm, y_top - 1.5 * cm, f"TGL : {tgl_final}")
+    c.drawString(x_awal + 0.3*cm, y_top - 1.9 * cm, f"NAMA : {data['Nama_Petugas'].upper()}")
 
-    # 6. TABEL DATA (UKURAN MINI)
+    # 6. TABEL DATA MINI
     y_tab = y_top - 2.2 * cm
     t_row = 0.6 * cm
     lebar_tabel_mini = lebar_box - 0.6 * cm
-    x_tab = margin_kertas_samping + 0.3 * cm
+    x_tab = x_awal + 0.3 * cm
     
     # Header Tabel
     c.rect(x_tab, y_tab - t_row, lebar_tabel_mini, t_row)
     c.setFont("Helvetica-Bold", 5.5)
     c.drawString(x_tab + 0.1*cm, y_tab - 0.4*cm, "JENIS")
-    c.drawCentredString(x_tab + (lebar_tabel_mini/2), y_tab - 0.4*cm, "JUMLAH")
+    c.drawCentredString(center_x, y_tab - 0.4*cm, "JUMLAH")
     c.drawRightString(x_tab + lebar_tabel_mini - 0.1*cm, y_tab - 0.4*cm, "KET")
     
     # Baris RODA 2
@@ -84,21 +86,20 @@ def cetak_tanda_terima_parkir(data):
     c.rect(x_tab, y_r2, lebar_tabel_mini, t_row)
     c.setFont("Helvetica", 6)
     c.drawString(x_tab + 0.1*cm, y_r2 + 0.2*cm, "RODA 2")
-    c.drawCentredString(x_tab + (lebar_tabel_mini/2), y_r2 + 0.2*cm, f"{data['MPP_Roda_R2']} LBR")
+    c.drawCentredString(center_x, y_r2 + 0.2*cm, f"{data['MPP_Roda_R2']} LBR")
     c.drawRightString(x_tab + lebar_tabel_mini - 0.1*cm, y_r2 + 0.2*cm, "MPP")
 
     # Baris RODA 4
     y_r4 = y_tab - (3 * t_row)
     c.rect(x_tab, y_r4, lebar_tabel_mini, t_row)
     c.drawString(x_tab + 0.1*cm, y_r4 + 0.2*cm, "RODA 4")
-    c.drawCentredString(x_tab + (lebar_tabel_mini/2), y_r4 + 0.2*cm, f"{data['MPP_Roda_R4']} LBR")
+    c.drawCentredString(center_x, y_r4 + 0.2*cm, f"{data['MPP_Roda_R4']} LBR")
     c.drawRightString(x_tab + lebar_tabel_mini - 0.1*cm, y_r4 + 0.2*cm, "MPP")
     
     c.showPage()
     c.save()
     buffer.seek(0)
     return buffer
-
 # ==========================================
 # 1. KONFIGURASI
 # ==========================================
