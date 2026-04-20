@@ -17,6 +17,307 @@ st.set_page_config(
 )
 conn = st.connection("gsheets", type=GSheetsConnection)
 
+# ==========================================
+# CUSTOM CSS - MODERN ELEGANT AESTHETIC
+# ==========================================
+st.markdown("""
+<style>
+    /* ===== FONT IMPORT - INTER (MODERN & CLEAN) ===== */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    /* ===== GLOBAL FONT OVERRIDE ===== */
+    html, body, [class*="css"], .stApp,
+    .stMarkdown, .stText, p, span, label, li, td, th,
+    div, input, textarea, select, button,
+    [data-testid="stMarkdownContainer"],
+    [data-testid="stWidgetLabel"],
+    .stSelectbox, .stMultiSelect, .stTextInput,
+    .stNumberInput, .stRadio, .stCheckbox {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+        letter-spacing: -0.01em;
+    }
+
+    /* ===== BACKGROUND ===== */
+    .stApp {
+        background: linear-gradient(135deg, #f8fafc 0%, #f0f4f8 50%, #e8eef5 100%);
+    }
+
+    /* ===== SIDEBAR STYLING ===== */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #0f172a 0%, #1e293b 40%, #0f172a 100%);
+        border-right: 1px solid rgba(255,255,255,0.06);
+    }
+    [data-testid="stSidebar"] * {
+        color: #e2e8f0 !important;
+        font-family: 'Inter', sans-serif !important;
+    }
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3 {
+        font-weight: 700 !important;
+        font-size: 1.1rem !important;
+        letter-spacing: -0.02em !important;
+        color: #f1f5f9 !important;
+    }
+    [data-testid="stSidebar"] .stRadio label {
+        font-size: 0.82rem !important;
+        font-weight: 500 !important;
+        padding: 6px 0 !important;
+        transition: all 0.2s ease;
+    }
+    [data-testid="stSidebar"] .stRadio label:hover {
+        color: #60a5fa !important;
+    }
+    [data-testid="stSidebar"] .stSelectbox label {
+        font-size: 0.78rem !important;
+        font-weight: 600 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.05em !important;
+        color: #94a3b8 !important;
+    }
+    [data-testid="stSidebar"] .stDivider {
+        border-color: rgba(255,255,255,0.08) !important;
+    }
+
+    /* ===== HEADINGS ===== */
+    h1 {
+        font-family: 'Inter', sans-serif !important;
+        font-weight: 800 !important;
+        font-size: 1.65rem !important;
+        color: #0f172a !important;
+        letter-spacing: -0.03em !important;
+        line-height: 1.2 !important;
+        margin-bottom: 0.4rem !important;
+    }
+    h2 {
+        font-family: 'Inter', sans-serif !important;
+        font-weight: 700 !important;
+        font-size: 1.25rem !important;
+        color: #1e293b !important;
+        letter-spacing: -0.025em !important;
+        line-height: 1.3 !important;
+    }
+    h3 {
+        font-family: 'Inter', sans-serif !important;
+        font-weight: 600 !important;
+        font-size: 1.05rem !important;
+        color: #334155 !important;
+        letter-spacing: -0.02em !important;
+    }
+
+    /* ===== BODY TEXT & PARAGRAPHS ===== */
+    p, .stMarkdown p {
+        font-size: 0.88rem !important;
+        font-weight: 400 !important;
+        line-height: 1.65 !important;
+        color: #475569 !important;
+    }
+
+    /* ===== METRIC CARDS ===== */
+    [data-testid="stMetric"] {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px 20px !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
+        transition: all 0.25s ease;
+    }
+    [data-testid="stMetric"]:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+        transform: translateY(-1px);
+    }
+    [data-testid="stMetricLabel"] {
+        font-size: 0.72rem !important;
+        font-weight: 600 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.04em !important;
+        color: #64748b !important;
+    }
+    [data-testid="stMetricValue"] {
+        font-family: 'JetBrains Mono', monospace !important;
+        font-size: 1.6rem !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+    }
+
+    /* ===== INPUT FIELDS ===== */
+    .stTextInput > div > div > input,
+    .stNumberInput > div > div > input {
+        font-family: 'Inter', sans-serif !important;
+        font-size: 0.88rem !important;
+        font-weight: 500 !important;
+        border: 1.5px solid #e2e8f0 !important;
+        border-radius: 10px !important;
+        padding: 10px 14px !important;
+        background: #ffffff !important;
+        color: #1e293b !important;
+        transition: all 0.2s ease;
+    }
+    .stTextInput > div > div > input:focus,
+    .stNumberInput > div > div > input:focus {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.12) !important;
+    }
+    .stTextInput label, .stNumberInput label,
+    .stSelectbox label, .stCheckbox label {
+        font-size: 0.78rem !important;
+        font-weight: 600 !important;
+        color: #374151 !important;
+        letter-spacing: 0.01em !important;
+        margin-bottom: 4px !important;
+    }
+
+    /* ===== BUTTONS ===== */
+    .stButton > button {
+        font-family: 'Inter', sans-serif !important;
+        font-size: 0.82rem !important;
+        font-weight: 600 !important;
+        border-radius: 10px !important;
+        padding: 8px 20px !important;
+        letter-spacing: 0.01em !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        border: 1.5px solid #e2e8f0 !important;
+    }
+    .stButton > button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+    }
+    .stButton > button[kind="primary"],
+    .stButton > button[data-testid="baseButton-primary"] {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+        border: none !important;
+        color: white !important;
+        box-shadow: 0 2px 8px rgba(37,99,235,0.25) !important;
+    }
+    .stButton > button[kind="primary"]:hover,
+    .stButton > button[data-testid="baseButton-primary"]:hover {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+        box-shadow: 0 6px 16px rgba(37,99,235,0.35) !important;
+    }
+    .stDownloadButton > button {
+        font-family: 'Inter', sans-serif !important;
+        font-size: 0.82rem !important;
+        font-weight: 600 !important;
+        border-radius: 10px !important;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        color: white !important;
+        border: none !important;
+        box-shadow: 0 2px 8px rgba(5,150,105,0.2) !important;
+    }
+    .stDownloadButton > button:hover {
+        box-shadow: 0 6px 16px rgba(5,150,105,0.3) !important;
+        transform: translateY(-1px);
+    }
+
+    /* ===== FORM CONTAINER ===== */
+    [data-testid="stForm"] {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 24px !important;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    /* ===== EXPANDER ===== */
+    .streamlit-expanderHeader {
+        font-family: 'Inter', sans-serif !important;
+        font-size: 0.88rem !important;
+        font-weight: 600 !important;
+        color: #1e293b !important;
+        background: white !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 12px !important;
+        padding: 12px 16px !important;
+    }
+    [data-testid="stExpander"] {
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 12px !important;
+        background: white !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        margin-bottom: 8px !important;
+    }
+
+    /* ===== DATAFRAME ===== */
+    [data-testid="stDataFrame"] {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    [data-testid="stDataFrame"] th {
+        font-family: 'Inter', sans-serif !important;
+        font-size: 0.72rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.04em !important;
+        color: #475569 !important;
+        background: #f8fafc !important;
+    }
+    [data-testid="stDataFrame"] td {
+        font-family: 'JetBrains Mono', monospace !important;
+        font-size: 0.78rem !important;
+        font-weight: 400 !important;
+        color: #334155 !important;
+    }
+
+    /* ===== ALERTS ===== */
+    .stAlert, [data-testid="stAlert"] {
+        font-size: 0.85rem !important;
+        font-weight: 500 !important;
+        border-radius: 10px !important;
+        border-left-width: 4px !important;
+    }
+
+    /* ===== DIVIDER ===== */
+    hr {
+        border: none !important;
+        border-top: 1px solid #e2e8f0 !important;
+        margin: 1.2rem 0 !important;
+    }
+
+    /* ===== CHECKBOX STYLING ===== */
+    .stCheckbox {
+        font-size: 0.84rem !important;
+    }
+    .stCheckbox label span {
+        font-weight: 500 !important;
+        color: #374151 !important;
+    }
+
+    /* ===== TABS (if used) ===== */
+    .stTabs [data-baseweb="tab"] {
+        font-family: 'Inter', sans-serif !important;
+        font-size: 0.84rem !important;
+        font-weight: 600 !important;
+    }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    /* ===== SMOOTH TRANSITIONS ===== */
+    .main .block-container {
+        animation: fadeIn 0.35s ease-out;
+        max-width: 1100px;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== HIDE STREAMLIT BRANDING ===== */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header [data-testid="stStatusWidget"] {display: none;}
+</style>
+""", unsafe_allow_html=True)
+
 def tombol_refresh_pojok(key_btn):
     """Fungsi khusus untuk tombol Refresh di pojok kanan atas"""
     if st.button("🔄 Refresh", key=key_btn, use_container_width=True):
@@ -432,10 +733,29 @@ def halaman_parkir(menu):
 # 6. MAIN RUNNER
 # ==========================================
 def main():
-    path_logo = "logo_hss.png" 
-    if os.path.exists(path_logo): st.sidebar.image(path_logo, width=100)
     with st.sidebar:
-        st.title("🗂️ UPTD PASAR")
+        # ===== LOGO KABUPATEN HSS =====
+        st.markdown("""
+        <div style="text-align:center; padding: 16px 0 8px 0;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Lambang_Kabupaten_Hulu_Sungai_Selatan.png/220px-Lambang_Kabupaten_Hulu_Sungai_Selatan.png" 
+                 width="80" style="filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3)); margin-bottom: 8px;">
+            <p style="font-size: 0.65rem; font-weight: 600; color: #94a3b8 !important; 
+                      letter-spacing: 0.08em; text-transform: uppercase; margin: 0; line-height: 1.4;">
+                Kabupaten<br>Hulu Sungai Selatan
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div style="text-align:center; padding: 4px 0 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 12px;">
+            <h2 style="font-size: 1.05rem !important; font-weight: 800 !important; 
+                       color: #f1f5f9 !important; letter-spacing: -0.02em; margin: 0;
+                       line-height: 1.3;">
+                🏪 UPTD PASAR<br>KANDANGAN
+            </h2>
+        </div>
+        """, unsafe_allow_html=True)
+        
         modul = st.selectbox("PILIH MODUL:", ["SK TOKO", "PARKIR"], key="pilih_modul")
         
         st.divider()
@@ -443,6 +763,16 @@ def main():
             menu = st.radio("MENU SK:", ["PENGANTARAN", "PENGAMBILAN"], key="pilih_menu_sk")
         else: 
             menu = st.radio("MENU PARKIR:", ["INPUT REKAP", "INPUT STOK", "KONFIRMASI"], key="pilih_menu_parkir")
+        
+        # ===== FOOTER SIDEBAR =====
+        st.markdown("""
+        <div style="position: fixed; bottom: 12px; left: 12px; right: 12px; text-align: center;">
+            <p style="font-size: 0.6rem; color: #475569 !important; margin: 0; 
+                      letter-spacing: 0.03em; line-height: 1.5;">
+                © 2025 UPTD Pengelolaan Pasar<br>Kab. Hulu Sungai Selatan
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
         
     if modul == "SK TOKO":
         if menu == "PENGANTARAN": halaman_pengantaran()
