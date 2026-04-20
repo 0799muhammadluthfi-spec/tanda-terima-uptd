@@ -67,7 +67,6 @@ st.markdown("""
     [data-testid="stStatusWidget"] { display: none !important; }
     button[title="View fullscreen"] { display: none !important; }
 
-    /* TOMBOL MINIMIZE SIDEBAR */
     [data-testid="stSidebar"] button[kind="header"],
     [data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"],
     [data-testid="stSidebar"] button[aria-label*="sidebar"],
@@ -135,7 +134,6 @@ st.markdown("""
         -webkit-text-fill-color: #111827 !important;
     }
 
-    /* ICON FONT PROTECTION */
     [data-testid="stExpanderToggleIcon"],
     [data-testid="stExpanderToggleIcon"] *,
     [data-testid="collapsedControl"] *,
@@ -157,7 +155,6 @@ st.markdown("""
         font-family: 'Material Symbols Rounded', 'Material Icons', system-ui, sans-serif !important;
     }
 
-    /* SIDEBAR */
     [data-testid="stSidebar"] {
         background: linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #0f172a 100%) !important;
         border-right: 1px solid rgba(255,255,255,0.05) !important;
@@ -183,10 +180,6 @@ st.markdown("""
         color: #e2e8f0 !important;
     }
 
-    /* ============================================
-       SIDEBAR NAVIGATION
-       ============================================ */
-
     [data-testid="stSidebar"] .stButton {
         margin-bottom: 0px !important;
         margin-top: 0px !important;
@@ -194,17 +187,10 @@ st.markdown("""
     }
 
     @keyframes sidebarFadeIn {
-        from {
-            opacity: 0;
-            transform: translateX(-8px);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
+        from { opacity: 0; transform: translateX(-8px); }
+        to { opacity: 1; transform: translateX(0); }
     }
 
-    /* BASE: Semua tombol sidebar UKURAN IDENTIK */
     [data-testid="stSidebar"] .stButton > button {
         width: 100% !important;
         font-family: 'Inter', sans-serif !important;
@@ -222,7 +208,6 @@ st.markdown("""
         transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
     }
 
-    /* TIDAK AKTIF */
     [data-testid="stSidebar"] .stButton > button[kind="secondary"] {
         background: transparent !important;
         border: 1px solid rgba(255,255,255,0.06) !important;
@@ -235,7 +220,6 @@ st.markdown("""
         border-color: rgba(255,255,255,0.1) !important;
     }
 
-    /* AKTIF */
     [data-testid="stSidebar"] .stButton > button[kind="primary"] {
         background: rgba(96,165,250,0.12) !important;
         border: 1px solid rgba(96,165,250,0.2) !important;
@@ -247,7 +231,6 @@ st.markdown("""
         color: #93bbfc !important;
     }
 
-    /* Font dalam tombol */
     [data-testid="stSidebar"] .stButton > button p,
     [data-testid="stSidebar"] .stButton > button span {
         font-family: 'Inter', sans-serif !important;
@@ -259,7 +242,6 @@ st.markdown("""
         transition: color 0.15s ease !important;
     }
 
-    /* SUB-MENU ANIMATION */
     .submenu-container {
         overflow: hidden;
         animation: slideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -267,21 +249,10 @@ st.markdown("""
     }
 
     @keyframes slideDown {
-        from {
-            max-height: 0;
-            opacity: 0;
-            transform: translateY(-10px) scaleY(0.95);
-        }
-        to {
-            max-height: 300px;
-            opacity: 1;
-            transform: translateY(0) scaleY(1);
-        }
+        from { max-height: 0; opacity: 0; transform: translateY(-10px) scaleY(0.95); }
+        to { max-height: 300px; opacity: 1; transform: translateY(0) scaleY(1); }
     }
 
-    /* ============================================
-       MAIN CONTENT
-       ============================================ */
     .main h1, .main h2, .main h3,
     .main p, .main li, .main td, .main th,
     .main label, .main input, .main textarea,
@@ -496,7 +467,6 @@ st.markdown("""
         border-top: 1px solid #e5e7eb !important;
     }
 
-    /* ANIMASI HALAMAN */
     .main .block-container {
         animation: pageTransition 0.4s ease-out;
         max-width: 80%;
@@ -504,19 +474,9 @@ st.markdown("""
     }
 
     @keyframes pageTransition {
-        from {
-            opacity: 0;
-            transform: translateY(12px);
-            filter: blur(2px);
-        }
-        50% {
-            filter: blur(0px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-            filter: blur(0px);
-        }
+        from { opacity: 0; transform: translateY(12px); filter: blur(2px); }
+        50% { filter: blur(0px); }
+        to { opacity: 1; transform: translateY(0); filter: blur(0px); }
     }
 
     @media (max-width: 768px) {
@@ -530,39 +490,20 @@ st.markdown("""
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
-    /* ============================================
-       ANIMASI KONTEN HALAMAN - STAGGERED ENTRY
-       ============================================ */
-
-    /* Header halaman */
     .main [data-testid="stHorizontalBlock"]:first-child {
         animation: contentSlideIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         opacity: 0;
     }
 
-    /* Metric cards - muncul satu per satu */
     .main [data-testid="stMetric"] {
         animation: contentFadeScale 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         opacity: 0;
     }
 
-    .main [data-testid="stHorizontalBlock"]:nth-child(2) [data-testid="stMetric"] {
-        animation-delay: 0.15s;
-    }
+    .main [data-testid="stColumn"]:nth-child(1) [data-testid="stMetric"] { animation-delay: 0.2s; }
+    .main [data-testid="stColumn"]:nth-child(2) [data-testid="stMetric"] { animation-delay: 0.35s; }
+    .main [data-testid="stColumn"]:nth-child(3) [data-testid="stMetric"] { animation-delay: 0.5s; }
 
-    .main [data-testid="stColumn"]:nth-child(1) [data-testid="stMetric"] {
-        animation-delay: 0.2s;
-    }
-
-    .main [data-testid="stColumn"]:nth-child(2) [data-testid="stMetric"] {
-        animation-delay: 0.35s;
-    }
-
-    .main [data-testid="stColumn"]:nth-child(3) [data-testid="stMetric"] {
-        animation-delay: 0.5s;
-    }
-
-    /* Subheader */
     .main h2 {
         animation: contentSlideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         animation-delay: 0.3s;
@@ -575,14 +516,12 @@ st.markdown("""
         opacity: 0;
     }
 
-    /* Checkbox group */
     .main .stCheckbox {
         animation: contentFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         animation-delay: 0.4s;
         opacity: 0;
     }
 
-    /* Divider */
     .main hr {
         animation: dividerExpand 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         animation-delay: 0.5s;
@@ -590,21 +529,18 @@ st.markdown("""
         transform-origin: left;
     }
 
-    /* Alert / info / warning / success */
     .main [data-testid="stAlert"] {
         animation: contentSlideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         animation-delay: 0.3s;
         opacity: 0;
     }
 
-    /* Form */
     .main [data-testid="stForm"] {
         animation: contentSlideIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         animation-delay: 0.5s;
         opacity: 0;
     }
 
-    /* Text input & number input */
     .main .stTextInput,
     .main .stNumberInput {
         animation: contentFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -612,82 +548,50 @@ st.markdown("""
         opacity: 0;
     }
 
-    /* Tombol di main content */
     .main .stButton {
         animation: contentFadeScale 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         animation-delay: 0.6s;
         opacity: 0;
     }
 
-    /* Download button */
     .main .stDownloadButton {
         animation: contentFadeScale 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         animation-delay: 0.55s;
         opacity: 0;
     }
 
-    /* Expander */
     .main [data-testid="stExpander"] {
         animation: contentSlideIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         animation-delay: 0.65s;
         opacity: 0;
     }
 
-    /* Dataframe / tabel */
     .main [data-testid="stDataFrame"] {
         animation: contentSlideIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         animation-delay: 0.7s;
         opacity: 0;
     }
 
-    /* ===== KEYFRAMES ===== */
-
     @keyframes contentSlideIn {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-            filter: blur(4px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-            filter: blur(0);
-        }
+        from { opacity: 0; transform: translateY(30px); filter: blur(4px); }
+        to { opacity: 1; transform: translateY(0); filter: blur(0); }
     }
 
     @keyframes contentFadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 
     @keyframes contentFadeScale {
-        from {
-            opacity: 0;
-            transform: scale(0.9) translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-        }
+        from { opacity: 0; transform: scale(0.9) translateY(20px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
     }
 
     @keyframes dividerExpand {
-        from {
-            opacity: 0;
-            transform: scaleX(0);
-        }
-        to {
-            opacity: 1;
-            transform: scaleX(1);
-        }
+        from { opacity: 0; transform: scaleX(0); }
+        to { opacity: 1; transform: scaleX(1); }
     }
-    
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -748,18 +652,44 @@ def format_tgl_hari_indo(tgl_str):
 def normalisasi_no(val):
     try:
         txt = str(val)
-        txt = txt.replace("\u00a0", "")  # hapus non-breaking space
-        txt = txt.replace("'", "")       # hapus tanda '
+        txt = txt.replace("\u00a0", "")
+        txt = txt.replace("'", "")
         txt = txt.strip()
-
-        # Kalau angka float seperti 1.0 → jadi 1
         try:
             return str(int(float(txt)))
         except:
             return txt
-
     except:
         return ""
+
+def cari_tanggal_belum_input_parkir(df_p: pd.DataFrame):
+    try:
+        if df_p.empty or "Tanggal" not in df_p.columns:
+            return None, pd.DataFrame()
+
+        df = df_p.copy()
+        df["Tgl_Cek"] = pd.to_datetime(df["Tanggal"], dayfirst=True, errors="coerce").dt.date
+        hari_ini = datetime.now().date()
+
+        kondisi_belum = (
+            df["Total_Karcis_R2"].astype(str).str.strip().isin(["-", "nan", "", "None", "null"]) &
+            df["Total_Karcis_R4"].astype(str).str.strip().isin(["-", "nan", "", "None", "null"])
+        )
+
+        df_belum = df[
+            (df["Tgl_Cek"].notna()) &
+            (df["Tgl_Cek"] <= hari_ini) &
+            kondisi_belum
+        ].copy()
+
+        if df_belum.empty:
+            return None, df_belum
+
+        tanggal_awal = df_belum.sort_values("Tgl_Cek").iloc[0]["Tgl_Cek"]
+        return tanggal_awal, df_belum
+
+    except:
+        return None, pd.DataFrame()
 
 # ==========================================
 # 3. FUNGSI PDF (SK TOKO & PARKIR)
@@ -924,7 +854,6 @@ def halaman_pengambilan_sk():
                     value=datetime.now().strftime("%d-%m-%Y"),
                     key="tgl_ambil_sk_pengambilan"
                 )
-
                 if st.button("✅ KONFIRMASI PENGAMBILAN"):
                     df_m.loc[mask_no, "Tanggal_Pengambilan"] = tgl_a
                     if safe_update("DATA_SK", df_m):
@@ -936,7 +865,7 @@ def halaman_pengambilan_sk():
     st.divider()
     st.subheader(f"📊 BELUM DIAMBIL ({len(df_b)})")
     st.dataframe(df_b.sort_values(by="No", ascending=True), use_container_width=True, hide_index=True)
-    
+
 # ==========================================
 # 5. MODUL PARKIR
 # ==========================================
@@ -948,7 +877,23 @@ def halaman_parkir(menu):
     df_p = load_data("DATA_PARKIR")
     hari_ini = datetime.now().date()
 
-    tgl_input_user = st.text_input("🔍 MASUKKAN TANGGAL", value=datetime.now().strftime("%d-%m-%Y"))
+    # INFO TANGGAL BELUM INPUT
+    if menu in ["INPUT REKAP", "INPUT STOK"]:
+        tgl_belum, df_belum = cari_tanggal_belum_input_parkir(df_p)
+        if tgl_belum:
+            st.warning(f"⚠️ Input parkir belum terisi mulai: **{tgl_belum.strftime('%d-%m-%Y')}**")
+            with st.expander("📅 Lihat daftar tanggal yang belum diinput", expanded=False):
+                if not df_belum.empty:
+                    tampil = df_belum[["Tanggal", "Nama_Petugas"]].copy()
+                    st.dataframe(tampil, use_container_width=True, hide_index=True)
+        else:
+            st.success("✅ Semua data parkir sampai hari ini sudah terinput.")
+
+    tgl_input_user = st.text_input(
+        "🔍 MASUKKAN TANGGAL",
+        value=datetime.now().strftime("%d-%m-%Y"),
+        key="tgl_input_parkir"
+    )
     try:
         tgl_bersih = str(tgl_input_user).strip().replace('/', '-')
         if len(tgl_bersih.split('-')[-1]) == 2: dt_user = datetime.strptime(tgl_bersih, "%d-%m-%y").date()
@@ -1065,8 +1010,7 @@ def halaman_parkir(menu):
             with cb2:
                 reset_stok = st.form_submit_button("🔄 RESET FORM", use_container_width=True)
 
-            if reset_stok:
-                st.rerun()
+            if reset_stok: st.rerun()
 
             if subm_stok:
                 df_p.loc[idx, ["Pengambilan_Karcis_R2", "Pengambilan_Karcis_R4"]] = [str(pk2), str(pk4)]
@@ -1133,25 +1077,20 @@ def halaman_parkir(menu):
                                     st.success("✅ Telah Dicetak")
 
     if 'Tgl_Temp' in df_p.columns: df_p = df_p.drop(columns=['Tgl_Temp'])
+
     with st.expander("📊 LOG INPUT TERAKHIR", expanded=False):
         if menu == "INPUT REKAP":
             df_isi = df_p[
                 (df_p["Total_Karcis_R2"].str.strip().apply(lambda x: x not in ["-", "nan", ""])) |
                 (df_p["Total_Karcis_R4"].str.strip().apply(lambda x: x not in ["-", "nan", ""]))
             ].copy()
-
             if not df_isi.empty:
                 df_isi["Tgl_Sort"] = pd.to_datetime(df_isi["Tanggal"], dayfirst=True, errors="coerce").dt.date
-
-                # Ambil data sesuai tanggal yang sedang diinput
                 last = df_isi[df_isi["Tgl_Sort"] == dt_user]
-
-                # Kalau kosong, baru fallback ke tanggal terbaru
                 if last.empty:
                     last = df_isi.sort_values(by="Tgl_Sort", ascending=False).head(1)
                 else:
                     last = last.head(1)
-
                 kolom = ["Tanggal", "Nama_Petugas", "Total_Karcis_R2", "Total_Karcis_R4", "MPP_Roda_R2", "MPP_Roda_R4"]
                 st.dataframe(last[kolom], hide_index=True, use_container_width=True)
             else:
@@ -1162,19 +1101,13 @@ def halaman_parkir(menu):
                 (df_p["Pengambilan_Karcis_R2"].str.strip().apply(lambda x: x not in ["-", "nan", ""])) |
                 (df_p["Pengambilan_Karcis_R4"].str.strip().apply(lambda x: x not in ["-", "nan", ""]))
             ].copy()
-
             if not df_isi.empty:
                 df_isi["Tgl_Sort"] = pd.to_datetime(df_isi["Tanggal"], dayfirst=True, errors="coerce").dt.date
-
-                # Ambil data sesuai tanggal yang sedang diinput
                 last = df_isi[df_isi["Tgl_Sort"] == dt_user]
-
-                # Kalau kosong, baru fallback ke tanggal terbaru
                 if last.empty:
                     last = df_isi.sort_values(by="Tgl_Sort", ascending=False).head(1)
                 else:
                     last = last.head(1)
-
                 kolom = ["Tanggal", "Nama_Petugas", "Pengambilan_Karcis_R2", "Pengambilan_Karcis_R4"]
                 st.dataframe(last[kolom], hide_index=True, use_container_width=True)
             else:
@@ -1186,7 +1119,6 @@ def halaman_parkir(menu):
                 (df_p["Status_MPP"].str.strip().apply(lambda x: x not in ["-", "nan", ""])) |
                 (df_p["Status_Cetak"].str.strip().apply(lambda x: x not in ["-", "nan", ""]))
             ].copy()
-
             if not df_isi.empty:
                 df_isi["Tgl_Sort"] = pd.to_datetime(df_isi["Tanggal"], dayfirst=True, errors="coerce")
                 last = df_isi.sort_values(by="Tgl_Sort", ascending=False).head(1)
@@ -1209,7 +1141,6 @@ def halaman_welcome():
 
     st.markdown(f"""
     <style>
-        /* ===== WELCOME ANIMATIONS ===== */
         .welcome-wrapper {{
             display: flex;
             flex-direction: column;
@@ -1219,33 +1150,22 @@ def halaman_welcome():
             text-align: center;
             padding: 20px;
         }}
-
         .welcome-logo {{
-            animation: logoEntry 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation: logoEntry 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+                       logoPulse 3s ease-in-out 2s infinite;
             opacity: 0;
             filter: drop-shadow(0 8px 24px rgba(0,0,0,0.12));
         }}
-
         @keyframes logoEntry {{
-            0% {{
-                opacity: 0;
-                transform: scale(0.3) translateY(30px);
-                filter: blur(8px) drop-shadow(0 8px 24px rgba(0,0,0,0.12));
-            }}
-            50% {{
-                opacity: 1;
-                filter: blur(0px) drop-shadow(0 8px 24px rgba(0,0,0,0.12));
-            }}
-            70% {{
-                transform: scale(1.08) translateY(-5px);
-            }}
-            100% {{
-                opacity: 1;
-                transform: scale(1) translateY(0);
-                filter: blur(0px) drop-shadow(0 8px 24px rgba(0,0,0,0.12));
-            }}
+            0% {{ opacity: 0; transform: scale(0.3) translateY(30px); filter: blur(8px); }}
+            50% {{ opacity: 1; filter: blur(0px); }}
+            70% {{ transform: scale(1.08) translateY(-5px); }}
+            100% {{ opacity: 1; transform: scale(1) translateY(0); filter: blur(0px); }}
         }}
-
+        @keyframes logoPulse {{
+            0%, 100% {{ transform: scale(1); }}
+            50% {{ transform: scale(1.03); }}
+        }}
         .welcome-title {{
             animation: textSlideUp 0.8s ease-out 0.4s forwards;
             opacity: 0;
@@ -1257,7 +1177,6 @@ def halaman_welcome():
             margin: 24px 0 0 0;
             line-height: 1.2;
         }}
-
         .welcome-subtitle {{
             animation: textSlideUp 0.8s ease-out 0.6s forwards;
             opacity: 0;
@@ -1267,7 +1186,6 @@ def halaman_welcome():
             color: #64748b;
             margin: 8px 0 0 0;
         }}
-
         .welcome-line {{
             animation: lineExpand 0.6s ease-out 0.8s forwards;
             opacity: 0;
@@ -1277,18 +1195,10 @@ def halaman_welcome():
             margin: 20px auto;
             border-radius: 2px;
         }}
-
         @keyframes lineExpand {{
-            from {{
-                opacity: 0;
-                width: 0px;
-            }}
-            to {{
-                opacity: 1;
-                width: 100px;
-            }}
+            from {{ opacity: 0; width: 0px; }}
+            to {{ opacity: 1; width: 100px; }}
         }}
-
         .welcome-hint {{
             animation: textSlideUp 0.8s ease-out 1.0s forwards;
             opacity: 0;
@@ -1298,7 +1208,6 @@ def halaman_welcome():
             color: #94a3b8;
             margin: 8px 0 0 0;
         }}
-
         .welcome-credit {{
             animation: creditFloat 0.8s ease-out 1.3s forwards;
             opacity: 0;
@@ -1306,7 +1215,6 @@ def halaman_welcome():
             padding-top: 20px;
             border-top: 1px solid #e5e7eb;
         }}
-
         .welcome-credit-label {{
             font-family: 'Inter', sans-serif;
             font-size: 0.65rem;
@@ -1316,7 +1224,6 @@ def halaman_welcome():
             text-transform: uppercase;
             margin: 0 0 4px 0;
         }}
-
         .welcome-credit-name {{
             font-family: 'Inter', sans-serif;
             font-size: 0.9rem;
@@ -1325,47 +1232,17 @@ def halaman_welcome():
             letter-spacing: 0.01em;
             margin: 0;
         }}
-
         @keyframes textSlideUp {{
-            from {{
-                opacity: 0;
-                transform: translateY(20px);
-                filter: blur(4px);
-            }}
-            to {{
-                opacity: 1;
-                transform: translateY(0);
-                filter: blur(0px);
-            }}
+            from {{ opacity: 0; transform: translateY(20px); filter: blur(4px); }}
+            to {{ opacity: 1; transform: translateY(0); filter: blur(0px); }}
         }}
-
         @keyframes creditFloat {{
-            from {{
-                opacity: 0;
-                transform: translateY(15px);
-            }}
-            to {{
-                opacity: 1;
-                transform: translateY(0);
-            }}
-        }}
-
-        /* Pulse halus pada logo setelah muncul */
-        .welcome-logo {{
-            animation: logoEntry 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
-                       logoPulse 3s ease-in-out 2s infinite;
-        }}
-
-        @keyframes logoPulse {{
-            0%, 100% {{ transform: scale(1); }}
-            50% {{ transform: scale(1.03); }}
+            from {{ opacity: 0; transform: translateY(15px); }}
+            to {{ opacity: 1; transform: translateY(0); }}
         }}
     </style>
-
     <div class="welcome-wrapper">
-        <div class="welcome-logo">
-            {logo_html}
-        </div>
+        <div class="welcome-logo">{logo_html}</div>
         <p class="welcome-title">UPTD PENGELOLAAN<br>PASAR KANDANGAN</p>
         <p class="welcome-subtitle">Kabupaten Hulu Sungai Selatan</p>
         <div class="welcome-line"></div>
@@ -1420,9 +1297,7 @@ def main():
         </div>
         """, unsafe_allow_html=True)
 
-        # SK TOKO
         is_sk = st.session_state["modul_aktif"] == "SK TOKO"
-
         if st.button(
             "📋  SK TOKO  ▾" if is_sk else "📋  SK TOKO",
             key="btn_modul_sk",
@@ -1452,9 +1327,7 @@ def main():
                         st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
-        # PARKIR
         is_parkir = st.session_state["modul_aktif"] == "PARKIR"
-
         if st.button(
             "🅿️  PARKIR  ▾" if is_parkir else "🅿️  PARKIR",
             key="btn_modul_parkir",
@@ -1484,7 +1357,6 @@ def main():
                         st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
-        # Footer
         st.markdown("""
         <div style="text-align:center; padding:24px 0 8px 0;
                     border-top:1px solid rgba(255,255,255,0.06); margin-top:40px;">
@@ -1499,7 +1371,6 @@ def main():
         </div>
         """, unsafe_allow_html=True)
 
-    # RENDER HALAMAN
     modul = st.session_state["modul_aktif"]
     menu = st.session_state["menu_aktif"]
 
