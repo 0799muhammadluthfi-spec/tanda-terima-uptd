@@ -243,9 +243,14 @@ def halaman_parkir(menu):
             nama_p = baris.iloc[0]["Nama_Petugas"]
             st.success(f"👤 PETUGAS: **{nama_p}** | 📅 **{format_tgl_hari_indo(tgl_input_user)}**")
             
-            # AMBIL SISA KEMARIN (idx - 1)
-            sisa_r2 = pd.to_numeric(df_p.iloc[idx - 1]["Sisa_Stok_R2"], errors='coerce') if idx > 0 else 0
-            sisa_r4 = pd.to_numeric(df_p.iloc[idx - 1]["Sisa_Stok_R4"], errors='coerce') if idx > 0 else 0
+            # AMBIL SISA KEMARIN (idx - 1) - ANTI ERROR
+            sisa_r2 = pd.to_numeric(df_p.iloc[idx - 1].get("Sisa_Stok_R2", 0), errors='coerce') if idx > 0 else 0
+            sisa_r4 = pd.to_numeric(df_p.iloc[idx - 1].get("Sisa_Stok_R4", 0), errors='coerce') if idx > 0 else 0
+            
+            # Jika kosong/tidak terbaca, paksa jadi angka 0
+            sisa_r2 = 0 if pd.isna(sisa_r2) else sisa_r2
+            sisa_r4 = 0 if pd.isna(sisa_r4) else sisa_r4
+            
             st.info(f"📊 SISA KEMARIN: R2={sisa_r2} | R4={sisa_r4}")
             
             with st.form("form_p_rekap"):
