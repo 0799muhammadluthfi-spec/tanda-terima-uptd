@@ -263,6 +263,29 @@ st.markdown("""
         box-sizing: border-box !important;
     }
 
+    /* RADIO OPTIONS - PILL STYLE TANPA LINGKARAN */
+    [data-testid="stSidebar"] .stRadio [role="radiogroup"] {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 6px !important;
+    }
+
+    [data-testid="stSidebar"] .stRadio [role="radiogroup"] > label {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: auto !important;
+        max-width: calc(100% - 20px) !important;
+        padding: 8px 14px !important;
+        margin: 0 auto !important;
+        border-radius: 10px !important;
+        transition: all 0.15s ease !important;
+        cursor: pointer !important;
+        text-align: center !important;
+        box-sizing: border-box !important;
+    }
+
     /* Hapus total ruang lingkaran radio */
     [data-testid="stSidebar"] .stRadio [role="radiogroup"] > label > div:first-child {
         display: none !important;
@@ -273,9 +296,9 @@ st.markdown("""
         padding: 0 !important;
     }
 
-    /* Paksa isi teks benar-benar center */
+    /* Isi teks */
     [data-testid="stSidebar"] .stRadio [role="radiogroup"] > label > div:last-child {
-        width: 100% !important;
+        width: auto !important;
         margin: 0 !important;
         padding: 0 !important;
         text-align: center !important;
@@ -291,9 +314,8 @@ st.markdown("""
         text-transform: none !important;
         transition: all 0.15s ease !important;
         text-align: center !important;
-        width: 100% !important;
-        display: block !important;
         margin: 0 !important;
+        white-space: nowrap !important;
     }
 
     /* Hover */
