@@ -111,3 +111,35 @@ if modul == "SK MENEMPATI TOKO":
         sel_berkas = [t for t in t_list if st.checkbox(t)]
 
         if st.button("💾 SIMPAN & CETAK"):
+            if not nama_toko or not sk:
+                st.error("NAMA TOKO & PEMILIK HARUS DIISI!")
+            else:
+                new_row = {"No": no_urut, "Tanggal_Pengantaran": tgl_t, "Tanggal_Pengambilan": "-", 
+                           "Nama_Toko": nama_toko, "No_Toko": no_toko, "Nama_Pemilik_Asli": sk, 
+                           "Nama_Pengantar_Berkas": pengantar, "Penerima_Berkas": penerima}
+                df_final = pd.concat([df_sk, pd.DataFrame([new_row])], ignore_index=True)
+                conn.update(worksheet="DATA_SK", data=df_final)
+                st.cache_data.clear()
+                st.success("✅ DATA DISIMPAN!")
+                st.download_button("📥 DOWNLOAD PDF", buat_pdf_full(new_row, sel_berkas), f"TANDA_{no_urut}.pdf")
+
+    elif menu_sk == "PENGAMBILAN":
+        st.header("🏁 PENGAMBILAN (OVERPRINT)")
+        no_cari = st.text_input("CARI NOMOR URUT").strip()
+        if no_cari:
+            hasil = df_sk[df_sk['No'] == no_cari]
+            if not hasil.empty:
+                data_lama = hasil.iloc[0]
+                st.info(f"DATA: {data_lama['Nama_Toko']} - {data_lama['Nama_Pemilik_Asli']}")
+                tgl_a = st.text_input("TANGGAL AMBIL", value=datetime.now().strftime("%d-%m-%Y"))
+                if st.button("✅ UPDATE & CETAK"):
+                    df_sk.loc[df_sk['No'] == no_cari, 'Tanggal_Pengambilan'] = tgl_a
+                    conn.update(worksheet="DATA_SK", data=df_sk)
+                    st.cache_data.clear()
+                    st.success("TANGGAL UPDATE!")
+                    st.download_button("📥 DOWNLOAD OVERPRINT", cetak_overprint(tgl_a), f"UP_{no_cari}.pdf")
+            else: st.error("TIDAK DITEMUKAN")
+
+elif modul == "REKAP PARKIR":
+    st.header("🅿️ MODUL REKAP PARKIR")
+    st.info("Silakan siapkan tab LOG_PARKIR di Google Sheets Anda besok.")
