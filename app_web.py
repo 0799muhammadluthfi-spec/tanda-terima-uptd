@@ -147,7 +147,7 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
         c.rect(X_POS + 0.15 * cm, y_tab - TINGGI_B, 6.5 * cm, TINGGI_B)
         # FIX: Lebar kotak nilai 13.2 agar mentok kanan
         c.rect(X_POS + 6.65 * cm, y_tab - TINGGI_B, 13.2 * cm, TINGGI_B) 
-        c.setFont("Helvetica-Bold", 9); c.drawString(X_POS + 0.4 * cm, y_tab - 0.7 * cm, label)
+        c.setFont("Helvetica-Bold", 10); c.drawString(X_POS + 0.4 * cm, y_tab - 0.7 * cm, label)
         c.setFont("Helvetica-Bold", 10); c.drawString(X_POS + 7.0 * cm, y_tab - 0.7 * cm, str(val).upper())
         y_tab -= TINGGI_B
 
