@@ -215,25 +215,66 @@ def halaman_parkir(menu):
     st.header(f"🚗 {menu}"); df_p = load_data("DATA_PARKIR")
 
     if menu == "INPUT REKAP":
-        st.subheader("📝 REKAP SETORAN"); tgl_i = st.text_input("TANGGAL", value=datetime.now().strftime("%d-%m-%Y"))
-        baris = df_p[df_p["Tanggal"].astype(str) == tgl_i]
+        st.subheader("📝 REKAP SETORAN")
+        tgl_i = st.text_input("TANGGAL", value=datetime.now().strftime("%d-%m-%Y"))
+        
+        # --- LOGIKA PENCARIAN TANGGAL TAHAN BANTING ---
+        try:
+            # Bersihkan input dan cari bentuk aslinya
+            t_bersih = str(tgl_i).replace('/', '-').strip()
+            fmt = "%d-%m-%y" if len(t_bersih.split('-')[-1]) == 2 else "%d-%m-%Y"
+            dt_obj = datetime.strptime(t_bersih, fmt)
+            
+            # Buat jaring untuk menangkap semua kemungkinan format dari Google Sheets
+            var1 = dt_obj.strftime("%d-%m-%Y")                     # Contoh: 01-04-2026
+            var2 = f"{dt_obj.day}/{dt_obj.month}/{dt_obj.year}"    # Contoh: 1/4/2026
+            var3 = f"{dt_obj.day}-{dt_obj.month}-{dt_obj.year}"    # Contoh: 1-4-2026
+            var4 = dt_obj.strftime("%Y-%m-%d")                     # Contoh: 2026-04-01 (Format baku Sheets)
+            var5 = dt_obj.strftime("%Y/%m/%d")                     # Contoh: 2026/04/01
+            
+            # Bersihkan kolom tanggal dari spasi tersembunyi, lalu cari yang cocok
+            kolom_excel = df_p["Tanggal"].astype(str).str.strip()
+            baris = df_p[kolom_excel.isin([var1, var2, var3, var4, var5, tgl_i.strip()])]
+        except:
+            # Fallback jika format gagal diproses
+            baris = df_p[df_p["Tanggal"].astype(str).str.strip() == tgl_i.strip()]
+        # ----------------------------------------------
+
         if not baris.empty:
-            idx = baris.index[0]; nama_p = baris.iloc[0]["Nama_Petugas"]
+            idx = baris.index[0]
+            nama_p = baris.iloc[0]["Nama_Petugas"]
             st.success(f"👤 PETUGAS: **{nama_p}** | 📅 **{format_tgl_hari_indo(tgl_i)}**")
+            
             sisa_r2 = df_p.iloc[idx - 1]["Sisa_Stok_R2"] if idx > 0 else 0
             sisa_r4 = df_p.iloc[idx - 1]["Sisa_Stok_R4"] if idx > 0 else 0
             st.info(f"📊 SISA KEMARIN: R2={sisa_r2} | R4={sisa_r4}")
+            
             with st.form("form_p"):
                 c1, c2 = st.columns(2)
-                with c1: pk2 = st.number_input("AMBIL R2"); tr2 = st.number_input("TERJUAL R2"); mr2 = st.number_input("MPP R2")
-                with c2: pk4 = st.number_input("AMBIL R4"); tr4 = st.number_input("TERJUAL R4"); mr4 = st.number_input("MPP R4")
+                with c1: 
+                    pk2 = st.number_input("AMBIL R2", min_value=0)
+                    tr2 = st.number_input("TERJUAL R2", min_value=0)
+                    mr2 = st.number_input("MPP R2", min_value=0)
+                with c2: 
+                    pk4 = st.number_input("AMBIL R4", min_value=0)
+                    tr4 = st.number_input("TERJUAL R4", min_value=0)
+                    mr4 = st.number_input("MPP R4", min_value=0)
+                
                 if st.form_submit_button("💾 UPDATE"):
-                    sn2 = (pk2 + sisa_r2) - tr2; sn4 = (pk4 + sisa_r4) - tr4
+                    # Hitung sisa
+                    sn2 = (pk2 + sisa_r2) - tr2
+                    sn4 = (pk4 + sisa_r4) - tr4
+                    
+                    # Update baris
                     df_p.loc[idx, ["Pengambilan_Karcis_R2", "Total_Karcis_R2", "MPP_Roda_R2", "Sisa_Stok_R2", "Khusus_Roda_R2"]] = [pk2, tr2, mr2, sn2, tr2-mr2]
                     df_p.loc[idx, ["Pengambilan_Karcis_R4", "Total_Karcis_R4", "MPP_Roda_R4", "Sisa_Stok_R4", "Khusus_Roda_R4"]] = [pk4, tr4, mr4, sn4, tr4-mr4]
                     df_p.loc[idx, ["Status_Khusus", "Status_MPP"]] = ["BELUM", "BELUM"]
-                    if safe_update("DATA_PARKIR", df_p): st.success("✅ Berhasil!"); st.rerun()
-        else: st.warning("⚠️ Tanggal belum ada di jadwal Sheet.")
+                    
+                    if safe_update("DATA_PARKIR", df_p): 
+                        st.success("✅ Berhasil!")
+                        st.rerun()
+        else: 
+            st.warning("⚠️ Tanggal belum ada di jadwal Sheet. Pastikan jadwal di Sheets sudah terisi.")
 
     elif menu == "KONFIRMASI":
         df_pen = df_p[(df_p["Status_Khusus"] == "BELUM") | (df_p["Status_MPP"] == "BELUM")].copy()
