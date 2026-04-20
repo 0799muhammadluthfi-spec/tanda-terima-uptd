@@ -247,11 +247,15 @@ st.markdown("""
     [data-testid="stSidebar"] .stRadio [role="radiogroup"] label {
         display: flex !important;
         align-items: center !important;
-        padding: 8px 14px !important;
-        margin: 2px 0 !important;
-        border-radius: 8px !important;
+        justify-content: center !important;
+        width: fit-content !important;
+        min-width: 140px !important;
+        padding: 8px 16px !important;
+        margin: 4px auto !important;
+        border-radius: 10px !important;
         transition: all 0.15s ease !important;
         cursor: pointer !important;
+        text-align: center !important;
     }
     /* Sembunyikan lingkaran radio */
     [data-testid="stSidebar"] .stRadio [role="radiogroup"] label > div:first-child {
@@ -262,10 +266,11 @@ st.markdown("""
         font-family: 'Inter', sans-serif !important;
         font-size: 0.86rem !important;
         font-weight: 500 !important;
-        color: #94a3b8 !important;
+        color: #cbd5e1 !important;
         letter-spacing: 0 !important;
         text-transform: none !important;
         transition: all 0.15s ease !important;
+        text-align: center !important;
     }
     /* Hover */
     [data-testid="stSidebar"] .stRadio [role="radiogroup"] label:hover {
