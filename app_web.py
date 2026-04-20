@@ -29,7 +29,6 @@ def get_logo_base64():
                 return base64.b64encode(f.read()).decode()
     urls = [
         "https://upload.wikimedia.org/wikipedia/commons/3/3e/Lambang_Kabupaten_Hulu_Sungai_Selatan.png",
-        "https://raw.githubusercontent.com/pfrfrfr/logo-pemda/main/hulu_sungai_selatan.png",
     ]
     for url in urls:
         try:
@@ -46,7 +45,7 @@ if "logo_b64" not in st.session_state:
     st.session_state["logo_b64"] = get_logo_base64()
 
 # ==========================================
-# CUSTOM CSS
+# CUSTOM CSS - PERBAIKAN ICON FONT
 # ==========================================
 st.markdown("""
 <style>
@@ -60,32 +59,39 @@ st.markdown("""
     }
 
     /* ==============================================
-       HIDE HANYA YANG AMAN - JANGAN SENTUH SIDEBAR CONTROL
+       HIDE ELEMENT STREAMLIT YANG AMAN
+       - JANGAN HIDE: header, collapsedControl, sidebar toggle
        ============================================== */
-    /* Hamburger menu di pojok kanan atas */
-    #MainMenu {
-        display: none !important;
-    }
+    #MainMenu { display: none !important; }
+    footer { display: none !important; }
+    .stAppDeployButton { display: none !important; }
+    [data-testid="manage-app-button"] { display: none !important; }
+    [data-testid="stStatusWidget"] { display: none !important; }
+    button[title="View fullscreen"] { display: none !important; }
 
-    /* Footer "Made with Streamlit" */
-    footer {
-        display: none !important;
-    }
-
-    /* Deploy button */
-    .stAppDeployButton,
-    [data-testid="manage-app-button"] {
-        display: none !important;
-    }
-
-    /* Status widget (running indicator) */
-    [data-testid="stStatusWidget"] {
-        display: none !important;
-    }
-
-    /* Fullscreen button pada dataframe/chart */
-    button[title="View fullscreen"] {
-        display: none !important;
+    /* ==============================================
+       KUNCI UTAMA: LINDUNGI SEMUA ICON FONT
+       Material Icons, Material Symbols, icon apapun
+       JANGAN PERNAH timpa font-family pada elemen ini
+       ============================================== */
+    [data-testid="stExpanderToggleIcon"],
+    [data-testid="stExpanderToggleIcon"] *,
+    [data-testid="collapsedControl"],
+    [data-testid="collapsedControl"] *,
+    .material-icons,
+    .material-symbols-outlined,
+    .material-symbols-rounded,
+    [class*="icon"],
+    [class*="Icon"],
+    [data-baseweb="icon"],
+    [data-baseweb="icon"] *,
+    svg, svg *, path, circle, rect, line, polyline, polygon,
+    [data-testid="stHeader"] *,
+    [data-testid="stHeader"] button,
+    [data-testid="stHeader"] span,
+    [data-testid="stSidebar"] > div:first-child > button,
+    [data-testid="stSidebar"] > div:first-child > button * {
+        font-family: 'Material Symbols Rounded', 'Material Icons', system-ui, sans-serif !important;
     }
 
     /* ============================================
@@ -96,28 +102,26 @@ st.markdown("""
         border-right: 1px solid rgba(255,255,255,0.05);
     }
 
-    /* Font sidebar */
-    [data-testid="stSidebar"] *:not(input):not(textarea):not(svg):not(path):not(button) {
-        font-family: 'Inter', sans-serif !important;
-    }
-
-    /* Warna teks sidebar umum */
+    /* Sidebar font - TARGET SPESIFIK, bukan wildcard * */
     [data-testid="stSidebar"] label,
-    [data-testid="stSidebar"] span,
     [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3,
+    [data-testid="stSidebar"] input,
+    [data-testid="stSidebar"] textarea,
+    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
+    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] span,
     [data-testid="stSidebar"] [data-testid="stWidgetLabel"] label,
     [data-testid="stSidebar"] [data-testid="stWidgetLabel"] p,
-    [data-testid="stSidebar"] [data-testid="stWidgetLabel"] span,
-    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
-    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] span {
+    [data-testid="stSidebar"] [data-testid="stWidgetLabel"] span {
+        font-family: 'Inter', sans-serif !important;
         color: #e2e8f0 !important;
     }
 
     /* SELECTBOX LABEL */
     [data-testid="stSidebar"] .stSelectbox > label,
-    [data-testid="stSidebar"] .stSelectbox [data-testid="stWidgetLabel"],
-    [data-testid="stSidebar"] .stSelectbox [data-testid="stWidgetLabel"] p,
-    [data-testid="stSidebar"] .stSelectbox [data-testid="stWidgetLabel"] label {
+    [data-testid="stSidebar"] .stSelectbox [data-testid="stWidgetLabel"] p {
         font-size: 0.75rem !important;
         font-weight: 700 !important;
         text-transform: uppercase !important;
@@ -125,27 +129,29 @@ st.markdown("""
         color: #cbd5e1 !important;
     }
 
-    /* SELECTBOX VALUE */
-    [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"],
-    [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] span,
-    [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] div,
-    [data-testid="stSidebar"] .stSelectbox [role="combobox"],
-    [data-testid="stSidebar"] .stSelectbox [role="combobox"] span,
-    [data-testid="stSidebar"] [data-baseweb="select"] > div > div {
+    /* SELECTBOX VALUE - teks yang terpilih */
+    [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div > div > div:first-child {
         color: #f8fafc !important;
+        font-family: 'Inter', sans-serif !important;
         font-size: 0.88rem !important;
         font-weight: 600 !important;
     }
-
     [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div {
         background: rgba(255,255,255,0.06) !important;
         border: 1px solid rgba(255,255,255,0.15) !important;
         border-radius: 8px !important;
     }
 
+    /* SELECTBOX DROPDOWN ICON - JANGAN TIMPA */
+    [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] svg,
+    [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] svg *,
+    [data-testid="stSidebar"] .stSelectbox [data-baseweb="icon"],
+    [data-testid="stSidebar"] .stSelectbox [data-baseweb="icon"] * {
+        font-family: 'Material Symbols Rounded', 'Material Icons', system-ui !important;
+    }
+
     /* RADIO LABEL */
     [data-testid="stSidebar"] .stRadio > label,
-    [data-testid="stSidebar"] .stRadio > [data-testid="stWidgetLabel"],
     [data-testid="stSidebar"] .stRadio > [data-testid="stWidgetLabel"] p {
         font-size: 0.72rem !important;
         font-weight: 700 !important;
@@ -155,17 +161,16 @@ st.markdown("""
     }
 
     /* RADIO OPTIONS */
-    [data-testid="stSidebar"] .stRadio [role="radiogroup"] label,
-    [data-testid="stSidebar"] .stRadio [role="radiogroup"] label span,
     [data-testid="stSidebar"] .stRadio [role="radiogroup"] label p,
-    [data-testid="stSidebar"] .stRadio [role="radiogroup"] label div {
+    [data-testid="stSidebar"] .stRadio [role="radiogroup"] label span {
+        font-family: 'Inter', sans-serif !important;
         font-size: 0.86rem !important;
         font-weight: 500 !important;
         color: #e2e8f0 !important;
         letter-spacing: 0 !important;
         text-transform: none !important;
     }
-    [data-testid="stSidebar"] .stRadio [role="radiogroup"] label:hover,
+    [data-testid="stSidebar"] .stRadio [role="radiogroup"] label:hover p,
     [data-testid="stSidebar"] .stRadio [role="radiogroup"] label:hover span {
         color: #60a5fa !important;
     }
@@ -175,6 +180,7 @@ st.markdown("""
     }
 
     [data-testid="stSidebar"] .stButton > button {
+        font-family: 'Inter', sans-serif !important;
         color: #e2e8f0 !important;
         border: 1px solid rgba(255,255,255,0.15) !important;
         background: rgba(255,255,255,0.05) !important;
@@ -188,36 +194,59 @@ st.markdown("""
     }
 
     /* ============================================
-       MAIN CONTENT - FONT
+       MAIN CONTENT FONT - TARGET SPESIFIK
+       TIDAK PAKAI WILDCARD * LAGI
        ============================================ */
-    .main *:not(svg):not(path):not([data-testid="stExpanderToggleIcon"] *),
-    [data-testid="stMainBlockContainer"] *:not(svg):not(path):not([data-testid="stExpanderToggleIcon"] *) {
+    .main h1, .main h2, .main h3,
+    .main p, .main li, .main td, .main th,
+    .main label, .main input, .main textarea,
+    .main [data-testid="stMarkdownContainer"] p,
+    .main [data-testid="stMarkdownContainer"] span,
+    .main [data-testid="stMarkdownContainer"] li,
+    .main [data-testid="stWidgetLabel"] label,
+    .main [data-testid="stWidgetLabel"] p,
+    .main [data-testid="stWidgetLabel"] span,
+    .main .stTextInput label,
+    .main .stTextInput input,
+    .main .stNumberInput label,
+    .main .stNumberInput input,
+    .main .stSelectbox label,
+    .main .stCheckbox label,
+    .main .stCheckbox label span,
+    .main .stRadio label,
+    .main .stButton > button,
+    .main .stDownloadButton > button,
+    .main .stDownloadButton > button p,
+    .main .stDownloadButton > button span,
+    [data-testid="stForm"] label,
+    [data-testid="stForm"] p,
+    [data-testid="stForm"] input {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
     }
 
     /* ===== HEADINGS ===== */
-    .main h1, [data-testid="stMainBlockContainer"] h1 {
+    .main h1 {
         font-size: 1.55rem !important;
         font-weight: 800 !important;
         color: #0f172a !important;
         letter-spacing: -0.03em !important;
         line-height: 1.25 !important;
     }
-    .main h2, [data-testid="stMainBlockContainer"] h2 {
+    .main h2 {
         font-size: 1.15rem !important;
         font-weight: 700 !important;
         color: #1e293b !important;
         letter-spacing: -0.02em !important;
     }
-    .main h3, [data-testid="stMainBlockContainer"] h3 {
+    .main h3 {
         font-size: 0.98rem !important;
         font-weight: 600 !important;
         color: #334155 !important;
     }
 
     /* ===== BODY TEXT ===== */
-    .main p, .main span:not([data-testid="stExpanderToggleIcon"] span), .main li,
-    [data-testid="stMainBlockContainer"] p {
+    .main p,
+    .main [data-testid="stMarkdownContainer"] p {
         font-size: 0.88rem !important;
         font-weight: 400 !important;
         line-height: 1.6 !important;
@@ -232,8 +261,7 @@ st.markdown("""
     .main .stTextInput label,
     .main .stNumberInput label,
     .main .stSelectbox label,
-    .main .stCheckbox label,
-    .main [data-testid="stWidgetLabel"] {
+    .main .stCheckbox label {
         font-size: 0.78rem !important;
         font-weight: 600 !important;
         color: #374151 !important;
@@ -331,8 +359,7 @@ st.markdown("""
         color: #ffffff !important;
     }
     .main .stDownloadButton > button p,
-    .main .stDownloadButton > button span,
-    .main .stDownloadButton > button div {
+    .main .stDownloadButton > button span {
         color: #ffffff !important;
         font-size: 0.82rem !important;
         overflow: visible !important;
@@ -348,7 +375,7 @@ st.markdown("""
     }
 
     /* ==============================================
-       EXPANDER - PERBAIKI ARROW ICON
+       EXPANDER - IKON PANAH DILINDUNGI
        ============================================== */
     [data-testid="stExpander"] {
         border: 1px solid #e5e7eb !important;
@@ -357,31 +384,15 @@ st.markdown("""
         margin-bottom: 6px !important;
     }
 
-    /* Header expander - teks judul */
-    [data-testid="stExpander"] summary,
-    [data-testid="stExpander"] [data-testid="stExpanderDetails"],
-    .streamlit-expanderHeader {
+    /* Teks judul expander saja */
+    [data-testid="stExpander"] summary > span > div > p,
+    [data-testid="stExpander"] summary > span > div > span,
+    .streamlit-expanderHeader p,
+    .streamlit-expanderHeader span:not([data-testid="stExpanderToggleIcon"]):not([data-testid="stExpanderToggleIcon"] *) {
         font-family: 'Inter', sans-serif !important;
         font-size: 0.86rem !important;
         font-weight: 600 !important;
         color: #1e293b !important;
-    }
-
-    /* PENTING: Jangan timpa font icon arrow expander */
-    [data-testid="stExpanderToggleIcon"],
-    [data-testid="stExpanderToggleIcon"] *,
-    [data-testid="stExpander"] summary svg,
-    [data-testid="stExpander"] summary svg *,
-    [data-testid="stExpander"] details summary span[data-testid="stExpanderToggleIcon"],
-    .streamlit-expanderHeader svg,
-    .streamlit-expanderHeader svg * {
-        font-family: inherit !important;
-        -webkit-font-smoothing: auto !important;
-    }
-
-    /* Pastikan SVG icon tidak terganggu */
-    svg, svg *, path, circle, rect, line, polyline, polygon {
-        font-family: inherit !important;
     }
 
     /* ===== DATAFRAME ===== */
@@ -836,7 +847,6 @@ def halaman_parkir(menu):
 # ==========================================
 def main():
     with st.sidebar:
-        # ===== LOGO HSS =====
         logo_b64 = st.session_state.get("logo_b64")
         
         if logo_b64:
@@ -854,7 +864,6 @@ def main():
             </div>
             """, unsafe_allow_html=True)
 
-        # ===== HEADER SIDEBAR =====
         st.markdown("""
         <div style="text-align:center; padding:4px 0 14px 0; 
                     border-bottom:1px solid rgba(255,255,255,0.08); margin-bottom:14px;">
@@ -879,7 +888,6 @@ def main():
         else: 
             menu = st.radio("MENU PARKIR:", ["INPUT REKAP", "INPUT STOK", "KONFIRMASI"], key="pilih_menu_parkir")
         
-        # ===== FOOTER =====
         st.markdown("""
         <div style="text-align:center; padding:24px 0 8px 0; 
                     border-top:1px solid rgba(255,255,255,0.06); margin-top:40px;">
