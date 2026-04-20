@@ -268,8 +268,9 @@ def halaman_parkir(menu):
                     sn2 = (pk2 + sisa_r2) - tr2
                     sn4 = (pk4 + sisa_r4) - tr4
                     
-                    df_p.loc[idx, ["Pengambilan_Karcis_R2", "Total_Karcis_R2", "MPP_Roda_R2", "Sisa_Stok_R2", "Khusus_Roda_R2"]] = [pk2, tr2, mr2, sn2, tr2-mr2]
-                    df_p.loc[idx, ["Pengambilan_Karcis_R4", "Total_Karcis_R4", "MPP_Roda_R4", "Sisa_Stok_R4", "Khusus_Roda_R4"]] = [pk4, tr4, mr4, sn4, tr4-mr4]
+                    # TAMBAHKAN str() UNTUK SEMUA ANGKA
+                    df_p.loc[idx, ["Pengambilan_Karcis_R2", "Total_Karcis_R2", "MPP_Roda_R2", "Sisa_Stok_R2", "Khusus_Roda_R2"]] = [str(pk2), str(tr2), str(mr2), str(sn2), str(tr2-mr2)]
+                    df_p.loc[idx, ["Pengambilan_Karcis_R4", "Total_Karcis_R4", "MPP_Roda_R4", "Sisa_Stok_R4", "Khusus_Roda_R4"]] = [str(pk4), str(tr4), str(mr4), str(sn4), str(tr4-mr4)]
                     df_p.loc[idx, ["Status_Khusus", "Status_MPP"]] = ["BELUM", "BELUM"]
                     
                     # Hapus kolom temp sebelum save
