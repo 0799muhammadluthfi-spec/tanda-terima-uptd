@@ -538,6 +538,7 @@ def halaman_parkir(menu_aktif):
     st.subheader("📊 LOG REKAP PARKIR")
     if not df_parkir.empty:
         st.dataframe(df_parkir.sort_values(by="No", ascending=False), use_container_width=True, hide_index=True)
+        
 # ==========================================
 # 7. MAIN APP
 # ==========================================
