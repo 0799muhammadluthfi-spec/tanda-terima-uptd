@@ -1134,42 +1134,48 @@ def halaman_parkir(menu):
 
     if 'Tgl_Temp' in df_p.columns: df_p = df_p.drop(columns=['Tgl_Temp'])
     with st.expander("📊 LOG INPUT TERAKHIR", expanded=False):
-        if menu == "INPUT REKAP":
-            df_isi = df_p[
-                (df_p["Total_Karcis_R2"].str.strip().apply(lambda x: x not in ["-", "nan", ""])) |
-                (df_p["Total_Karcis_R4"].str.strip().apply(lambda x: x not in ["-", "nan", ""]))
-            ]
-            if not df_isi.empty:
-                last = df_isi.sort_values(by="Tanggal", ascending=False).head(1)
-                kolom = ["Tanggal", "Nama_Petugas", "Total_Karcis_R2", "Total_Karcis_R4", "MPP_Roda_R2", "MPP_Roda_R4"]
-                st.dataframe(last[kolom], hide_index=True, use_container_width=True)
-            else:
-                st.info("Belum ada data yang diinput.")
+    if menu == "INPUT REKAP":
+        df_isi = df_p[
+            (df_p["Total_Karcis_R2"].str.strip().apply(lambda x: x not in ["-", "nan", ""])) |
+            (df_p["Total_Karcis_R4"].str.strip().apply(lambda x: x not in ["-", "nan", ""]))
+        ].copy()
 
-        elif menu == "INPUT STOK":
-            df_isi = df_p[
-                (df_p["Pengambilan_Karcis_R2"].str.strip().apply(lambda x: x not in ["-", "nan", ""])) |
-                (df_p["Pengambilan_Karcis_R4"].str.strip().apply(lambda x: x not in ["-", "nan", ""]))
-            ]
-            if not df_isi.empty:
-                last = df_isi.sort_values(by="Tanggal", ascending=False).head(1)
-                kolom = ["Tanggal", "Nama_Petugas", "Pengambilan_Karcis_R2", "Pengambilan_Karcis_R4"]
-                st.dataframe(last[kolom], hide_index=True, use_container_width=True)
-            else:
-                st.info("Belum ada data yang diinput.")
+        if not df_isi.empty:
+            df_isi["Tgl_Sort"] = pd.to_datetime(df_isi["Tanggal"], dayfirst=True, errors="coerce")
+            last = df_isi.sort_values(by="Tgl_Sort", ascending=False).head(1)
+            kolom = ["Tanggal", "Nama_Petugas", "Total_Karcis_R2", "Total_Karcis_R4", "MPP_Roda_R2", "MPP_Roda_R4"]
+            st.dataframe(last[kolom], hide_index=True, use_container_width=True)
+        else:
+            st.info("Belum ada data yang diinput.")
 
-        elif menu == "KONFIRMASI":
-            df_isi = df_p[
-                (df_p["Status_Khusus"].str.strip().apply(lambda x: x not in ["-", "nan", ""])) |
-                (df_p["Status_MPP"].str.strip().apply(lambda x: x not in ["-", "nan", ""])) |
-                (df_p["Status_Cetak"].str.strip().apply(lambda x: x not in ["-", "nan", ""]))
-            ]
-            if not df_isi.empty:
-                last = df_isi.sort_values(by="Tanggal", ascending=False).head(1)
-                kolom = ["Tanggal", "Nama_Petugas", "Status_Khusus", "Status_MPP", "Status_Cetak"]
-                st.dataframe(last[kolom], hide_index=True, use_container_width=True)
-            else:
-                st.info("Belum ada data yang diinput.")
+    elif menu == "INPUT STOK":
+        df_isi = df_p[
+            (df_p["Pengambilan_Karcis_R2"].str.strip().apply(lambda x: x not in ["-", "nan", ""])) |
+            (df_p["Pengambilan_Karcis_R4"].str.strip().apply(lambda x: x not in ["-", "nan", ""]))
+        ].copy()
+
+        if not df_isi.empty:
+            df_isi["Tgl_Sort"] = pd.to_datetime(df_isi["Tanggal"], dayfirst=True, errors="coerce")
+            last = df_isi.sort_values(by="Tgl_Sort", ascending=False).head(1)
+            kolom = ["Tanggal", "Nama_Petugas", "Pengambilan_Karcis_R2", "Pengambilan_Karcis_R4"]
+            st.dataframe(last[kolom], hide_index=True, use_container_width=True)
+        else:
+            st.info("Belum ada data yang diinput.")
+
+    elif menu == "KONFIRMASI":
+        df_isi = df_p[
+            (df_p["Status_Khusus"].str.strip().apply(lambda x: x not in ["-", "nan", ""])) |
+            (df_p["Status_MPP"].str.strip().apply(lambda x: x not in ["-", "nan", ""])) |
+            (df_p["Status_Cetak"].str.strip().apply(lambda x: x not in ["-", "nan", ""]))
+        ].copy()
+
+        if not df_isi.empty:
+            df_isi["Tgl_Sort"] = pd.to_datetime(df_isi["Tanggal"], dayfirst=True, errors="coerce")
+            last = df_isi.sort_values(by="Tgl_Sort", ascending=False).head(1)
+            kolom = ["Tanggal", "Nama_Petugas", "Status_Khusus", "Status_MPP", "Status_Cetak"]
+            st.dataframe(last[kolom], hide_index=True, use_container_width=True)
+        else:
+            st.info("Belum ada data yang diinput.")
 
 # ==========================================
 # 6. HALAMAN WELCOME
