@@ -255,18 +255,23 @@ def halaman_pengantaran():
 
         submitted = st.form_submit_button("💾 SIMPAN DATA", type="primary")
 
-        if submitted:
+if submitted:
             errors = []
             if not no_urut.strip(): errors.append("Nomor Urut wajib diisi")
             if not nama_toko: errors.append("Nama Toko wajib diisi")
             if not nama_pemilik: errors.append("Nama Pemilik wajib diisi")
 
-            if not df_sk.empty and no_urut.strip() in df_sk["No"].str.strip().values:
-                errors.append(f"Nomor Urut {no_urut} sudah ada!")
-
             if errors:
                 for err in errors: st.error(f"❌ {err}")
             else:
+                # LOGIKA TIMPA DATA BARU
+                is_update = False
+                if not df_sk.empty and no_urut.strip() in df_sk["No"].str.strip().values:
+                    is_update = True
+                    st.warning(f"⚠️ Pemberitahuan: Nomor Urut {no_urut} sudah ada. Data lama telah ditimpa/diupdate!")
+                    # Hapus data lama dari memori sementara sebelum ditambah yang baru
+                    df_sk = df_sk[df_sk["No"].str.strip() != no_urut.strip()]
+
                 new_row = {
                     "No": no_urut.strip(), "Tanggal_Pengantaran": tgl_terima,
                     "Tanggal_Pengambilan": "-", "Nama_Toko": nama_toko, "No_Toko": no_toko,
@@ -274,12 +279,16 @@ def halaman_pengantaran():
                     "Penerima_Berkas": nama_penerima,
                 }
 
+                # Gabungkan data baru
                 df_baru = pd.concat([df_sk, pd.DataFrame([new_row])], ignore_index=True)
 
                 if safe_update("DATA_SK", df_baru):
                     st.session_state["last_data"] = new_row
                     st.session_state["last_berkas"] = sel_berkas
-                    st.success(f"✅ Data Nomor {no_urut} berhasil disimpan!")
+                    if is_update:
+                        st.success(f"✅ Data Nomor {no_urut} berhasil ditimpa/diupdate!")
+                    else:
+                        st.success(f"✅ Data Nomor {no_urut} berhasil disimpan!")
                     st.balloons()
 
     if "last_data" in st.session_state and st.session_state["last_data"]:
