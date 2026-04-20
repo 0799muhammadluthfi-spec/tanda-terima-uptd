@@ -400,42 +400,46 @@ def halaman_parkir():
     elif menu_parkir == "KONFIRMASI PENERIMAAN":
         st.subheader("✅ Verifikasi Karcis Masuk")
         
-        # Pengaman jika kolom belum ada
-        if "Status_Terima" not in df_parkir.columns:
-            df_parkir["Status_Terima"] = "BELUM" 
+        # Pengaman kolom status baru
+        for col in ["Status_Khusus", "Status_MPP"]:
+            if col not in df_parkir.columns:
+                df_parkir[col] = "BELUM"
             
-        df_pending = df_parkir[df_parkir["Status_Terima"] == "BELUM"]
+        # Tampilkan data yang salah satu statusnya masih "BELUM"
+        df_pending = df_parkir[(df_parkir["Status_Khusus"] == "BELUM") | (df_parkir["Status_MPP"] == "BELUM")]
         
         if df_pending.empty:
-            st.info("Semua rekap sudah dikonfirmasi. Tidak ada antrean.")
+            st.info("Semua rekap sudah dikonfirmasi.")
         else:
             for index, row in df_pending.iterrows():
-                # Judul kotak ekspander
                 with st.expander(f"📦 Rekap Nomor: {row['No']} - {row['Nama_Petugas']} ({row['Tanggal']})"):
+                    col_k, col_m = st.columns(2)
                     
-                    # Membuat 2 kolom untuk memisahkan R2 dan R4
-                    col_r2, col_r4 = st.columns(2)
-                    
-                    with col_r2:
-                        st.markdown("#### 🏍️ RODA 2 (MOTOR)")
-                        st.write(f"• **Khusus:** {row['Khusus_Roda_R2']} lbr")
-                        st.write(f"• **MPP:** {row['MPP_Roda_R2']} lbr")
-                        st.write(f"**TOTAL R2: {row['Total_Karcis_R2']}**")
-                    
-                    with col_r4:
-                        st.markdown("#### 🚗 RODA 4 (MOBIL)")
-                        st.write(f"• **Khusus:** {row['Khusus_Roda_R4']} lbr")
-                        st.write(f"• **MPP:** {row['MPP_Roda_R4']} lbr")
-                        st.write(f"**TOTAL R4: {row['Total_Karcis_R4']}**")
-                    
-                    st.divider()
-                    
-                    # Tombol Konfirmasi
-                    if st.button(f"KONFIRMASI PENERIMAAN #{row['No']}", type="primary", key=f"btn_{row['No']}", use_container_width=True):
-                        df_parkir.loc[df_parkir["No"] == row["No"], "Status_Terima"] = "SUDAH"
-                        if safe_update("DATA_PARKIR", df_parkir):
-                            st.success(f"✅ Data {row['Nama_Petugas']} Berhasil Dikonfirmasi!")
-                            st.rerun()
+                    # --- BAGIAN KHUSUS ---
+                    with col_k:
+                        st.markdown("### 🎫 KARCIS KHUSUS")
+                        st.write(f"R2: {row['Khusus_Roda_R2']} | R4: {row['Khusus_Roda_R4']}")
+                        if row["Status_Khusus"] == "BELUM":
+                            if st.button(f"TERIMA KHUSUS #{row['No']}", type="primary", key=f"kh_{row['No']}"):
+                                df_parkir.loc[df_parkir["No"] == row["No"], "Status_Khusus"] = "SUDAH"
+                                if safe_update("DATA_PARKIR", df_parkir):
+                                    st.success("Karcis Khusus Diterima!")
+                                    st.rerun()
+                        else:
+                            st.success("✅ Terverifikasi")
+
+                    # --- BAGIAN MPP ---
+                    with col_m:
+                        st.markdown("### 🏢 KARCIS MPP")
+                        st.write(f"R2: {row['MPP_Roda_R2']} | R4: {row['MPP_Roda_R4']}")
+                        if row["Status_MPP"] == "BELUM":
+                            if st.button(f"TERIMA MPP #{row['No']}", type="primary", key=f"mpp_{row['No']}"):
+                                df_parkir.loc[df_parkir["No"] == row["No"], "Status_MPP"] = "SUDAH"
+                                if safe_update("DATA_PARKIR", df_parkir):
+                                    st.success("Karcis MPP Diterima!")
+                                    st.rerun()
+                        else:
+                            st.success("✅ Terverifikasi")
 
     # Tampilkan tabel history di bawah
     st.divider()
