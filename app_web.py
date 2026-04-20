@@ -13,7 +13,7 @@ st.set_page_config(page_title="UPTD PASAR KANDANGAN", layout="wide")
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 # ==========================================
-# 2. FUNGSI PDF (UKURAN POTONG F4: 22x12 CM)
+# 2. FUNGSI PDF (UKURAN 22x12 CM)
 # ==========================================
 def buat_pdf_full(data, berkas_list):
     buffer = BytesIO()
@@ -80,7 +80,6 @@ if modul == "SK MENEMPATI TOKO":
     if menu_sk == "PENGANTARAN":
         st.header("📝 INPUT PENGANTARAN BERKAS SK")
         
-        # Hitung No Urut Otomatis
         try:
             val_no = pd.to_numeric(df_sk['No'], errors='coerce').max()
             next_no = int(val_no) + 1 if not pd.isna(val_no) else 1
@@ -95,13 +94,12 @@ if modul == "SK MENEMPATI TOKO":
             sk = c2.text_input("NAMA PEMILIK SK").upper()
             pengantar = c2.text_input("PENGANTAR").upper()
             penerima = c2.text_input("PENERIMA").upper()
-            
             st.write("---")
             st.subheader("📋 CEKLIST DOKUMEN")
             t_list = ["SK ASLI MENEMPATI", "PAS FOTO 3X4 (2 LBR)", "FC KTP PEMILIK", "FC KARTU SEWA", "SURAT KUASA", "SURAT KEHILANGAN"]
             sel_berkas = [t for t in t_list if st.checkbox(t)]
             
-            submit = st.form_submit_button("💾 SIMPAN & BUAT PDF")
+            submit = st.form_submit_button("💾 SIMPAN DATA")
             
             if submit:
                 if not nama_toko or not sk:
@@ -112,22 +110,36 @@ if modul == "SK MENEMPATI TOKO":
                                "Nama_Pengantar_Berkas": pengantar, "Penerima_Berkas": penerima}
                     df_final = pd.concat([df_sk, pd.DataFrame([new_row])], ignore_index=True)
                     conn.update(worksheet="DATA_SK", data=df_final)
+                    # Simpan ke session state agar tombol download muncul di luar form
+                    st.session_state['last_data'] = new_row
+                    st.session_state['last_berkas'] = sel_berkas
                     st.success(f"✅ DATA {nama_toko} BERHASIL DISIMPAN!")
-                    st.download_button("📥 DOWNLOAD PDF TANDA TERIMA", buat_pdf_full(new_row, sel_berkas), f"TANDA_{no_urut}.pdf")
+                    st.cache_data.clear()
+
+        # TOMBOL DOWNLOAD DI LUAR FORM
+        if 'last_data' in st.session_state:
+            st.write("---")
+            st.download_button(
+                label="📥 DOWNLOAD PDF TANDA TERIMA",
+                data=buat_pdf_full(st.session_state['last_data'], st.session_state['last_berkas']),
+                file_name=f"TANDA_{st.session_state['last_data']['No']}.pdf",
+                mime="application/pdf"
+            )
 
     elif menu_sk == "PENGAMBILAN":
-        st.header("🏁 PENGAMBILAN BERKAS (UPDATE TANGGAL)")
+        st.header("🏁 PENGAMBILAN BERKAS")
         no_cari = st.text_input("MASUKKAN NOMOR URUT:").strip()
         if no_cari:
             hasil = df_sk[df_sk['No'].str.strip() == no_cari]
             if not hasil.empty:
                 data_lama = hasil.iloc[0]
-                st.success(f"📦 DATA DITEMUKAN: {data_lama['Nama_Toko']} (Pemilik: {data_lama['Nama_Pemilik_Asli']})")
+                st.success(f"📦 DATA DITEMUKAN: {data_lama['Nama_Toko']}")
                 tgl_a = st.text_input("TANGGAL AMBIL", value=datetime.now().strftime("%d-%m-%Y"))
-                if st.button("✅ UPDATE TANGGAL AMBIL"):
+                if st.button("✅ UPDATE TANGGAL"):
                     df_sk.loc[df_sk['No'].str.strip() == no_cari, 'Tanggal_Pengambilan'] = tgl_a
                     conn.update(worksheet="DATA_SK", data=df_sk)
-                    st.success("✅ TANGGAL BERHASIL DIUPDATE!")
+                    st.success("✅ BERHASIL DIUPDATE!")
+                    st.cache_data.clear()
             else:
                 st.error("❌ NOMOR URUT TIDAK DITEMUKAN!")
 
@@ -137,63 +149,52 @@ elif modul == "REKAP PARKIR":
     df_p = conn.read(worksheet="LOG_PARKIR", ttl=0).astype(str)
 
     if menu_p == "INPUT HARIAN":
-        st.header("🅿️ INPUT LAPORAN PARKIR HARIAN")
+        st.header("🅿️ INPUT PARKIR")
         try:
             sisa_r2_lalu = int(float(df_p['SISA_R2'].iloc[-1]))
             sisa_r4_lalu = int(float(df_p['SISA_R4'].iloc[-1]))
         except:
             sisa_r2_lalu = 0; sisa_r4_lalu = 0
 
-        st.info(f"📊 SALDO KARCIS SAAT INI: R2: **{sisa_r2_lalu}** | R4: **{sisa_r4_lalu}**")
+        st.info(f"📊 SALDO KARCIS: R2: {sisa_r2_lalu} | R4: {sisa_r4_lalu}")
 
         with st.form("form_parkir", clear_on_submit=True):
             col1, col2 = st.columns(2)
-            tgl = col1.date_input("TANGGAL LAPORAN")
+            tgl = col1.date_input("TANGGAL")
             petugas = col2.text_input("NAMA PETUGAS").upper()
-            
-            st.write("---")
             c3, c4 = st.columns(2)
             with c3:
-                st.subheader("🎟️ PENGAMBILAN BARU")
                 ambil_r2 = st.number_input("AMBIL R2", min_value=0, step=1)
                 ambil_r4 = st.number_input("AMBIL R4", min_value=0, step=1)
             with c4:
-                st.subheader("🏙️ PARKIR KHUSUS")
                 khusus_r2 = st.number_input("KHUSUS R2", min_value=0, step=1)
                 khusus_r4 = st.number_input("KHUSUS R4", min_value=0, step=1)
+            mpp_r2 = st.number_input("MPP R2", min_value=0, step=1)
+            mpp_r4 = st.number_input("MPP R4", min_value=0, step=1)
             
-            st.subheader("🏢 PARKIR MPP")
-            c5, c6 = st.columns(2)
-            mpp_r2 = c5.number_input("MPP R2", min_value=0, step=1)
-            mpp_r4 = c6.number_input("MPP R4", min_value=0, step=1)
-            
-            if st.form_submit_button("💾 SIMPAN REKAP PARKIR"):
+            if st.form_submit_button("💾 SIMPAN"):
                 total_pakai_r2 = khusus_r2 + mpp_r2
                 total_pakai_r4 = khusus_r4 + mpp_r4
                 sisa_baru_r2 = sisa_r2_lalu + ambil_r2 - total_pakai_r2
                 sisa_baru_r4 = sisa_r4_lalu + ambil_r4 - total_pakai_r4
                 
-                new_data = {
-                    "TANGGAL": tgl.strftime("%d/%m/%Y"), "NAMA": petugas,
-                    "AMBIL_R2": ambil_r2, "KHUSUS_R2": khusus_r2, "MPP_R2": mpp_r2,
-                    "AMBIL_R4": ambil_r4, "KHUSUS_R4": khusus_r4, "MPP_R4": mpp_r4,
-                    "SISA_R2": sisa_baru_r2, "SISA_R4": sisa_baru_r4, "STATUS_TERIMA": "BELUM"
-                }
-                df_up = pd.concat([df_p, pd.DataFrame([new_data])], ignore_index=True)
+                new_p = {"TANGGAL": tgl.strftime("%d/%m/%Y"), "NAMA": petugas,
+                         "AMBIL_R2": ambil_r2, "KHUSUS_R2": khusus_r2, "MPP_R2": mpp_r2,
+                         "AMBIL_R4": ambil_r4, "KHUSUS_R4": khusus_r4, "MPP_R4": mpp_r4,
+                         "SISA_R2": sisa_baru_r2, "SISA_R4": sisa_baru_r4, "STATUS_TERIMA": "BELUM"}
+                df_up = pd.concat([df_p, pd.DataFrame([new_p])], ignore_index=True)
                 conn.update(worksheet="LOG_PARKIR", data=df_up)
-                st.success("✅ DATA PARKIR TERSIMPAN!")
+                st.success("✅ TERSIMPAN!")
                 st.cache_data.clear()
 
     elif menu_p == "VERIFIKASI TERIMA":
-        st.header("✅ VERIFIKASI PENERIMAAN")
+        st.header("✅ VERIFIKASI")
         df_pending = df_p[df_p['STATUS_TERIMA'] == "BELUM"]
-        if df_pending.empty:
-            st.success("SEMUA SUDAH BERES!")
-        else:
+        if not df_pending.empty:
             st.table(df_pending[['TANGGAL', 'NAMA', 'SISA_R2', 'SISA_R4']])
-            tgl_verif = st.selectbox("PILIH TANGGAL:", df_pending['TANGGAL'].unique())
-            if st.button("SAYA SUDAH TERIMA SETORAN"):
-                df_p.loc[df_p['TANGGAL'] == tgl_verif, 'STATUS_TERIMA'] = "SUDAH"
+            tgl_v = st.selectbox("PILIH TANGGAL:", df_pending['TANGGAL'].unique())
+            if st.button("VERIFIKASI"):
+                df_p.loc[df_p['TANGGAL'] == tgl_v, 'STATUS_TERIMA'] = "SUDAH"
                 conn.update(worksheet="LOG_PARKIR", data=df_p)
                 st.cache_data.clear()
                 st.rerun()
