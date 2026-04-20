@@ -346,7 +346,7 @@ def halaman_pengambilan():
 # 6. MODUL PARKIR
 # ==========================================
 def halaman_parkir(menu_aktif):
-    st.header(f"🚗 MODUL {menu_aktif}")
+    st.header(f"🚗 {menu_aktif}")
     df_parkir = load_data("DATA_PARKIR")
 
     if menu_aktif == "INPUT REKAP":
@@ -386,16 +386,17 @@ def halaman_parkir(menu_aktif):
 
     elif menu_aktif == "KONFIRMASI":
         st.subheader("✅ Verifikasi Penerimaan Karcis")
+        # Pastikan kolom status ada agar tidak error putih
         for col in ["Status_Khusus", "Status_MPP"]:
             if col not in df_parkir.columns: df_parkir[col] = "BELUM"
             
         df_pending = df_parkir[(df_parkir["Status_Khusus"] == "BELUM") | (df_parkir["Status_MPP"] == "BELUM")]
         
         if df_pending.empty:
-            st.info("Tidak ada antrean konfirmasi.")
+            st.info("Semua rekap sudah dikonfirmasi.")
         else:
             for index, row in df_pending.sort_values(by="No").iterrows():
-                with st.expander(f"📦 Nomor: {row['No']} - {row['Nama_Petugas']}"):
+                with st.expander(f"📦 Nomor: {row['No']} - {row['Nama_Petugas']} ({row['Tanggal']})"):
                     ck, cm = st.columns(2)
                     with ck:
                         st.markdown("### 🎫 KHUSUS")
@@ -405,6 +406,7 @@ def halaman_parkir(menu_aktif):
                                 df_parkir.loc[df_parkir["No"] == row["No"], "Status_Khusus"] = "SUDAH"
                                 if safe_update("DATA_PARKIR", df_parkir): st.rerun()
                         else: st.success("✅ KHUSUS OKE")
+
                     with cm:
                         st.markdown("### 🏢 MPP")
                         st.write(f"R2: {row['MPP_Roda_R2']} | R4: {row['MPP_Roda_R4']}")
@@ -415,5 +417,28 @@ def halaman_parkir(menu_aktif):
                         else: st.success("✅ MPP OKE")
 
     st.divider()
+    st.subheader("📊 LOG REKAP PARKIR")
     if not df_parkir.empty:
         st.dataframe(df_parkir.sort_values(by="No", ascending=False), use_container_width=True, hide_index=True)
+
+# ==========================================
+# 7. MAIN APP
+# ==========================================
+def main():
+    with st.sidebar:
+        st.title("🏪 UPTD PASAR")
+        modul = st.selectbox("PILIH MODUL:", ["SK TOKO", "PARKIR"])
+        
+        if modul == "SK TOKO":
+            menu = st.radio("MENU SK:", ["PENGANTARAN", "PENGAMBILAN"])
+        else:
+            menu = st.radio("MENU PARKIR:", ["INPUT REKAP", "KONFIRMASI"])
+    
+    if modul == "SK TOKO":
+        if menu == "PENGANTARAN": halaman_pengantaran()
+        else: halaman_pengambilan()
+    else:
+        halaman_parkir(menu)
+
+if __name__ == "__main__":
+    main()
