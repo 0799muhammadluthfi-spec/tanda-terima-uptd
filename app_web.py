@@ -24,7 +24,9 @@ def load_data(worksheet: str) -> pd.DataFrame:
     """Load data dari Google Sheets dengan error handling."""
     try:
         df = conn.read(worksheet=worksheet, ttl=0)
-        return df.astype(str).replace("nan", "-").replace("None", "-")
+        # FIX PENCARIAN 1.0 -> 1 : Hapus akhiran .0 otomatis dari seluruh data angka
+        df = df.astype(str).replace(r'\.0$', '', regex=True).replace("nan", "-").replace("None", "-")
+        return df
     except Exception as e:
         st.error(f"Gagal membaca data: {e}")
         return pd.DataFrame()
@@ -53,35 +55,35 @@ def safe_update(worksheet: str, data: pd.DataFrame) -> bool:
 
 
 # ==========================================
-# 3. FUNGSI PDF (VERSI FINAL 22x12 CM)
+# 3. FUNGSI PDF (VERSI F4 PORTRAIT 21.5 x 12 CM)
 # ==========================================
 def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
     buffer = BytesIO()
-    # UKURAN SESUAI PERMINTAAN: Lebar 22cm, Tinggi 12cm
-    UKURAN_CUSTOM = (22 * cm, 12 * cm)
+    # KERTAS F4 (Lebar 21.5 cm), Tinggi potongan 12 cm. 
+    # Printer setting harus PORTRAIT (Berdiri).
+    UKURAN_CUSTOM = (21.5 * cm, 12 * cm)
     c = canvas.Canvas(buffer, pagesize=UKURAN_CUSTOM)
     
-    # Koordinat dasar
-    X_POS = 1 * cm
-    Y_POS = 1 * cm # Margin bawah
-    LEBAR = 22 * cm
+    X_POS = 0.75 * cm # Margin sedikit digeser ke kiri agar pas di F4
+    Y_POS = 1 * cm 
+    LEBAR = 21.5 * cm
     TENGAH = LEBAR / 2
 
     # ------------------------------------------
-    # HALAMAN 1 - DEPAN (Tanda Terima & Checklist)
+    # HALAMAN 1 - DEPAN
     # ------------------------------------------
-    # Bingkai Ganda (Khas Dokumen Resmi)
+    # Bingkai (Luar dan Dalam ketebalan 1.5)
     c.setLineWidth(1.5)
-    c.rect(X_POS, Y_POS, 20 * cm, 10 * cm) # Bingkai Luar
-    c.setLineWidth(0.5)
-    c.rect(X_POS + 0.15 * cm, Y_POS + 0.15 * cm, 19.7 * cm, 9.7 * cm) # Bingkai Dalam
+    c.rect(X_POS, Y_POS, 20 * cm, 10 * cm)
+    c.rect(X_POS + 0.15 * cm, Y_POS + 0.15 * cm, 19.7 * cm, 9.7 * cm)
 
     # Judul
     c.setFont("Helvetica-Bold", 13)
     c.drawCentredString(TENGAH, Y_POS + 8.8 * cm, "TANDA TERIMA BERKAS PERPANJANGAN IZIN TOKO")
     
-    # Garis Judul
-    c.line(X_POS + 3*cm, Y_POS + 8.6*cm, X_POS + 17*cm, Y_POS + 8.6*cm)
+    # 1 Garis Judul (Tebal 2)
+    c.setLineWidth(2)
+    c.line(TENGAH - 5.5*cm, Y_POS + 8.5*cm, TENGAH + 5.5*cm, Y_POS + 8.5*cm)
 
     # Checklist Berkas
     yy = Y_POS + 7.5 * cm
@@ -92,28 +94,29 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
         c.drawString(X_POS + 1 * cm, yy, f"{i}. {item}")
         
         c.setFont("Helvetica-Bold", 10)
-        x_status = X_POS + 14.5 * cm
+        x_status = X_POS + 14 * cm
         c.drawString(x_status, yy, "ADA   /   TIDAK ADA")
         
-        # Logika Coret Otomatis
-        c.setLineWidth(1.2)
+        # Coretan Pas di Tengah (Tebal 1.5)
+        c.setLineWidth(1.5)
+        y_strike = yy + 0.11 * cm # Titik tengah huruf
+        
         if item in berkas_list:
-            # Coret tulisan "TIDAK ADA"
-            c.line(x_status + 1.2 * cm, yy + 0.1 * cm, x_status + 3.8 * cm, yy + 0.1 * cm)
+            # Coret TIDAK ADA (Panjang disesuaikan)
+            c.line(x_status + 1.4 * cm, y_strike, x_status + 3.4 * cm, y_strike)
         else:
-            # Coret tulisan "ADA"
-            c.line(x_status - 0.1 * cm, yy + 0.1 * cm, x_status + 0.8 * cm, yy + 0.1 * cm)
+            # Coret ADA
+            c.line(x_status - 0.1 * cm, y_strike, x_status + 0.9 * cm, y_strike)
         yy -= 0.7 * cm
 
-    # Area Tanda Tangan
-    c.setLineWidth(1)
-    c.line(X_POS + 0.15 * cm, Y_POS + 3.0 * cm, X_POS + 19.85 * cm, Y_POS + 3.0 * cm) # Garis atas TTD
-    c.line(TENGAH, Y_POS + 0.15 * cm, TENGAH, Y_POS + 3.0 * cm) # Garis tengah TTD
+    # Tanda Tangan
+    c.setLineWidth(1.5)
+    c.line(X_POS + 0.15 * cm, Y_POS + 3.0 * cm, X_POS + 19.85 * cm, Y_POS + 3.0 * cm)
+    c.line(TENGAH, Y_POS + 0.15 * cm, TENGAH, Y_POS + 3.0 * cm)
 
     c.setFont("Helvetica-Bold", 9)
     c.drawCentredString(X_POS + 5 * cm, Y_POS + 2.5 * cm, "PENGANTAR BERKAS")
     c.drawCentredString(X_POS + 15 * cm, Y_POS + 2.5 * cm, "PETUGAS PENERIMA")
-
     c.setFont("Helvetica-Bold", 11)
     c.drawCentredString(X_POS + 5 * cm, Y_POS + 0.6 * cm, f"( {str(data.get('Nama_Pengantar_Berkas', '')).upper()} )")
     c.drawCentredString(X_POS + 15 * cm, Y_POS + 0.6 * cm, f"( {str(data.get('Penerima_Berkas', '')).upper()} )")
@@ -121,31 +124,33 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
     c.showPage()
 
     # ------------------------------------------
-    # HALAMAN 2 - BELAKANG (Detail & Perhatian)
+    # HALAMAN 2 - BELAKANG
     # ------------------------------------------
-    # Bingkai Tetap Sama
     c.setLineWidth(1.5)
     c.rect(X_POS, Y_POS, 20 * cm, 10 * cm)
-    c.setLineWidth(0.5)
     c.rect(X_POS + 0.15 * cm, Y_POS + 0.15 * cm, 19.7 * cm, 9.7 * cm)
 
-    # Tabel Detail (Dibuat ringkas agar muat Perhatian)
-    y_tab = Y_POS + 9.4 * cm
+    y_tab = Y_POS + 8.8 * cm 
     TINGGI_B = 1.05 * cm
+    
+    # Kosongkan Tgl Ambil jika belum ada
+    tgl_ambil_pdf = data.get("Tanggal_Pengambilan", "-")
+    if tgl_ambil_pdf in ["-", "nan", "NAN", ""]:
+        tgl_ambil_pdf = ""
+
+    # Susunan Tabel Baru
     DETAIL_ROWS = [
-        ("NOMOR URUT", data.get("No", "-")),
+        ("NOMOR", data.get("No", "-")),
         ("TGL TERIMA", data.get("Tanggal_Pengantaran", "-")),
-        ("TGL AMBIL", data.get("Tanggal_Pengambilan", "-")),
-        ("NAMA TOKO", data.get("Nama_Toko", "-")),
-        ("NOMOR TOKO", data.get("No_Toko", "-")),
+        ("TGL AMBIL", tgl_ambil_pdf),
+        ("NAMA & NO. TOKO", f"{data.get('Nama_Toko', '-')} - {data.get('No_Toko', '-')}"),
         ("PEMILIK (SK)", data.get("Nama_Pemilik_Asli", "-"))
     ]
 
     for label, val in DETAIL_ROWS:
-        # Kotak Label
+        c.setLineWidth(1.5) # Tebal tabel 1.5
         c.rect(X_POS + 0.15 * cm, y_tab - TINGGI_B, 6 * cm, TINGGI_B)
-        # Kotak Isi
-        c.rect(X_POS + 6.15 * cm, y_tab - TINGGI_B, 13.7 * cm, TINGGI_B)
+        c.rect(X_POS + 6.15 * cm, y_tab - TINGGI_B, 13.5 * cm, TINGGI_B)
         
         c.setFont("Helvetica-Bold", 9)
         c.drawString(X_POS + 0.5 * cm, y_tab - 0.7 * cm, label)
@@ -153,18 +158,33 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
         c.drawString(X_POS + 6.5 * cm, y_tab - 0.7 * cm, str(val).upper())
         y_tab -= TINGGI_B
 
-    # Teks Perhatian (Di bagian bawah)
+    # Teks Perhatian
     c.setFont("Helvetica-Bold", 10)
-    c.drawString(X_POS + 0.6 * cm, Y_POS + 2.5 * cm, "PERHATIAN:")
+    c.drawString(X_POS + 0.6 * cm, Y_POS + 2.4 * cm, "PERHATIAN:")
     c.setFont("Helvetica", 9)
-    c.drawString(X_POS + 0.6 * cm, Y_POS + 2.0 * cm, "1. Simpan tanda terima ini sebagai syarat pengambilan SK asli.")
-    c.drawString(X_POS + 0.6 * cm, Y_POS + 1.5 * cm, "2. Kehilangan tanda terima harap melapor ke petugas UPTD Pasar.")
-    c.drawString(X_POS + 0.6 * cm, Y_POS + 1.0 * cm, "3. Pengambilan SK tidak dapat diwakilkan tanpa Surat Kuasa bermaterai.")
+    c.drawString(X_POS + 0.6 * cm, Y_POS + 1.8 * cm, "1. Simpan tanda terima ini sebagai syarat pengambilan SK asli.")
+    c.drawString(X_POS + 0.6 * cm, Y_POS + 1.2 * cm, "2. Kehilangan tanda terima harap melapor ke petugas UPTD Pasar.")
+    c.drawString(X_POS + 0.6 * cm, Y_POS + 0.6 * cm, "3. Pengambilan SK tidak dapat diwakilkan tanpa Surat Kuasa bermaterai.")
 
     c.save()
     buffer.seek(0)
     return buffer
 
+def cetak_overprint(tgl_ambil: str) -> BytesIO:
+    """Fungsi khusus untuk nge-print tanggal ambil di kolom yang kosong"""
+    buffer = BytesIO()
+    c = canvas.Canvas(buffer, pagesize=(21.5 * cm, 12 * cm))
+    c.setFont("Helvetica-Bold", 10)
+    
+    X_POS = 0.75 * cm
+    Y_POS = 1 * cm
+    # Koordinat presisi di dalam kotak TGL AMBIL (Baris ke-3)
+    y_target = Y_POS + 8.8 * cm - (1.05 * cm * 2) - 0.7 * cm
+    c.drawString(X_POS + 6.5 * cm, y_target, tgl_ambil.upper())
+    
+    c.save()
+    buffer.seek(0)
+    return buffer
 
 # ==========================================
 # 4. MODUL SK TOKO - PENGANTARAN
@@ -174,14 +194,9 @@ def halaman_pengantaran():
 
     df_sk = load_data("DATA_SK")
 
-    # Info statistik singkat
     col_stat1, col_stat2, col_stat3 = st.columns(3)
     total = len(df_sk) if not df_sk.empty else 0
-    sudah_ambil = (
-        len(df_sk[df_sk["Tanggal_Pengambilan"] != "-"])
-        if not df_sk.empty
-        else 0
-    )
+    sudah_ambil = len(df_sk[df_sk["Tanggal_Pengambilan"] != "-"]) if not df_sk.empty else 0
     belum_ambil = total - sudah_ambil
 
     col_stat1.metric("📦 Total Berkas", total)
@@ -191,19 +206,13 @@ def halaman_pengantaran():
     st.divider()
 
     SEMUA_BERKAS = [
-        "SK ASLI MENEMPATI",
-        "PAS FOTO 3X4 (2 LBR)",
-        "FC KTP PEMILIK",
-        "FC KARTU SEWA",
-        "SURAT KUASA",
-        "SURAT KEHILANGAN",
+        "SK ASLI MENEMPATI", "PAS FOTO 3X4 (2 LBR)", "FC KTP PEMILIK", 
+        "FC KARTU SEWA", "SURAT KUASA", "SURAT KEHILANGAN"
     ]
 
-    # State untuk menyimpan berkas yang dipilih (di luar form)
     if "sel_berkas" not in st.session_state:
         st.session_state["sel_berkas"] = []
 
-    # Pilih berkas DI LUAR form agar tidak reset
     st.subheader("☑️ Pilih Berkas yang Dibawa:")
     cols_berkas = st.columns(3)
     sel_berkas = []
@@ -214,25 +223,14 @@ def halaman_pengantaran():
 
     st.divider()
 
-    # Form input data
     with st.form("form_pengantaran", clear_on_submit=False):
         st.subheader("📋 Data Pengantaran")
-
         next_no = get_next_no(df_sk)
-
         col1, col2 = st.columns(2)
 
         with col1:
-            no_urut = st.text_input(
-                "NO. URUT *",
-                value=str(next_no),
-                help="Nomor urut otomatis, bisa diubah",
-            )
-            tgl_terima = st.text_input(
-                "TANGGAL TERIMA *",
-                value=datetime.now().strftime("%d-%m-%Y"),
-                help="Format: DD-MM-YYYY",
-            )
+            no_urut = st.text_input("NO. URUT *", value=str(next_no), help="Nomor urut otomatis")
+            tgl_terima = st.text_input("TANGGAL TERIMA *", value=datetime.now().strftime("%d-%m-%Y"))
             nama_toko = st.text_input("NAMA TOKO *").strip().upper()
             no_toko = st.text_input("NOMOR TOKO *").strip().upper()
 
@@ -244,72 +242,43 @@ def halaman_pengantaran():
         submitted = st.form_submit_button("💾 SIMPAN DATA", type="primary")
 
         if submitted:
-            # Validasi
             errors = []
-            if not no_urut.strip():
-                errors.append("No. Urut wajib diisi")
-            if not nama_toko:
-                errors.append("Nama Toko wajib diisi")
-            if not no_toko:
-                errors.append("Nomor Toko wajib diisi")
-            if not nama_pemilik:
-                errors.append("Nama Pemilik wajib diisi")
-            if not nama_pengantar:
-                errors.append("Nama Pengantar wajib diisi")
-            if not nama_penerima:
-                errors.append("Nama Penerima wajib diisi")
+            if not no_urut.strip(): errors.append("No. Urut wajib diisi")
+            if not nama_toko: errors.append("Nama Toko wajib diisi")
+            if not nama_pemilik: errors.append("Nama Pemilik wajib diisi")
 
-            # Cek duplikat No Urut
             if not df_sk.empty and no_urut.strip() in df_sk["No"].str.strip().values:
                 errors.append(f"No. Urut {no_urut} sudah ada!")
 
             if errors:
-                for err in errors:
-                    st.error(f"❌ {err}")
+                for err in errors: st.error(f"❌ {err}")
             else:
                 new_row = {
-                    "No": no_urut.strip(),
-                    "Tanggal_Pengantaran": tgl_terima,
-                    "Tanggal_Pengambilan": "-",
-                    "Nama_Toko": nama_toko,
-                    "No_Toko": no_toko,
-                    "Nama_Pemilik_Asli": nama_pemilik,
-                    "Nama_Pengantar_Berkas": nama_pengantar,
+                    "No": no_urut.strip(), "Tanggal_Pengantaran": tgl_terima,
+                    "Tanggal_Pengambilan": "-", "Nama_Toko": nama_toko, "No_Toko": no_toko,
+                    "Nama_Pemilik_Asli": nama_pemilik, "Nama_Pengantar_Berkas": nama_pengantar,
                     "Penerima_Berkas": nama_penerima,
                 }
 
-                df_baru = pd.concat(
-                    [df_sk, pd.DataFrame([new_row])],
-                    ignore_index=True,
-                )
+                df_baru = pd.concat([df_sk, pd.DataFrame([new_row])], ignore_index=True)
 
                 if safe_update("DATA_SK", df_baru):
                     st.session_state["last_data"] = new_row
                     st.session_state["last_berkas"] = sel_berkas
-                    st.success(
-                        f"✅ Data No. {no_urut} berhasil disimpan!"
-                    )
+                    st.success(f"✅ Data No. {no_urut} berhasil disimpan!")
                     st.balloons()
 
-    # Tombol download PDF (di luar form agar tetap muncul)
     if "last_data" in st.session_state and st.session_state["last_data"]:
         st.divider()
         st.subheader("📄 Download Tanda Terima")
-
         last = st.session_state["last_data"]
-        st.info(
-            f"**No:** {last['No']} | "
-            f"**Toko:** {last['Nama_Toko']} | "
-            f"**Pemilik:** {last['Nama_Pemilik_Asli']}"
-        )
+        st.info(f"**No:** {last['No']} | **Toko:** {last['Nama_Toko']} | **Pemilik:** {last['Nama_Pemilik_Asli']}")
 
         pdf_buffer = buat_pdf_full(last, st.session_state.get("last_berkas", []))
         st.download_button(
-            label="📥 DOWNLOAD PDF TANDA TERIMA",
-            data=pdf_buffer,
+            label="📥 DOWNLOAD PDF TANDA TERIMA", data=pdf_buffer,
             file_name=f"TANDA_TERIMA_{last['No']}_{last['Nama_Toko']}.pdf",
-            mime="application/pdf",
-            type="primary",
+            mime="application/pdf", type="primary",
         )
 
         if st.button("🔄 Input Baru", type="secondary"):
@@ -317,18 +286,12 @@ def halaman_pengantaran():
             del st.session_state["last_berkas"]
             st.rerun()
 
-    # Tabel data terbaru
     st.divider()
     st.subheader("📊 Data Terbaru (10 Record Terakhir)")
     if not df_sk.empty:
-        st.dataframe(
-            df_sk.tail(10).reset_index(drop=True),
-            use_container_width=True,
-            hide_index=True,
-        )
+        st.dataframe(df_sk.tail(10).reset_index(drop=True), use_container_width=True, hide_index=True)
     else:
         st.info("Belum ada data.")
-
 
 # ==========================================
 # 5. MODUL SK TOKO - PENGAMBILAN
@@ -337,105 +300,90 @@ def halaman_pengambilan():
     st.header("🏁 PENGAMBILAN BERKAS")
 
     df_sk = load_data("DATA_SK")
-
     if df_sk.empty:
         st.warning("Tidak ada data tersedia.")
         return
 
-    # Filter tampilkan yang belum diambil
     col_filter, col_search = st.columns([1, 2])
-
     with col_filter:
-        tampilkan = st.selectbox(
-            "Tampilkan:",
-            ["Semua", "Belum Diambil", "Sudah Diambil"],
-        )
-
+        tampilkan = st.selectbox("Tampilkan:", ["Semua", "Belum Diambil", "Sudah Diambil"])
     with col_search:
-        no_cari = st.text_input(
-            "🔍 CARI NOMOR URUT:",
-            placeholder="Masukkan nomor urut...",
-        ).strip()
+        no_cari = st.text_input("🔍 CARI NOMOR URUT:", placeholder="Masukkan nomor urut...").strip()
 
-    # Filter data untuk tabel
     df_tampil = df_sk.copy()
     if tampilkan == "Belum Diambil":
         df_tampil = df_tampil[df_tampil["Tanggal_Pengambilan"] == "-"]
     elif tampilkan == "Sudah Diambil":
         df_tampil = df_tampil[df_tampil["Tanggal_Pengambilan"] != "-"]
 
-    # Pencarian spesifik
     if no_cari:
         hasil = df_sk[df_sk["No"].str.strip() == no_cari]
-
         if not hasil.empty:
             data_row = hasil.iloc[0]
-            sudah_ambil = data_row["Tanggal_Pengambilan"] != "-"
+            sudah_ambil = data_row["Tanggal_Pengambilan"] not in ["-", "nan", "NAN", ""]
 
             st.divider()
-
-            # Info card
             col_info1, col_info2, col_info3 = st.columns(3)
             col_info1.metric("🏪 Nama Toko", data_row["Nama_Toko"])
             col_info2.metric("👤 Pemilik", data_row["Nama_Pemilik_Asli"])
-            col_info3.metric(
-                "📅 Tgl Terima",
-                data_row["Tanggal_Pengantaran"],
-            )
+            col_info3.metric("📅 Tgl Terima", data_row["Tanggal_Pengantaran"])
 
             if sudah_ambil:
-                st.success(
-                    f"✅ Berkas ini sudah diambil pada: "
-                    f"**{data_row['Tanggal_Pengambilan']}**"
+                st.success(f"✅ Berkas ini sudah diambil pada: **{data_row['Tanggal_Pengambilan']}**")
+                # Tombol Reprint Overprint
+                st.download_button(
+                    label="🖨️ PRINT ULANG TANGGAL AMBIL",
+                    data=cetak_overprint(data_row['Tanggal_Pengambilan']),
+                    file_name=f"OVERPRINT_{no_cari}.pdf",
+                    mime="application/pdf"
                 )
             else:
                 st.warning("⏳ Berkas BELUM diambil.")
+                tgl_ambil = st.text_input("📅 TANGGAL PENGAMBILAN:", value=datetime.now().strftime("%d-%m-%Y"))
 
-                tgl_ambil = st.text_input(
-                    "📅 TANGGAL PENGAMBILAN:",
-                    value=datetime.now().strftime("%d-%m-%Y"),
+                if st.button("✅ KONFIRMASI PENGAMBILAN", type="primary"):
+                    mask = df_sk["No"].str.strip() == no_cari
+                    df_sk.loc[mask, "Tanggal_Pengambilan"] = tgl_ambil
+                    
+                    if safe_update("DATA_SK", df_sk):
+                        st.session_state['ready_to_print_overprint'] = tgl_ambil
+                        st.session_state['print_no'] = no_cari
+                        st.success(f"✅ Berkas No. {no_cari} berhasil diupdate!")
+
+            # Tombol Print muncul setelah update konfirmasi
+            if st.session_state.get('print_no') == no_cari:
+                st.write("---")
+                st.download_button(
+                    label="🖨️ PRINT TANGGAL AMBIL DI KERTAS SEKARANG",
+                    data=cetak_overprint(st.session_state['ready_to_print_overprint']),
+                    file_name=f"OVERPRINT_{no_cari}.pdf",
+                    mime="application/pdf",
+                    type="primary"
                 )
-
-                col_btn1, col_btn2 = st.columns([1, 4])
-                with col_btn1:
-                    if st.button("✅ KONFIRMASI PENGAMBILAN", type="primary"):
-                        mask = df_sk["No"].str.strip() == no_cari
-                        df_sk.loc[mask, "Tanggal_Pengambilan"] = tgl_ambil
-
-                        if safe_update("DATA_SK", df_sk):
-                            st.success(
-                                f"✅ Berkas No. {no_cari} berhasil diupdate!"
-                            )
-                            st.rerun()
         else:
             st.error(f"❌ Nomor urut **{no_cari}** tidak ditemukan!")
 
-    # Tabel data
     st.divider()
     st.subheader(f"📊 Data ({tampilkan}): {len(df_tampil)} record")
 
     if not df_tampil.empty:
-        # Highlight belum diambil
         def highlight_row(row):
-            if row["Tanggal_Pengambilan"] == "-":
+            if row["Tanggal_Pengambilan"] in ["-", "", "nan"]:
                 return ["background-color: #fff3cd"] * len(row)
             return ["background-color: #d4edda"] * len(row)
 
         st.dataframe(
             df_tampil.reset_index(drop=True).style.apply(highlight_row, axis=1),
-            use_container_width=True,
-            hide_index=True,
+            use_container_width=True, hide_index=True
         )
     else:
         st.info(f"Tidak ada data untuk kategori: {tampilkan}")
-
 
 # ==========================================
 # 6. MODUL PARKIR
 # ==========================================
 def halaman_parkir():
     st.header("🚗 MANAJEMEN PARKIR")
-
     tab1, tab2 = st.tabs(["📝 Input Parkir", "📊 Data Parkir"])
 
     with tab1:
@@ -444,103 +392,56 @@ def halaman_parkir():
 
         with st.form("form_parkir"):
             col1, col2 = st.columns(2)
-
             with col1:
                 no_urut = st.text_input("NO. URUT", value=str(next_no))
-                tgl = st.text_input(
-                    "TANGGAL",
-                    value=datetime.now().strftime("%d-%m-%Y"),
-                )
+                tgl = st.text_input("TANGGAL", value=datetime.now().strftime("%d-%m-%Y"))
                 nama = st.text_input("NAMA").strip().upper()
-
             with col2:
                 no_kendaraan = st.text_input("NO. KENDARAAN").strip().upper()
-                jenis = st.selectbox(
-                    "JENIS KENDARAAN",
-                    ["MOTOR", "MOBIL", "TRUK", "LAINNYA"],
-                )
-                tarif = st.number_input(
-                    "TARIF (Rp)", min_value=0, step=500, value=2000
-                )
+                jenis = st.selectbox("JENIS KENDARAAN", ["MOTOR", "MOBIL", "TRUK", "LAINNYA"])
+                tarif = st.number_input("TARIF (Rp)", min_value=0, step=500, value=2000)
 
             if st.form_submit_button("💾 SIMPAN", type="primary"):
-                new_row = {
-                    "No": no_urut,
-                    "Tanggal": tgl,
-                    "Nama": nama,
-                    "No_Kendaraan": no_kendaraan,
-                    "Jenis": jenis,
-                    "Tarif": tarif,
-                }
-                df_baru = pd.concat(
-                    [df_parkir, pd.DataFrame([new_row])],
-                    ignore_index=True,
-                )
+                new_row = {"No": no_urut, "Tanggal": tgl, "Nama": nama, "No_Kendaraan": no_kendaraan, "Jenis": jenis, "Tarif": tarif}
+                df_baru = pd.concat([df_parkir, pd.DataFrame([new_row])], ignore_index=True)
                 if safe_update("DATA_PARKIR", df_baru):
                     st.success("✅ Data parkir berhasil disimpan!")
 
     with tab2:
         df_parkir = load_data("DATA_PARKIR")
         if not df_parkir.empty:
-            # Summary
             try:
-                total_tarif = pd.to_numeric(
-                    df_parkir["Tarif"], errors="coerce"
-                ).sum()
+                total_tarif = pd.to_numeric(df_parkir["Tarif"], errors="coerce").sum()
                 col1, col2 = st.columns(2)
                 col1.metric("🚗 Total Kendaraan", len(df_parkir))
                 col2.metric("💰 Total Tarif", f"Rp {total_tarif:,.0f}")
-            except Exception:
-                pass
-
-            st.dataframe(
-                df_parkir.reset_index(drop=True),
-                use_container_width=True,
-                hide_index=True,
-            )
+            except Exception: pass
+            st.dataframe(df_parkir.reset_index(drop=True), use_container_width=True, hide_index=True)
         else:
             st.info("Belum ada data parkir.")
-
 
 # ==========================================
 # 7. MAIN APP
 # ==========================================
 def main():
-    # Sidebar
     with st.sidebar:
-        st.image(
-            "https://via.placeholder.com/200x80?text=UPTD+PASAR",
-            use_column_width=True,
-        )
+        st.image("https://via.placeholder.com/200x80?text=UPTD+PASAR", use_column_width=True)
         st.title("🗂️ DASHBOARD UPTD")
         st.caption("PASAR KANDANGAN")
         st.divider()
-
-        modul = st.selectbox(
-            "📁 PILIH MODUL:",
-            ["SK TOKO", "PARKIR"],
-        )
-
+        modul = st.selectbox("📁 PILIH MODUL:", ["SK TOKO", "PARKIR"])
         if modul == "SK TOKO":
-            menu = st.radio(
-                "📋 MENU SK TOKO:",
-                ["PENGANTARAN", "PENGAMBILAN"],
-            )
+            menu = st.radio("📋 MENU SK TOKO:", ["PENGANTARAN", "PENGAMBILAN"])
         else:
             menu = None
-
         st.divider()
         st.caption(f"🕐 {datetime.now().strftime('%d/%m/%Y %H:%M')}")
 
-    # Routing
     if modul == "SK TOKO":
-        if menu == "PENGANTARAN":
-            halaman_pengantaran()
-        elif menu == "PENGAMBILAN":
-            halaman_pengambilan()
+        if menu == "PENGANTARAN": halaman_pengantaran()
+        elif menu == "PENGAMBILAN": halaman_pengambilan()
     elif modul == "PARKIR":
         halaman_parkir()
-
 
 if __name__ == "__main__":
     main()
