@@ -197,16 +197,13 @@ st.markdown("""
     }
 
     /* ============================================
-       SIDEBAR NAVIGATION - ACCORDION STYLE
+       SIDEBAR NAVIGATION - TOMBOL MODUL & SUBMENU
+       Ukuran SAMA untuk aktif & tidak aktif
        ============================================ */
 
-    /* Tombol modul TIDAK AKTIF */
-    [data-testid="stSidebar"] .stButton > button[kind="secondary"] {
+    /* Semua tombol di sidebar - ukuran seragam */
+    [data-testid="stSidebar"] .stButton > button {
         width: 100% !important;
-        background: rgba(255,255,255,0.04) !important;
-        border: 1px solid rgba(255,255,255,0.08) !important;
-        border-radius: 10px !important;
-        color: #94a3b8 !important;
         font-family: 'Inter', sans-serif !important;
         font-size: 0.78rem !important;
         font-weight: 700 !important;
@@ -214,9 +211,17 @@ st.markdown("""
         text-transform: uppercase !important;
         padding: 12px 16px !important;
         margin-bottom: 2px !important;
+        border-radius: 10px !important;
         transition: all 0.15s ease !important;
         text-align: left !important;
         justify-content: flex-start !important;
+    }
+
+    /* Tombol TIDAK AKTIF (secondary) */
+    [data-testid="stSidebar"] .stButton > button[kind="secondary"] {
+        background: rgba(255,255,255,0.04) !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
+        color: #94a3b8 !important;
     }
 
     [data-testid="stSidebar"] .stButton > button[kind="secondary"]:hover {
@@ -225,22 +230,11 @@ st.markdown("""
         border-color: rgba(255,255,255,0.15) !important;
     }
 
-    /* Tombol modul AKTIF */
+    /* Tombol AKTIF (primary) - UKURAN SAMA, hanya beda warna */
     [data-testid="stSidebar"] .stButton > button[kind="primary"] {
-        width: 100% !important;
         background: rgba(96,165,250,0.12) !important;
         border: 1px solid rgba(96,165,250,0.25) !important;
-        border-radius: 10px !important;
         color: #60a5fa !important;
-        font-family: 'Inter', sans-serif !important;
-        font-size: 0.78rem !important;
-        font-weight: 700 !important;
-        letter-spacing: 0.04em !important;
-        text-transform: uppercase !important;
-        padding: 12px 16px !important;
-        margin-bottom: 2px !important;
-        text-align: left !important;
-        justify-content: flex-start !important;
     }
 
     [data-testid="stSidebar"] .stButton > button[kind="primary"]:hover {
@@ -248,12 +242,12 @@ st.markdown("""
         color: #93bbfc !important;
     }
 
-    /* Sub-menu button di sidebar */
-    [data-testid="stSidebar"] .stButton > button[kind="secondary"] p,
-    [data-testid="stSidebar"] .stButton > button[kind="secondary"] span,
-    [data-testid="stSidebar"] .stButton > button[kind="primary"] p,
-    [data-testid="stSidebar"] .stButton > button[kind="primary"] span {
+    /* Font dalam tombol sidebar */
+    [data-testid="stSidebar"] .stButton > button p,
+    [data-testid="stSidebar"] .stButton > button span {
         font-family: 'Inter', sans-serif !important;
+        font-size: 0.78rem !important;
+        font-weight: 700 !important;
     }
 
     /* ============================================
@@ -931,14 +925,55 @@ def halaman_parkir(menu):
                 st.info("Belum ada data yang diinput.")
 
 # ==========================================
-# 6. MAIN RUNNER
+# 6. HALAMAN WELCOME
+# ==========================================
+def halaman_welcome():
+    logo_b64 = st.session_state.get("logo_b64")
+
+    st.markdown("<div style='height: 60px;'></div>", unsafe_allow_html=True)
+
+    if logo_b64:
+        st.markdown(f"""
+        <div style="text-align:center; padding:20px 0;">
+            <img src="data:image/png;base64,{logo_b64}" width="120" height="auto"
+                 style="display:inline-block; filter:drop-shadow(0 4px 12px rgba(0,0,0,0.15));">
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <div style="text-align:center; padding:20px 0;">
+            <div style="font-size:5rem; line-height:1;">🏛️</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div style="text-align:center; padding:10px 0 30px 0;">
+        <h1 style="font-family:'Inter',sans-serif; font-size:2rem; font-weight:800;
+                   color:#0f172a; letter-spacing:-0.03em; margin:0 0 8px 0;">
+            UPTD PENGELOLAAN PASAR KANDANGAN
+        </h1>
+        <p style="font-family:'Inter',sans-serif; font-size:1rem; font-weight:500;
+                  color:#64748b; margin:0 0 6px 0;">
+            Kabupaten Hulu Sungai Selatan
+        </p>
+        <div style="width:80px; height:3px; background:linear-gradient(90deg,#3b82f6,#60a5fa);
+                    margin:16px auto; border-radius:2px;"></div>
+        <p style="font-family:'Inter',sans-serif; font-size:0.9rem; font-weight:400;
+                  color:#94a3b8; margin:16px 0 0 0;">
+            Silakan pilih modul pada menu di sebelah kiri untuk memulai.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# ==========================================
+# 7. MAIN RUNNER
 # ==========================================
 def main():
-    # Inisialisasi session state navigasi
+    # Inisialisasi session state navigasi — KOSONG saat pertama kali
     if "modul_aktif" not in st.session_state:
-        st.session_state["modul_aktif"] = "SK TOKO"
+        st.session_state["modul_aktif"] = None
     if "menu_aktif" not in st.session_state:
-        st.session_state["menu_aktif"] = "PENGANTARAN"
+        st.session_state["menu_aktif"] = None
 
     with st.sidebar:
         logo_b64 = st.session_state.get("logo_b64")
@@ -980,15 +1015,19 @@ def main():
         is_sk = st.session_state["modul_aktif"] == "SK TOKO"
 
         if st.button(
-            "📋  SK TOKO" if not is_sk else "📋  SK TOKO  ▾",
+            "📋  SK TOKO  ▾" if is_sk else "📋  SK TOKO",
             key="btn_modul_sk",
             type="primary" if is_sk else "secondary",
             use_container_width=True
         ):
-            if not is_sk:
+            if is_sk:
+                # Klik lagi = tutup (kembali ke welcome)
+                st.session_state["modul_aktif"] = None
+                st.session_state["menu_aktif"] = None
+            else:
                 st.session_state["modul_aktif"] = "SK TOKO"
                 st.session_state["menu_aktif"] = "PENGANTARAN"
-                st.rerun()
+            st.rerun()
 
         # Sub-menu SK TOKO
         if is_sk:
@@ -1025,15 +1064,19 @@ def main():
         is_parkir = st.session_state["modul_aktif"] == "PARKIR"
 
         if st.button(
-            "🅿️  PARKIR" if not is_parkir else "🅿️  PARKIR  ▾",
+            "🅿️  PARKIR  ▾" if is_parkir else "🅿️  PARKIR",
             key="btn_modul_parkir",
             type="primary" if is_parkir else "secondary",
             use_container_width=True
         ):
-            if not is_parkir:
+            if is_parkir:
+                # Klik lagi = tutup (kembali ke welcome)
+                st.session_state["modul_aktif"] = None
+                st.session_state["menu_aktif"] = None
+            else:
                 st.session_state["modul_aktif"] = "PARKIR"
                 st.session_state["menu_aktif"] = "INPUT REKAP"
-                st.rerun()
+            st.rerun()
 
         # Sub-menu PARKIR
         if is_parkir:
@@ -1077,12 +1120,14 @@ def main():
         """, unsafe_allow_html=True)
 
     # ==========================================
-    # RENDER HALAMAN (TIDAK BERUBAH)
+    # RENDER HALAMAN
     # ==========================================
     modul = st.session_state["modul_aktif"]
     menu = st.session_state["menu_aktif"]
 
-    if modul == "SK TOKO":
+    if modul is None:
+        halaman_welcome()
+    elif modul == "SK TOKO":
         if menu == "PENGANTARAN":
             halaman_pengantaran()
         else:
