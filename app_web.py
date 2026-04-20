@@ -17,25 +17,30 @@ st.set_page_config(
 )
 conn = st.connection("gsheets", type=GSheetsConnection)
 
+def tombol_refresh_pojok(key_btn):
+    """Fungsi khusus untuk tombol Refresh di pojok kanan atas"""
+    if st.button("🔄 Refresh", key=key_btn, use_container_width=True):
+        st.cache_data.clear()
+        st.rerun()
+
 # ==========================================
 # 2. FUNGSI HELPER (LOAD, SAVE, FORMAT)
 # ==========================================
 def load_data(worksheet: str) -> pd.DataFrame:
     try:
         df = conn.read(worksheet=worksheet, ttl=0)
-        df = df.astype(str).replace(r'\.0$', '', regex=True).replace("nan", "-").replace("None", "-")
         
-        # --- PEMBERSIH BARIS KOSONG OTOMATIS (AGAR DATA HANTU HILANG) ---
-        if "No" in df.columns:
-            df = df[(df["No"] != "-") & (df["No"].str.strip() != "")]
-        if "Tanggal" in df.columns:
-            df = df[(df["Tanggal"] != "-") & (df["Tanggal"].str.strip() != "")]
-        # ----------------------------------------------------------------
+        # BERSILAT LIDAH DENGAN DATA GOOGLE SHEETS AGAR SUPER BERSIH
+        df = df.astype(str).replace(r'\.0$', '', regex=True)
+        for col in df.columns:
+            df[col] = df[col].str.strip() # Babat habis spasi tersembunyi
+        df = df.replace(["nan", "None", "", "null", "NaN", "<NA>"], "-") # Seragamkan semua data siluman jadi "-"
 
         if worksheet == "DATA_PARKIR" and not df.empty:
             if "Status_Cetak" not in df.columns:
                 df["Status_Cetak"] = "BELUM"
                 conn.update(worksheet=worksheet, data=df)
+                st.cache_data.clear()
         return df
     except Exception as e:
         st.error(f"Gagal membaca data: {e}")
@@ -51,7 +56,7 @@ def get_next_no(df: pd.DataFrame, col: str = "No") -> int:
 def safe_update(worksheet: str, data: pd.DataFrame) -> bool:
     try:
         conn.update(worksheet=worksheet, data=data)
-        st.cache_data.clear() # Ini aman dipakai di sini saat save data
+        st.cache_data.clear()
         return True
     except Exception as e:
         st.error(f"Gagal menyimpan: {e}")
@@ -145,10 +150,9 @@ def cetak_overprint(tgl_ambil: str) -> BytesIO:
 # 4. MODUL SK TOKO
 # ==========================================
 def halaman_pengantaran():
-    # Header & Tombol Refresh Pojok
-    c_title, c_btn = st.columns([0.85, 0.15])
-    c_title.header("📝 INPUT PENGANTARAN BERKAS")
-    if c_btn.button("🔄 Refresh", key="r_ant", use_container_width=True): st.rerun()
+    c_head, c_btn = st.columns([0.88, 0.12])
+    c_head.header("📝 INPUT PENGANTARAN BERKAS")
+    with c_btn: tombol_refresh_pojok("ref_pengantaran")
     
     df_sk = load_data("DATA_SK")
     col_stat1, col_stat2, col_stat3 = st.columns(3)
@@ -190,17 +194,19 @@ def halaman_pengantaran():
         st.divider(); l = st.session_state["last_sk"]
         st.download_button("📥 DOWNLOAD PDF TANDA TERIMA", data=buat_pdf_full(l, st.session_state["last_berkas"]), file_name=f"TANDA_{l['No']}.pdf", mime="application/pdf")
     st.divider(); st.subheader("📊 DATA GOOGLE SHEETS")
-    if not df_sk.empty: st.dataframe(df_sk.sort_values(by="No", ascending=False), use_container_width=True, hide_index=True)
+    if not df_sk.empty:
+        df_tampil = df_sk[df_sk["No"] != "-"].copy()
+        st.dataframe(df_tampil.sort_values(by="No", ascending=False), use_container_width=True, hide_index=True)
 
 def halaman_pengambilan_sk():
-    # Header & Tombol Refresh Pojok
-    c_title, c_btn = st.columns([0.85, 0.15])
-    c_title.header("PENGAMBILAN BERKAS SK")
-    if c_btn.button("🔄 Refresh", key="r_amb", use_container_width=True): st.rerun()
+    c_head, c_btn = st.columns([0.88, 0.12])
+    c_head.header("PENGAMBILAN BERKAS SK")
+    with c_btn: tombol_refresh_pojok("ref_ambil")
     
     df_m = load_data("DATA_SK")
     if df_m.empty: return
-    df_b = df_m[df_m["Tanggal_Pengambilan"] == "-"]; no_cari = st.text_input("🔍 CARI NOMOR URUT:").strip()
+    df_b = df_m[(df_m["Tanggal_Pengambilan"] == "-") & (df_m["No"] != "-")]
+    no_cari = st.text_input("🔍 CARI NOMOR URUT:").strip()
     if no_cari:
         hasil = df_m[df_m["No"].str.strip() == no_cari]
         if not hasil.empty:
@@ -220,10 +226,9 @@ def halaman_pengambilan_sk():
 # 5. MODUL PARKIR
 # ==========================================
 def halaman_parkir(menu):
-    # Header & Tombol Refresh Pojok
-    c_title, c_btn = st.columns([0.85, 0.15])
-    c_title.header(f"🚗 {menu}")
-    if c_btn.button("🔄 Refresh", key="r_prk", use_container_width=True): st.rerun()
+    c_head, c_btn = st.columns([0.88, 0.12])
+    c_head.header(f"🚗 {menu}")
+    with c_btn: tombol_refresh_pojok("ref_parkir")
 
     df_p = load_data("DATA_PARKIR")
     hari_ini = datetime.now().date()
@@ -310,12 +315,12 @@ def halaman_parkir(menu):
                 if safe_update("DATA_PARKIR", df_p): st.success("✅ Stok Berhasil Ditambahkan!"); st.rerun()
 
     elif menu == "KONFIRMASI":
-        # Pastikan data yang kosong murni tidak ikut masuk
-        df_pen = df_p[
-            (df_p["Total_Karcis_R2"] != "-") & 
-            (df_p["Total_Karcis_R2"] != "nan") & 
-            (df_p["Total_Karcis_R2"].str.strip() != "")
-        ].copy()
+        
+        # FILTER ANTI HANTU: Hanya tampilkan jika Total Karcis terdeteksi sebagai ANGKA
+        # Jika isian karcis dihapus di Sheets, nilainya tidak akan terbaca sebagai angka
+        kondisi_angka_r2 = df_p["Total_Karcis_R2"].str.isnumeric()
+        kondisi_angka_r4 = df_p["Total_Karcis_R4"].str.isnumeric()
+        df_pen = df_p[kondisi_angka_r2 | kondisi_angka_r4].copy()
         
         if df_pen.empty: 
             st.info("TIDAK ADA DATA KONFIRMASI.")
@@ -323,9 +328,9 @@ def halaman_parkir(menu):
             df_pen['Tgl_Temp'] = pd.to_datetime(df_pen['Tanggal'], dayfirst=True, errors='coerce').dt.date
             
             df_terfilter = df_pen[
-                (df_pen["Status_Khusus"].str.strip() != "SUDAH") |
-                (df_pen["Status_MPP"].str.strip() != "SUDAH") |
-                (df_pen["Status_Cetak"].str.strip() != "SUDAH") |
+                (df_pen["Status_Khusus"] != "SUDAH") |
+                (df_pen["Status_MPP"] != "SUDAH") |
+                (df_pen["Status_Cetak"] != "SUDAH") |
                 (df_pen['Tgl_Temp'] == hari_ini)
             ].copy()
 
@@ -383,12 +388,13 @@ def main():
     if os.path.exists(path_logo): st.sidebar.image(path_logo, width=100)
     with st.sidebar:
         st.title("🗂️ UPTD PASAR")
-        modul = st.selectbox("PILIH MODUL:", ["SK TOKO", "PARKIR"])
+        modul = st.selectbox("PILIH MODUL:", ["SK TOKO", "PARKIR"], key="pilih_modul")
         
-        # TOMBOL REFRESH DI SIDEBAR DIHAPUS, DIPINDAH KE ATAS
-        
-        if modul == "SK TOKO": menu = st.radio("MENU SK:", ["PENGANTARAN", "PENGAMBILAN"])
-        else: menu = st.radio("MENU PARKIR:", ["INPUT REKAP", "INPUT STOK", "KONFIRMASI"])
+        st.divider()
+        if modul == "SK TOKO": 
+            menu = st.radio("MENU SK:", ["PENGANTARAN", "PENGAMBILAN"], key="pilih_menu_sk")
+        else: 
+            menu = st.radio("MENU PARKIR:", ["INPUT REKAP", "INPUT STOK", "KONFIRMASI"], key="pilih_menu_parkir")
         
     if modul == "SK TOKO":
         if menu == "PENGANTARAN": halaman_pengantaran()
