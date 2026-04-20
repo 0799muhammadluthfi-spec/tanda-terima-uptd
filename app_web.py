@@ -45,7 +45,7 @@ if "logo_b64" not in st.session_state:
     st.session_state["logo_b64"] = get_logo_base64()
 
 # ==========================================
-# CUSTOM CSS - PERBAIKAN ICON FONT
+# CUSTOM CSS
 # ==========================================
 st.markdown("""
 <style>
@@ -60,7 +60,6 @@ st.markdown("""
 
     /* ==============================================
        HIDE ELEMENT STREAMLIT YANG AMAN
-       - JANGAN HIDE: header, collapsedControl, sidebar toggle
        ============================================== */
     #MainMenu { display: none !important; }
     footer { display: none !important; }
@@ -70,9 +69,24 @@ st.markdown("""
     button[title="View fullscreen"] { display: none !important; }
 
     /* ==============================================
+       TOMBOL MINIMIZE SIDEBAR - WARNA PUTIH
+       ============================================== */
+    [data-testid="stSidebar"] button[kind="header"],
+    [data-testid="stSidebar"] > div:first-child > button,
+    [data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] svg,
+    [data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebarCollapseButton"] svg,
+    [data-testid="collapsedControl"],
+    [data-testid="collapsedControl"] svg,
+    [data-testid="stSidebarNavCollapseIcon"],
+    [data-testid="stSidebarNavCollapseIcon"] svg {
+        color: #ffffff !important;
+        fill: #ffffff !important;
+    }
+
+    /* ==============================================
        KUNCI UTAMA: LINDUNGI SEMUA ICON FONT
-       Material Icons, Material Symbols, icon apapun
-       JANGAN PERNAH timpa font-family pada elemen ini
        ============================================== */
     [data-testid="stExpanderToggleIcon"],
     [data-testid="stExpanderToggleIcon"] *,
@@ -102,7 +116,7 @@ st.markdown("""
         border-right: 1px solid rgba(255,255,255,0.05);
     }
 
-    /* Sidebar font - TARGET SPESIFIK, bukan wildcard * */
+    /* Sidebar font - TARGET SPESIFIK */
     [data-testid="stSidebar"] label,
     [data-testid="stSidebar"] p,
     [data-testid="stSidebar"] h1,
@@ -129,7 +143,7 @@ st.markdown("""
         color: #cbd5e1 !important;
     }
 
-    /* SELECTBOX VALUE - teks yang terpilih */
+    /* SELECTBOX VALUE */
     [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div > div > div:first-child {
         color: #f8fafc !important;
         font-family: 'Inter', sans-serif !important;
@@ -195,7 +209,6 @@ st.markdown("""
 
     /* ============================================
        MAIN CONTENT FONT - TARGET SPESIFIK
-       TIDAK PAKAI WILDCARD * LAGI
        ============================================ */
     .main h1, .main h2, .main h3,
     .main p, .main li, .main td, .main th,
@@ -374,9 +387,7 @@ st.markdown("""
         padding: 20px !important;
     }
 
-    /* ==============================================
-       EXPANDER - IKON PANAH DILINDUNGI
-       ============================================== */
+    /* ===== EXPANDER ===== */
     [data-testid="stExpander"] {
         border: 1px solid #e5e7eb !important;
         border-radius: 10px !important;
@@ -384,7 +395,6 @@ st.markdown("""
         margin-bottom: 6px !important;
     }
 
-    /* Teks judul expander saja */
     [data-testid="stExpander"] summary > span > div > p,
     [data-testid="stExpander"] summary > span > div > span,
     .streamlit-expanderHeader p,
