@@ -529,6 +529,143 @@ st.markdown("""
 
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+        /* ============================================
+       ANIMASI KONTEN HALAMAN - STAGGERED ENTRY
+       ============================================ */
+
+    /* Header halaman */
+    .main [data-testid="stHorizontalBlock"]:first-child {
+        animation: contentSlideIn 0.4s ease-out forwards;
+    }
+
+    /* Metric cards */
+    .main [data-testid="stMetric"] {
+        animation: contentFadeScale 0.5s ease-out forwards;
+        animation-delay: 0.1s;
+        opacity: 0;
+    }
+
+    /* Form */
+    .main [data-testid="stForm"] {
+        animation: contentSlideIn 0.5s ease-out forwards;
+        animation-delay: 0.15s;
+        opacity: 0;
+    }
+
+    /* Alert / info / warning / success */
+    .main [data-testid="stAlert"] {
+        animation: contentSlideIn 0.4s ease-out forwards;
+        animation-delay: 0.1s;
+        opacity: 0;
+    }
+
+    /* Expander */
+    .main [data-testid="stExpander"] {
+        animation: contentSlideIn 0.5s ease-out forwards;
+        animation-delay: 0.2s;
+        opacity: 0;
+    }
+
+    /* Dataframe / tabel */
+    .main [data-testid="stDataFrame"] {
+        animation: contentSlideIn 0.5s ease-out forwards;
+        animation-delay: 0.25s;
+        opacity: 0;
+    }
+
+    /* Checkbox group */
+    .main .stCheckbox {
+        animation: contentFadeIn 0.4s ease-out forwards;
+        animation-delay: 0.1s;
+        opacity: 0;
+    }
+
+    /* Divider */
+    .main hr {
+        animation: dividerExpand 0.5s ease-out forwards;
+        animation-delay: 0.15s;
+        opacity: 0;
+        transform-origin: left;
+    }
+
+    /* Subheader */
+    .main h2, .main h3 {
+        animation: contentSlideIn 0.4s ease-out forwards;
+        animation-delay: 0.1s;
+        opacity: 0;
+    }
+
+    /* Download button */
+    .main .stDownloadButton {
+        animation: contentFadeScale 0.4s ease-out forwards;
+        animation-delay: 0.15s;
+        opacity: 0;
+    }
+
+    /* Text input & number input */
+    .main .stTextInput,
+    .main .stNumberInput {
+        animation: contentFadeIn 0.4s ease-out forwards;
+        animation-delay: 0.1s;
+        opacity: 0;
+    }
+
+    /* Tombol di main content */
+    .main .stButton {
+        animation: contentFadeScale 0.35s ease-out forwards;
+        animation-delay: 0.1s;
+        opacity: 0;
+    }
+
+    /* ===== KEYFRAMES ===== */
+
+    @keyframes contentSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(16px);
+            filter: blur(2px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+            filter: blur(0);
+        }
+    }
+
+    @keyframes contentFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes contentFadeScale {
+        from {
+            opacity: 0;
+            transform: scale(0.95) translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    @keyframes dividerExpand {
+        from {
+            opacity: 0;
+            transform: scaleX(0);
+        }
+        to {
+            opacity: 1;
+            transform: scaleX(1);
+        }
+    }
+    
 </style>
 """, unsafe_allow_html=True)
 
