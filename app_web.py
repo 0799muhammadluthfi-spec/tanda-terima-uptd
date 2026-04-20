@@ -11,63 +11,69 @@ from streamlit_gsheets import GSheetsConnection
 # ========================================== 
 def cetak_tanda_terima_parkir(data):
     buffer = BytesIO()
-    # Gunakan ukuran F4 standar agar terbaca PORTRAIT oleh printer
-    # Lebar: 21.5cm, Tinggi: 33cm
+    # Gunakan ukuran F4 standar (Portrait)
     c = canvas.Canvas(buffer, pagesize=(21.5 * cm, 33 * cm))
     
-    # KITA SETTING KOORDINAT UNTUK UKURAN 13.6cm x 7cm
-    # Kita gambar di area paling atas kertas
-    lebar_tanda_terima = 13.6 * cm
-    tinggi_tanda_terima = 7.0 * cm
-    y_top = 33 * cm - 1.0 * cm # Mulai dari 1cm dari atas kertas
-    y_bottom = y_top - tinggi_tanda_terima
+    # PENGATURAN DIMENSI (Tinggi 6cm, Lebar Full Kertas)
+    lebar_kertas = 21.5 * cm
+    tinggi_box = 6.0 * cm
+    margin_samping = 1.0 * cm
+    lebar_tabel = lebar_kertas - (2 * margin_samping) # Lebar tabel menyesuaikan kertas
     
-    # 1. Garis Bingkai (Tanda Potong)
+    # Posisi Vertikal (Kita turunkan sedikit dari paling atas supaya tidak terpotong printer)
+    y_top = 32 * cm 
+    y_bottom = y_top - tinggi_box
+    
+    # 1. Bingkai Luar (Tanda Potong Full Lebar)
     c.setDash(1, 2)
     c.setLineWidth(0.5)
-    c.rect(1 * cm, y_bottom, lebar_tanda_terima, tinggi_tanda_terima)
+    c.rect(margin_samping, y_bottom, lebar_tabel, tinggi_box)
     c.setDash()
     
-    # 2. Header (Posisi disesuaikan agar di tengah kotak 13.6cm)
-    center_x = 1 * cm + (lebar_tanda_terima / 2)
-    
-    c.setFont("Helvetica-Bold", 11)
+    # 2. Header
+    center_x = lebar_kertas / 2
+    c.setFont("Helvetica-Bold", 12)
     c.drawCentredString(center_x, y_top - 0.8 * cm, "UPTD PENGELOLAAN PASAR KANDANGAN")
-    
-    c.setFont("Helvetica-Bold", 9)
+    c.setFont("Helvetica-Bold", 10)
     c.drawCentredString(center_x, y_top - 1.3 * cm, "TANDA TERIMA SETORAN PARKIR (MPP)")
     
-    c.setLineWidth(1.2)
-    c.line(2 * cm, y_top - 1.6 * cm, 13.5 * cm, y_top - 1.6 * cm)
-    
-    # 3. Isi Data
+    # 3. Data Identitas (Atas Tabel)
     c.setFont("Helvetica", 10)
-    x_label = 2.0 * cm
-    x_titik = 5.5 * cm
-    x_value = 5.8 * cm
-    y_data = y_top - 2.5 * cm
+    c.drawString(margin_samping + 0.5*cm, y_top - 2.1 * cm, f"TANGGAL : {data['Tanggal']}")
+    c.drawRightString(lebar_kertas - margin_samping - 0.5*cm, y_top - 2.1 * cm, f"NAMA : {data['Nama_Petugas']}")
+
+    # 4. TABEL DATA
+    y_tab = y_top - 2.5 * cm
+    t_row = 0.7 * cm # Tinggi baris tabel
     
-    items = [
-        ("TANGGAL", data['Tanggal']),
-        ("NAMA PETUGAS", data['Nama_Petugas']),
-        ("JENIS KARCIS", "KARCIS MPP"),
-        ("RODA 2 (R2)", f"{data['MPP_Roda_R2']} Lembar"),
-        ("RODA 4 (R4)", f"{data['MPP_Roda_R4']} Lembar")
-    ]
+    # Header Tabel
+    c.setLineWidth(1)
+    c.rect(margin_samping + 0.5*cm, y_tab - t_row, lebar_tabel - 1*cm, t_row)
+    c.setFont("Helvetica-Bold", 9)
+    c.drawString(margin_samping + 1*cm, y_tab - 0.5*cm, "JENIS KENDARAAN")
+    c.drawCentredString(center_x + 2*cm, y_tab - 0.5*cm, "RINCIAN KARCIS")
+    c.drawRightString(lebar_kertas - margin_samping - 1*cm, y_tab - 0.5*cm, "KETERANGAN")
     
-    for label, value in items:
-        c.setFont("Helvetica", 10)
-        c.drawString(x_label, y_data, label)
-        c.drawString(x_titik, y_data, ":")
-        c.setFont("Helvetica-Bold", 10)
-        c.drawString(x_value, y_data, str(value))
-        y_data -= 0.7 * cm
-        
-    # 4. Footer (ID dan Waktu)
+    # Baris R2
+    y_r2 = y_tab - (2 * t_row)
+    c.rect(margin_samping + 0.5*cm, y_r2, lebar_tabel - 1*cm, t_row)
+    c.setFont("Helvetica", 9)
+    c.drawString(margin_samping + 1*cm, y_r2 + 0.2*cm, "RODA 2 (MOTOR)")
+    c.drawCentredString(center_x + 2*cm, y_r2 + 0.2*cm, f"{data['MPP_Roda_R2']} Lembar")
+    c.drawRightString(lebar_kertas - margin_samping - 1*cm, y_r2 + 0.2*cm, "MPP")
+
+    # Baris R4
+    y_r4 = y_tab - (3 * t_row)
+    c.rect(margin_samping + 0.5*cm, y_r4, lebar_tabel - 1*cm, t_row)
+    c.drawString(margin_samping + 1*cm, y_r4 + 0.2*cm, "RODA 4 (MOBIL)")
+    c.drawCentredString(center_x + 2*cm, y_r4 + 0.2*cm, f"{data['MPP_Roda_R4']} Lembar")
+    c.drawRightString(lebar_kertas - margin_samping - 1*cm, y_r4 + 0.2*cm, "MPP")
+    
+    # 5. Footer Info
     c.setFont("Helvetica-Oblique", 7)
     tgl_cetak = datetime.now().strftime("%d/%m/%Y %H:%M")
-    c.drawString(2.0 * cm, y_bottom + 0.4 * cm, f"ID: PRK-{data['No']}")
-    c.drawRightString(14.0 * cm, y_bottom + 0.4 * cm, f"Dicetak: {tgl_cetak} WITA")
+    c.drawString(margin_samping + 0.5*cm, y_bottom + 0.3 * cm, f"ID: PRK-{data['No']}")
+    c.drawRightString(lebar_kertas - margin_samping - 0.5*cm, y_bottom + 0.3 * cm, f"Dicetak pada: {tgl_cetak} WITA")
     
     c.showPage()
     c.save()
