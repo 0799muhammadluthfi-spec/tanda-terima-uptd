@@ -141,21 +141,45 @@ if menu == "PENGANTARAN BERKAS":
         if cols_cek[i % 3].checkbox(t):
             sel_berkas.append(t)
 
-    if st.button("💾 SIMPAN & CETAK TANDA TERIMA"):
+if st.button("💾 SIMPAN & CETAK TANDA TERIMA"):
         if not nama_toko or not sk:
             st.error("❌ NAMA TOKO DAN PEMILIK TIDAK BOLEH KOSONG!")
         else:
-            new_row = {"No": no_urut, "Tanggal_Pengantaran": tgl_t, "Tanggal_Pengambilan": "-", 
-                       "Nama_Toko": nama_toko, "No_Toko": no_toko, "Nama_Pemilik_Asli": sk, 
-                       "Nama_Pengantar_Berkas": pengantar, "Penerima_Berkas": penerima}
+            # 1. Pastikan data disusun dalam dictionary dengan nama kolom yang benar
+            new_row = {
+                "No": no_urut, 
+                "Tanggal_Pengantaran": tgl_t, 
+                "Tanggal_Pengambilan": "-", 
+                "Nama_Toko": nama_toko, 
+                "No_Toko": no_toko, 
+                "Nama_Pemilik_Asli": sk, 
+                "Nama_Pengantar_Berkas": pengantar, 
+                "Penerima_Berkas": penerima
+            }
             
-            if is_duplicate: df = df[df['No'] != no_urut]
+            # 2. Proses update data ke Google Sheets
+            if is_duplicate: 
+                df = df[df['No'] != no_urut]
+            
             df_final = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
             
-            conn.update(data=df_final)
-            st.cache_data.clear()
-            st.success("✅ DATA BERHASIL DISIMPAN!")
-            st.download_button("📥 DOWNLOAD PDF TANDA TERIMA", buat_pdf_full(new_row, sel_berkas), f"TANDA_{no_urut}.pdf")
+            try:
+                conn.update(data=df_final)
+                st.cache_data.clear()
+                st.success(f"✅ DATA NOMOR {no_urut} BERHASIL DISIMPAN!")
+                
+                # 3. Panggil fungsi PDF dan buat tombol downloadnya
+                # Kita masukkan fungsi PDF-nya ke dalam variabel pdf_data dulu
+                pdf_data = buat_pdf_full(new_row, sel_berkas)
+                
+                st.download_button(
+                    label="📥 DOWNLOAD PDF SEKARANG",
+                    data=pdf_data,
+                    file_name=f"TANDA_{no_urut}.pdf",
+                    mime="application/pdf"
+                )
+            except Exception as e:
+                st.error(f"❌ GAGAL MENYIMPAN: {e}")
 
 # --- BAGIAN 2: PENGAMBILAN BERKAS ---
 elif menu == "PENGAMBILAN BERKAS":
