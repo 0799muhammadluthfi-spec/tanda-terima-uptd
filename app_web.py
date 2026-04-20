@@ -259,6 +259,18 @@ def halaman_pengantaran():
             mime="application/pdf"
         )
 
+# Letakkan ini di bagian paling bawah fungsi halaman_pengantaran
+    st.divider()
+    st.subheader("📊 DATA TABEL GOOGLE SHEETS")
+    if not df_sk.empty:
+        # Menampilkan tabel, diurutkan agar nomor terbaru muncul paling atas
+        # Pastikan kolom "No" diurutkan secara terbalik (ascending=False)
+        st.dataframe(
+            df_sk.sort_values(by="No", ascending=False), 
+            use_container_width=True, 
+            hide_index=True
+        )
+
 # ==========================================
 # 5. MODUL PENGAMBILAN
 # ==========================================
@@ -284,6 +296,12 @@ def halaman_pengambilan():
                                    data=cetak_overprint(st.session_state['print_tgl']),
                                    file_name=f"AMBIL_{no_cari}.pdf")
         else: st.error("❌ Tidak Ditemukan!")
+
+# Letakkan ini di bagian paling bawah fungsi halaman_pengambilan
+    st.divider()
+    st.subheader("📊 DAFTAR BERKAS TERDAFTAR")
+    if not df_sk.empty:
+        st.dataframe(df_sk, use_container_width=True, hide_index=True)
 
 # ==========================================
 # 6. MODUL PARKIR & MAIN
