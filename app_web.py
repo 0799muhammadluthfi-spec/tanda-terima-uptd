@@ -278,43 +278,59 @@ def halaman_parkir(menu):
 
     elif menu == "KONFIRMASI":
         df_pen = df_p[(df_p["Total_Karcis_R2"] != "-") & (df_p["Total_Karcis_R2"] != "nan")].copy()
-        if df_pen.empty: st.info("TIDAK ADA DATA KONFIRMASI.")
+        if df_pen.empty: 
+            st.info("TIDAK ADA DATA KONFIRMASI.")
         else:
             df_pen = df_pen.sort_index(ascending=False).head(10)
+            
             for i, row in df_pen.iterrows():
-                stat_k = row.get("Status_Khusus", "BELUM")
-                stat_m = row.get("Status_MPP", "BELUM")
-                stat_c = row.get("Status_Cetak", "BELUM")
+                # AMBIL STATUS TERBARU LANGSUNG DARI MEMORI TERAKHIR
+                stat_k = str(row.get("Status_Khusus", "BELUM")).strip()
+                stat_m = str(row.get("Status_MPP", "BELUM")).strip()
+                stat_c = str(row.get("Status_Cetak", "BELUM")).strip()
                 
+                # Syarat Lunas / Selesai: Ketiganya harus "SUDAH"
                 lunas = (stat_k == "SUDAH") and (stat_m == "SUDAH") and (stat_c == "SUDAH")
+                
+                # IKON DAN JUDUL OTOMATIS BERUBAH
                 ikon = "✅ [SELESAI]" if lunas else "📦 [BELUM SELESAI]"
                 
+                # JIKA LUNAS, KOTAK OTOMATIS TERTUTUP (expanded=False)
                 with st.expander(f"{ikon} {row['Tanggal']} - {row['Nama_Petugas']}", expanded=not lunas):
+                    
                     if lunas:
-                        st.success("✨ Seluruh proses setoran dan pencetakan telah selesai.")
-                        
+                        # BLOK HIJAU CANTIK KETIKA DIBUKA
+                        st.success("✨ PROSES SELESAI: Setoran dan pencetakan telah tuntas.")
+                    
+                    # ----------------- TAMPILAN DALAM KOTAK -----------------
                     ck, cm = st.columns(2)
+                    
                     with ck:
                         st.write(f"**KHUSUS**\nR2: {row['Khusus_Roda_R2']} | R4: {row['Khusus_Roda_R4']}")
-                        if stat_k == "BELUM":
+                        if stat_k != "SUDAH":
                             if st.button("TERIMA KHUSUS", key=f"k{i}", use_container_width=True):
                                 df_p.loc[i, "Status_Khusus"] = "SUDAH"
-                                if safe_update("DATA_PARKIR", df_p): st.rerun()
-                        else: st.success("✅ Khusus Diterima")
+                                safe_update("DATA_PARKIR", df_p)
+                                st.rerun() # Refresh instan agar judul ikut berubah
+                        else: 
+                            st.success("✅ Khusus Diterima")
                     
                     with cm:
                         st.write(f"**MPP**\nR2: {row['MPP_Roda_R2']} | R4: {row['MPP_Roda_R4']}")
-                        if stat_m == "BELUM":
+                        if stat_m != "SUDAH":
                             if st.button("TERIMA MPP", key=f"m{i}", type="primary", use_container_width=True):
                                 df_p.loc[i, "Status_MPP"] = "SUDAH"
-                                if safe_update("DATA_PARKIR", df_p): st.rerun()
+                                safe_update("DATA_PARKIR", df_p)
+                                st.rerun() # Refresh instan agar judul ikut berubah
                         else: 
+                            # JIKA MPP SUDAH, MUNCULKAN TOMBOL PRINT DAN "SUDAH CETAK"
                             st.download_button("🖨️ CETAK PDF MPP", data=cetak_tanda_terima_parkir(row), file_name=f"MPP_{row['Tanggal']}.pdf", key=f"p{i}", use_container_width=True)
                             
                             if stat_c != "SUDAH":
                                 if st.button("✅ SUDAH CETAK", key=f"c{i}", use_container_width=True):
                                     df_p.loc[i, "Status_Cetak"] = "SUDAH"
-                                    if safe_update("DATA_PARKIR", df_p): st.rerun()
+                                    safe_update("DATA_PARKIR", df_p)
+                                    st.rerun() # Refresh instan agar judul ikut berubah dan kotak menutup
                             else:
                                 st.success("✅ Telah Dicetak")
                                 
