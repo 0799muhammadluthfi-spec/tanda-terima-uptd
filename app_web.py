@@ -889,20 +889,19 @@ def halaman_pengambilan_sk():
     with c_btn:
         tombol_refresh_pojok("ref_ambil")
 
-    df_m = load_data("DATA_SK")   # ← df_m didefinisikan di sini
+    df_m = load_data("DATA_SK")
     if df_m.empty:
         return
 
     df_b = df_m[(df_m["Tanggal_Pengambilan"] == "-") & (df_m["No"] != "-")]
 
-    no_cari = st.text_input("🔍 CARI NOMOR URUT:").strip()
+    no_cari = st.text_input(
+        "🔍 CARI NOMOR URUT:",
+        key="cari_no_sk_pengambilan",
+        placeholder="Masukkan nomor urut, misal 1"
+    ).strip()
 
     if no_cari:
-        st.write("Kamu ketik:", repr(no_cari))
-        st.write("Isi kolom No:", df_m["No"].tolist())
-        st.write("Normalisasi input:", repr(normalisasi_no(no_cari)))
-        st.write("Normalisasi kolom No:", df_m["No"].apply(normalisasi_no).tolist())
-
         no_cari_norm = normalisasi_no(no_cari)
         mask_no = df_m["No"].apply(normalisasi_no) == no_cari_norm
         hasil = df_m[mask_no]
@@ -922,8 +921,10 @@ def halaman_pengambilan_sk():
                 st.warning(f"🏪 Toko: {data['Nama_Toko']}")
                 tgl_a = st.text_input(
                     "📅 TANGGAL AMBIL:",
-                    value=datetime.now().strftime("%d-%m-%Y")
+                    value=datetime.now().strftime("%d-%m-%Y"),
+                    key="tgl_ambil_sk_pengambilan"
                 )
+
                 if st.button("✅ KONFIRMASI PENGAMBILAN"):
                     df_m.loc[mask_no, "Tanggal_Pengambilan"] = tgl_a
                     if safe_update("DATA_SK", df_m):
@@ -935,7 +936,7 @@ def halaman_pengambilan_sk():
     st.divider()
     st.subheader(f"📊 BELUM DIAMBIL ({len(df_b)})")
     st.dataframe(df_b.sort_values(by="No", ascending=True), use_container_width=True, hide_index=True)
-
+    
 # ==========================================
 # 5. MODUL PARKIR
 # ==========================================
