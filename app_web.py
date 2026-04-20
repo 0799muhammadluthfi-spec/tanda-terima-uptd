@@ -52,38 +52,49 @@ def safe_update(worksheet: str, data: pd.DataFrame) -> bool:
         return False
 
 # ==========================================
-# 3. FUNGSI PDF (VERSI F4 PORTRAIT - CETAK DI ATAS)
+# 3. FUNGSI PDF (F4 PORTRAIT + GARIS POTONG)
 # ==========================================
 def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
     buffer = BytesIO()
-    # KERTAS FULL F4 PORTRAIT (21.5 cm x 33 cm)
-    # Printer setting harus PORTRAIT (Berdiri) & Kertas F4/Folio
     UKURAN_KERTAS = (21.5 * cm, 33 * cm)
     c = canvas.Canvas(buffer, pagesize=UKURAN_KERTAS)
     
-    # Koordinat ditaruh di paling atas kertas
-    Y_BASE = 21.5 * cm # Jarak dari bawah kertas, menyisakan ruang 11.5cm di atas
-    X_POS = 0.75 * cm 
-    LEBAR = 21.5 * cm
-    TENGAH = LEBAR / 2
+    # PERHITUNGAN MARGIN SIMETRIS
+    M = 0.75 * cm # Margin keliling
+    TINGGI_POTONG = 12 * cm
+    Y_POTONG = 33 * cm - TINGGI_POTONG # Garis potong di 21 cm
+    
+    Y_BASE = Y_POTONG + M
+    X_POS = M 
+    LEBAR_BOX = 21.5 * cm - (2 * M) # Lebar 20 cm
+    TINGGI_BOX = TINGGI_POTONG - (2 * M) # Tinggi 10.5 cm
+    TENGAH = 21.5 * cm / 2
+
+    def gambar_garis_potong():
+        c.setLineWidth(1)
+        c.setDash(4, 4) # Garis putus-putus
+        c.line(0, Y_POTONG, 21.5 * cm, Y_POTONG)
+        c.setFont("Helvetica-Oblique", 8)
+        c.drawString(0.5 * cm, Y_POTONG + 0.15 * cm, "✂ --- Batas potong (Tinggi 12 cm) ---")
+        c.setDash() # Reset ke solid line
 
     # ------------------------------------------
     # HALAMAN 1 - DEPAN
     # ------------------------------------------
+    gambar_garis_potong()
+    
     c.setLineWidth(1.5)
-    c.rect(X_POS, Y_BASE, 20 * cm, 10 * cm) # Bingkai Luar
-    c.rect(X_POS + 0.15 * cm, Y_BASE + 0.15 * cm, 19.7 * cm, 9.7 * cm) # Bingkai Dalam
+    c.rect(X_POS, Y_BASE, LEBAR_BOX, TINGGI_BOX) 
+    c.rect(X_POS + 0.15 * cm, Y_BASE + 0.15 * cm, LEBAR_BOX - 0.3 * cm, TINGGI_BOX - 0.3 * cm) 
 
     # Judul
     c.setFont("Helvetica-Bold", 13)
-    c.drawCentredString(TENGAH, Y_BASE + 8.8 * cm, "TANDA TERIMA BERKAS PERPANJANGAN IZIN TOKO")
-    
-    # Garis Judul (Ketebalan 2)
+    c.drawCentredString(TENGAH, Y_BASE + 9.3 * cm, "TANDA TERIMA BERKAS PERPANJANGAN IZIN TOKO")
     c.setLineWidth(2)
-    c.line(TENGAH - 5.5*cm, Y_BASE + 8.5*cm, TENGAH + 5.5*cm, Y_BASE + 8.5*cm)
+    c.line(TENGAH - 5.5*cm, Y_BASE + 9.0*cm, TENGAH + 5.5*cm, Y_BASE + 9.0*cm)
 
     # Checklist Berkas
-    yy = Y_BASE + 7.5 * cm
+    yy = Y_BASE + 8.0 * cm
     SEMUA_BERKAS = ["SK ASLI MENEMPATI", "PAS FOTO 3X4 (2 LBR)", "FC KTP PEMILIK", "FC KARTU SEWA", "SURAT KUASA", "SURAT KEHILANGAN"]
     
     for i, item in enumerate(SEMUA_BERKAS, 1):
@@ -94,26 +105,22 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
         x_status = X_POS + 14 * cm
         c.drawString(x_status, yy, "ADA   /   TIDAK ADA")
         
-        # Coretan (Ketebalan 1.5) & Panjang disesuaikan
         c.setLineWidth(1.5)
         y_strike = yy + 0.11 * cm 
         if item in berkas_list:
-            # Coret TIDAK ADA (Panjang sudah diperpendek)
             c.line(x_status + 1.4 * cm, y_strike, x_status + 3.5 * cm, y_strike)
         else:
-            # Coret ADA
             c.line(x_status - 0.1 * cm, y_strike, x_status + 0.8 * cm, y_strike)
         yy -= 0.7 * cm
 
-    # Garis Tanda Tangan (Ketebalan 1.5)
+    # Tanda Tangan
     c.setLineWidth(1.5)
-    c.line(X_POS + 0.15 * cm, Y_BASE + 3.0 * cm, X_POS + 19.85 * cm, Y_BASE + 3.0 * cm) 
+    c.line(X_POS + 0.15 * cm, Y_BASE + 3.0 * cm, X_POS + LEBAR_BOX - 0.15 * cm, Y_BASE + 3.0 * cm) 
     c.line(TENGAH, Y_BASE + 0.15 * cm, TENGAH, Y_BASE + 3.0 * cm) 
 
     c.setFont("Helvetica-Bold", 9)
     c.drawCentredString(X_POS + 5 * cm, Y_BASE + 2.5 * cm, "PENGANTAR BERKAS")
     c.drawCentredString(X_POS + 15 * cm, Y_BASE + 2.5 * cm, "PETUGAS PENERIMA")
-
     c.setFont("Helvetica-Bold", 11)
     c.drawCentredString(X_POS + 5 * cm, Y_BASE + 0.6 * cm, f"( {str(data.get('Nama_Pengantar_Berkas', '')).upper()} )")
     c.drawCentredString(X_POS + 15 * cm, Y_BASE + 0.6 * cm, f"( {str(data.get('Penerima_Berkas', '')).upper()} )")
@@ -123,12 +130,13 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
     # ------------------------------------------
     # HALAMAN 2 - BELAKANG
     # ------------------------------------------
+    gambar_garis_potong()
+    
     c.setLineWidth(1.5)
-    c.rect(X_POS, Y_BASE, 20 * cm, 10 * cm)
-    c.rect(X_POS + 0.15 * cm, Y_BASE + 0.15 * cm, 19.7 * cm, 9.7 * cm)
+    c.rect(X_POS, Y_BASE, LEBAR_BOX, TINGGI_BOX)
+    c.rect(X_POS + 0.15 * cm, Y_BASE + 0.15 * cm, LEBAR_BOX - 0.3 * cm, TINGGI_BOX - 0.3 * cm)
 
-    # Memulai tabel PERSIS dari garis kotak dalam bagian atas, agar tidak ada sisa kolom
-    y_tab = Y_BASE + 9.85 * cm 
+    y_tab = Y_BASE + TINGGI_BOX - 0.15 * cm # 10.35 cm
     TINGGI_B = 1.15 * cm
     
     tgl_ambil_pdf = data.get("Tanggal_Pengambilan", "-")
@@ -146,7 +154,7 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
     for label, val in DETAIL_ROWS:
         c.setLineWidth(1.5) 
         c.rect(X_POS + 0.15 * cm, y_tab - TINGGI_B, 6 * cm, TINGGI_B)
-        c.rect(X_POS + 6.15 * cm, y_tab - TINGGI_B, 13.7 * cm, TINGGI_B)
+        c.rect(X_POS + 6.15 * cm, y_tab - TINGGI_B, LEBAR_BOX - 6.45 * cm, TINGGI_B) # Mentok presisi
         
         c.setFont("Helvetica-Bold", 9)
         c.drawString(X_POS + 0.5 * cm, y_tab - 0.7 * cm, label)
@@ -167,14 +175,13 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
 
 def cetak_overprint(tgl_ambil: str) -> BytesIO:
     buffer = BytesIO()
-    # Overprint juga disesuaikan dengan F4 Portrait
     c = canvas.Canvas(buffer, pagesize=(21.5 * cm, 33 * cm))
     c.setFont("Helvetica-Bold", 10)
     
-    Y_BASE = 21.5 * cm
-    X_POS = 0.75 * cm
     # Koordinat presisi di dalam kotak TGL AMBIL
-    y_target = Y_BASE + 6.8 * cm 
+    X_POS = 0.75 * cm
+    # Perhitungan: 33cm - 12cm (potong) + 0.75cm (margin) + 10.35cm (top inner border) - 2x1.15cm (dua baris di atasnya) - 0.7cm (jarak teks ke garis atas)
+    y_target = 29.1 * cm 
     c.drawString(X_POS + 6.5 * cm, y_target, tgl_ambil.upper())
     
     c.save()
