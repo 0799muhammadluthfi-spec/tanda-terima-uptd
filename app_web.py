@@ -69,20 +69,54 @@ st.markdown("""
     button[title="View fullscreen"] { display: none !important; }
 
     /* ==============================================
-       TOMBOL MINIMIZE SIDEBAR - WARNA PUTIH
+       TOMBOL MINIMIZE SIDEBAR - PUTIH CERAH
        ============================================== */
+    /* Tombol collapse di dalam sidebar */
     [data-testid="stSidebar"] button[kind="header"],
     [data-testid="stSidebar"] > div:first-child > button,
     [data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebarCollapseButton"] {
+        color: #ffffff !important;
+        background: rgba(255, 255, 255, 0.12) !important;
+        border: 1px solid rgba(255, 255, 255, 0.25) !important;
+        border-radius: 6px !important;
+    }
+    [data-testid="stSidebar"] button[kind="header"]:hover,
+    [data-testid="stSidebar"] > div:first-child > button:hover,
+    [data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"]:hover,
+    [data-testid="stSidebarCollapseButton"]:hover {
+        background: rgba(255, 255, 255, 0.25) !important;
+    }
+
+    /* SVG icon di dalam tombol collapse */
+    [data-testid="stSidebar"] button[kind="header"] svg,
+    [data-testid="stSidebar"] > div:first-child > button svg,
     [data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] svg,
-    [data-testid="stSidebarCollapseButton"],
     [data-testid="stSidebarCollapseButton"] svg,
-    [data-testid="collapsedControl"],
-    [data-testid="collapsedControl"] svg,
-    [data-testid="stSidebarNavCollapseIcon"],
-    [data-testid="stSidebarNavCollapseIcon"] svg {
+    [data-testid="stSidebar"] button[kind="header"] svg path,
+    [data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] svg path {
         color: #ffffff !important;
         fill: #ffffff !important;
+        stroke: #ffffff !important;
+    }
+
+    /* Tombol expand (muncul saat sidebar tertutup) */
+    [data-testid="collapsedControl"],
+    [data-testid="collapsedControl"] > button {
+        color: #0f172a !important;
+        background: #ffffff !important;
+        border: 1px solid #d1d5db !important;
+        border-radius: 6px !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+    }
+    [data-testid="collapsedControl"] > button:hover {
+        background: #f1f5f9 !important;
+    }
+    [data-testid="collapsedControl"] svg,
+    [data-testid="collapsedControl"] svg path {
+        color: #0f172a !important;
+        fill: #0f172a !important;
+        stroke: #0f172a !important;
     }
 
     /* ==============================================
