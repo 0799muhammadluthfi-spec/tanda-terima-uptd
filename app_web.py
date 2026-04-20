@@ -1139,10 +1139,19 @@ def halaman_parkir(menu):
                 (df_p["Total_Karcis_R2"].str.strip().apply(lambda x: x not in ["-", "nan", ""])) |
                 (df_p["Total_Karcis_R4"].str.strip().apply(lambda x: x not in ["-", "nan", ""]))
             ].copy()
-            
+
             if not df_isi.empty:
-                df_isi["Tgl_Sort"] = pd.to_datetime(df_isi["Tanggal"], dayfirst=True, errors="coerce")
-                last = df_isi.sort_values(by="Tgl_Sort", ascending=False).head(1)
+                df_isi["Tgl_Sort"] = pd.to_datetime(df_isi["Tanggal"], dayfirst=True, errors="coerce").dt.date
+
+                # Ambil data sesuai tanggal yang sedang diinput
+                last = df_isi[df_isi["Tgl_Sort"] == dt_user]
+
+                # Kalau kosong, baru fallback ke tanggal terbaru
+                if last.empty:
+                    last = df_isi.sort_values(by="Tgl_Sort", ascending=False).head(1)
+                else:
+                    last = last.head(1)
+
                 kolom = ["Tanggal", "Nama_Petugas", "Total_Karcis_R2", "Total_Karcis_R4", "MPP_Roda_R2", "MPP_Roda_R4"]
                 st.dataframe(last[kolom], hide_index=True, use_container_width=True)
             else:
@@ -1153,10 +1162,19 @@ def halaman_parkir(menu):
                 (df_p["Pengambilan_Karcis_R2"].str.strip().apply(lambda x: x not in ["-", "nan", ""])) |
                 (df_p["Pengambilan_Karcis_R4"].str.strip().apply(lambda x: x not in ["-", "nan", ""]))
             ].copy()
-            
+
             if not df_isi.empty:
-                df_isi["Tgl_Sort"] = pd.to_datetime(df_isi["Tanggal"], dayfirst=True, errors="coerce")
-                last = df_isi.sort_values(by="Tgl_Sort", ascending=False).head(1)
+                df_isi["Tgl_Sort"] = pd.to_datetime(df_isi["Tanggal"], dayfirst=True, errors="coerce").dt.date
+
+                # Ambil data sesuai tanggal yang sedang diinput
+                last = df_isi[df_isi["Tgl_Sort"] == dt_user]
+
+                # Kalau kosong, baru fallback ke tanggal terbaru
+                if last.empty:
+                    last = df_isi.sort_values(by="Tgl_Sort", ascending=False).head(1)
+                else:
+                    last = last.head(1)
+
                 kolom = ["Tanggal", "Nama_Petugas", "Pengambilan_Karcis_R2", "Pengambilan_Karcis_R4"]
                 st.dataframe(last[kolom], hide_index=True, use_container_width=True)
             else:
@@ -1168,7 +1186,7 @@ def halaman_parkir(menu):
                 (df_p["Status_MPP"].str.strip().apply(lambda x: x not in ["-", "nan", ""])) |
                 (df_p["Status_Cetak"].str.strip().apply(lambda x: x not in ["-", "nan", ""]))
             ].copy()
-            
+
             if not df_isi.empty:
                 df_isi["Tgl_Sort"] = pd.to_datetime(df_isi["Tanggal"], dayfirst=True, errors="coerce")
                 last = df_isi.sort_values(by="Tgl_Sort", ascending=False).head(1)
