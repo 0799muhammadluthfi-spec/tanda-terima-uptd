@@ -20,7 +20,7 @@ st.set_page_config(
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 # ==========================================
-# FUNGSI LOGO HSS - PASTI MUNCUL
+# FUNGSI LOGO HSS
 # ==========================================
 def get_logo_base64():
     for nama_file in ["logo_hss.png", "logo.png", "Logo_HSS.png"]:
@@ -54,107 +54,54 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-    /* ===== BACKGROUND UTAMA ===== */
+    /* ===== BACKGROUND ===== */
     .stApp {
         background: linear-gradient(160deg, #f8fafc 0%, #f1f5f9 100%);
     }
 
     /* ==============================================
-       HAPUS SEMUA TOOLBAR / HEADER / KEYBOARD HINT
+       HIDE HANYA YANG AMAN - JANGAN SENTUH SIDEBAR CONTROL
        ============================================== */
-    /* Header bar Streamlit sepenuhnya */
-    header,
-    header[data-testid="stHeader"],
-    [data-testid="stHeader"] {
+    /* Hamburger menu di pojok kanan atas */
+    #MainMenu {
         display: none !important;
-        visibility: hidden !important;
-        height: 0 !important;
-        min-height: 0 !important;
-        max-height: 0 !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        overflow: hidden !important;
-        position: absolute !important;
-        top: -9999px !important;
     }
 
-    /* Toolbar (titik tiga pojok kanan) */
-    [data-testid="stToolbar"],
-    div[data-testid="stToolbar"],
-    [data-testid="stDecoration"],
-    div[data-testid="stDecoration"],
-    [data-testid="stStatusWidget"],
-    div[data-testid="stStatusWidget"] {
+    /* Footer "Made with Streamlit" */
+    footer {
         display: none !important;
-        visibility: hidden !important;
-        height: 0 !important;
-        width: 0 !important;
-        overflow: hidden !important;
-        position: absolute !important;
-        pointer-events: none !important;
     }
 
-    /* Main menu hamburger */
-    #MainMenu,
-    button[kind="header"],
-    [data-testid="stMainMenu"],
-    div[data-testid="stMainMenu"] {
-        display: none !important;
-        visibility: hidden !important;
-    }
-
-    /* Keyboard shortcut overlay/iframe */
-    iframe[title*="shortcut"],
-    iframe[title*="keyboard"],
-    iframe[title*="Keyboard"],
-    iframe[title="streamlit_shortcuts"] {
-        display: none !important;
-        visibility: hidden !important;
-        height: 0 !important;
-        width: 0 !important;
-    }
-
-    /* Deploy button & badge */
+    /* Deploy button */
     .stAppDeployButton,
-    .viewerBadge_container__r5tak,
-    .styles_viewerBadge__CvC9N,
     [data-testid="manage-app-button"] {
         display: none !important;
-        visibility: hidden !important;
     }
 
-    /* Tooltip di sidebar */
-    [data-testid="stSidebar"] [title],
-    [data-testid="stSidebar"] .stTooltipIcon,
-    [data-testid="collapsedControl"] {
+    /* Status widget (running indicator) */
+    [data-testid="stStatusWidget"] {
         display: none !important;
-        visibility: hidden !important;
     }
 
-    /* Footer bawaan */
-    footer,
-    .reportview-container .main footer {
-        display: none !important;
-        visibility: hidden !important;
-    }
-
-    /* Fullscreen button on widgets */
+    /* Fullscreen button pada dataframe/chart */
     button[title="View fullscreen"] {
         display: none !important;
     }
 
     /* ============================================
-       SIDEBAR STYLING
+       SIDEBAR
        ============================================ */
     [data-testid="stSidebar"] {
         background: linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
         border-right: 1px solid rgba(255,255,255,0.05);
     }
 
-    [data-testid="stSidebar"] *:not(input):not(textarea) {
+    /* Font sidebar */
+    [data-testid="stSidebar"] *:not(input):not(textarea):not(svg):not(path):not(button) {
         font-family: 'Inter', sans-serif !important;
     }
 
+    /* Warna teks sidebar umum */
     [data-testid="stSidebar"] label,
     [data-testid="stSidebar"] span,
     [data-testid="stSidebar"] p,
@@ -182,10 +129,8 @@ st.markdown("""
     [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"],
     [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] span,
     [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] div,
-    [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] [data-testid="stMarkdownContainer"],
     [data-testid="stSidebar"] .stSelectbox [role="combobox"],
     [data-testid="stSidebar"] .stSelectbox [role="combobox"] span,
-    [data-testid="stSidebar"] .stSelectbox [role="option"],
     [data-testid="stSidebar"] [data-baseweb="select"] > div > div {
         color: #f8fafc !important;
         font-size: 0.88rem !important;
@@ -243,13 +188,14 @@ st.markdown("""
     }
 
     /* ============================================
-       MAIN CONTENT
+       MAIN CONTENT - FONT
        ============================================ */
-    .main *,
-    [data-testid="stMainBlockContainer"] * {
+    .main *:not(svg):not(path):not([data-testid="stExpanderToggleIcon"] *),
+    [data-testid="stMainBlockContainer"] *:not(svg):not(path):not([data-testid="stExpanderToggleIcon"] *) {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
     }
 
+    /* ===== HEADINGS ===== */
     .main h1, [data-testid="stMainBlockContainer"] h1 {
         font-size: 1.55rem !important;
         font-weight: 800 !important;
@@ -269,7 +215,8 @@ st.markdown("""
         color: #334155 !important;
     }
 
-    .main p, .main span, .main li,
+    /* ===== BODY TEXT ===== */
+    .main p, .main span:not([data-testid="stExpanderToggleIcon"] span), .main li,
     [data-testid="stMainBlockContainer"] p {
         font-size: 0.88rem !important;
         font-weight: 400 !important;
@@ -281,6 +228,7 @@ st.markdown("""
         color: #1e293b !important;
     }
 
+    /* ===== FORM LABELS ===== */
     .main .stTextInput label,
     .main .stNumberInput label,
     .main .stSelectbox label,
@@ -296,6 +244,7 @@ st.markdown("""
         color: #374151 !important;
     }
 
+    /* ===== INPUT FIELDS ===== */
     .main .stTextInput input,
     .main .stNumberInput input {
         font-size: 0.88rem !important;
@@ -316,6 +265,7 @@ st.markdown("""
         color: #9ca3af !important;
     }
 
+    /* ===== METRIC ===== */
     [data-testid="stMetric"] {
         background: #ffffff;
         border: 1px solid #e5e7eb;
@@ -337,7 +287,7 @@ st.markdown("""
         color: #111827 !important;
     }
 
-    /* BUTTONS */
+    /* ===== BUTTONS ===== */
     .main .stButton > button {
         font-size: 0.82rem !important;
         font-weight: 600 !important;
@@ -362,7 +312,7 @@ st.markdown("""
         color: #ffffff !important;
     }
 
-    /* DOWNLOAD BUTTON - PERBAIKI TEKS TIDAK TERTIMPA */
+    /* ===== DOWNLOAD BUTTON ===== */
     .main .stDownloadButton > button {
         font-size: 0.82rem !important;
         font-weight: 600 !important;
@@ -374,8 +324,7 @@ st.markdown("""
         line-height: 1.4 !important;
         white-space: nowrap !important;
         overflow: visible !important;
-        text-overflow: unset !important;
-        min-height: 38px !important;
+        min-height: 40px !important;
     }
     .main .stDownloadButton > button:hover {
         background: linear-gradient(135deg, #059669, #047857) !important;
@@ -388,10 +337,9 @@ st.markdown("""
         font-size: 0.82rem !important;
         overflow: visible !important;
         white-space: nowrap !important;
-        text-overflow: unset !important;
     }
 
-    /* FORM */
+    /* ===== FORM CONTAINER ===== */
     [data-testid="stForm"] {
         background: #ffffff;
         border: 1px solid #e5e7eb;
@@ -399,21 +347,44 @@ st.markdown("""
         padding: 20px !important;
     }
 
-    /* EXPANDER */
+    /* ==============================================
+       EXPANDER - PERBAIKI ARROW ICON
+       ============================================== */
     [data-testid="stExpander"] {
         border: 1px solid #e5e7eb !important;
         border-radius: 10px !important;
         background: #ffffff !important;
         margin-bottom: 6px !important;
-        overflow: visible !important;
     }
+
+    /* Header expander - teks judul */
+    [data-testid="stExpander"] summary,
+    [data-testid="stExpander"] [data-testid="stExpanderDetails"],
     .streamlit-expanderHeader {
+        font-family: 'Inter', sans-serif !important;
         font-size: 0.86rem !important;
         font-weight: 600 !important;
         color: #1e293b !important;
     }
 
-    /* DATAFRAME */
+    /* PENTING: Jangan timpa font icon arrow expander */
+    [data-testid="stExpanderToggleIcon"],
+    [data-testid="stExpanderToggleIcon"] *,
+    [data-testid="stExpander"] summary svg,
+    [data-testid="stExpander"] summary svg *,
+    [data-testid="stExpander"] details summary span[data-testid="stExpanderToggleIcon"],
+    .streamlit-expanderHeader svg,
+    .streamlit-expanderHeader svg * {
+        font-family: inherit !important;
+        -webkit-font-smoothing: auto !important;
+    }
+
+    /* Pastikan SVG icon tidak terganggu */
+    svg, svg *, path, circle, rect, line, polyline, polygon {
+        font-family: inherit !important;
+    }
+
+    /* ===== DATAFRAME ===== */
     [data-testid="stDataFrame"] {
         border-radius: 10px;
         border: 1px solid #e5e7eb;
@@ -432,19 +403,19 @@ st.markdown("""
         color: #374151 !important;
     }
 
-    /* ALERTS */
+    /* ===== ALERTS ===== */
     .main [data-testid="stAlert"] p {
         font-size: 0.84rem !important;
         font-weight: 500 !important;
     }
 
-    /* DIVIDER */
+    /* ===== DIVIDER ===== */
     .main hr {
         border: none !important;
         border-top: 1px solid #e5e7eb !important;
     }
 
-    /* ANIMATION */
+    /* ===== ANIMATION ===== */
     .main .block-container {
         animation: fadeIn 0.3s ease-out;
         max-width: 1100px;
@@ -454,7 +425,7 @@ st.markdown("""
         to { opacity: 1; transform: translateY(0); }
     }
 
-    /* SCROLLBAR */
+    /* ===== SCROLLBAR ===== */
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 </style>
@@ -883,7 +854,7 @@ def main():
             </div>
             """, unsafe_allow_html=True)
 
-        # ===== HEADER: UPTD PASAR KANDANGAN + KAB HSS (1 baris, tanpa emoji) =====
+        # ===== HEADER SIDEBAR =====
         st.markdown("""
         <div style="text-align:center; padding:4px 0 14px 0; 
                     border-bottom:1px solid rgba(255,255,255,0.08); margin-bottom:14px;">
@@ -908,7 +879,7 @@ def main():
         else: 
             menu = st.radio("MENU PARKIR:", ["INPUT REKAP", "INPUT STOK", "KONFIRMASI"], key="pilih_menu_parkir")
         
-        # ===== FOOTER - M. LUTHFI RENALDI =====
+        # ===== FOOTER =====
         st.markdown("""
         <div style="text-align:center; padding:24px 0 8px 0; 
                     border-top:1px solid rgba(255,255,255,0.06); margin-top:40px;">
