@@ -53,207 +53,113 @@ def safe_update(worksheet: str, data: pd.DataFrame) -> bool:
 
 
 # ==========================================
-# 3. FUNGSI PDF
+# 3. FUNGSI PDF (VERSI FINAL 22x12 CM)
 # ==========================================
 def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
-    """
-    Buat PDF 2 halaman (depan & belakang) untuk tanda terima berkas.
-    
-    Args:
-        data: Dictionary berisi data pengantaran
-        berkas_list: List berkas yang ADA
-    
-    Returns:
-        BytesIO buffer berisi PDF
-    """
     buffer = BytesIO()
+    # UKURAN SESUAI PERMINTAAN: Lebar 22cm, Tinggi 12cm
     UKURAN_CUSTOM = (22 * cm, 12 * cm)
     c = canvas.Canvas(buffer, pagesize=UKURAN_CUSTOM)
     
-    # Konstanta layout
+    # Koordinat dasar
     X_POS = 1 * cm
-    Y_POS = 1 * cm
+    Y_POS = 1 * cm # Margin bawah
     LEBAR = 22 * cm
     TENGAH = LEBAR / 2
 
-    SEMUA_BERKAS = [
-        "SK ASLI MENEMPATI",
-        "PAS FOTO 3X4 (2 LBR)",
-        "FC KTP PEMILIK",
-        "FC KARTU SEWA",
-        "SURAT KUASA",
-        "SURAT KEHILANGAN",
-    ]
-
     # ------------------------------------------
-    # HALAMAN 1 - DEPAN
+    # HALAMAN 1 - DEPAN (Tanda Terima & Checklist)
     # ------------------------------------------
-    def gambar_border():
-        c.setLineWidth(1.5)
-        c.rect(X_POS, Y_POS, 20 * cm, 10 * cm)
-        c.rect(X_POS + 0.15 * cm, Y_POS + 0.15 * cm, 19.7 * cm, 9.7 * cm)
-
-    gambar_border()
+    # Bingkai Ganda (Khas Dokumen Resmi)
+    c.setLineWidth(1.5)
+    c.rect(X_POS, Y_POS, 20 * cm, 10 * cm) # Bingkai Luar
+    c.setLineWidth(0.5)
+    c.rect(X_POS + 0.15 * cm, Y_POS + 0.15 * cm, 19.7 * cm, 9.7 * cm) # Bingkai Dalam
 
     # Judul
-    c.setFont("Helvetica-Bold", 12)
-    c.drawCentredString(
-        TENGAH,
-        Y_POS + 9.2 * cm,
-        "TANDA TERIMA BERKAS PERPANJANGAN IZIN TOKO",
-    )
+    c.setFont("Helvetica-Bold", 13)
+    c.drawCentredString(TENGAH, Y_POS + 8.8 * cm, "TANDA TERIMA BERKAS PERPANJANGAN IZIN TOKO")
+    
+    # Garis Judul
+    c.line(X_POS + 3*cm, Y_POS + 8.6*cm, X_POS + 17*cm, Y_POS + 8.6*cm)
 
-    # Subtitle info
-    c.setFont("Helvetica", 8)
-    c.drawCentredString(
-        TENGAH,
-        Y_POS + 8.7 * cm,
-        f"No: {data.get('No', '-')}  |  "
-        f"Tgl Terima: {data.get('Tanggal_Pengantaran', '-')}  |  "
-        f"Tgl Ambil: {data.get('Tanggal_Pengambilan', '-')}",
-    )
-
-    # Daftar berkas
-    yy = Y_POS + 7.8 * cm
+    # Checklist Berkas
+    yy = Y_POS + 7.5 * cm
+    SEMUA_BERKAS = ["SK ASLI MENEMPATI", "PAS FOTO 3X4 (2 LBR)", "FC KTP PEMILIK", "FC KARTU SEWA", "SURAT KUASA", "SURAT KEHILANGAN"]
+    
     for i, item in enumerate(SEMUA_BERKAS, 1):
-        ada = item in berkas_list
-
-        # Nama berkas
-        c.setFont("Helvetica-BoldOblique", 9)
+        c.setFont("Helvetica-BoldOblique", 10)
         c.drawString(X_POS + 1 * cm, yy, f"{i}. {item}")
-
-        # Status ADA / TIDAK ADA
-        x_status = X_POS + 14 * cm
-        c.setFont("Helvetica-Bold", 9)
+        
+        c.setFont("Helvetica-Bold", 10)
+        x_status = X_POS + 14.5 * cm
         c.drawString(x_status, yy, "ADA   /   TIDAK ADA")
-
-        # Garis bawah pada pilihan yang sesuai
-        if ada:
-            # Garis bawah "ADA"
-            c.line(
-                x_status,
-                yy - 0.05 * cm,
-                x_status + 1.4 * cm,
-                yy - 0.05 * cm,
-            )
+        
+        # Logika Coret Otomatis
+        c.setLineWidth(1.2)
+        if item in berkas_list:
+            # Coret tulisan "TIDAK ADA"
+            c.line(x_status + 1.2 * cm, yy + 0.1 * cm, x_status + 3.8 * cm, yy + 0.1 * cm)
         else:
-            # Garis bawah "TIDAK ADA"
-            c.line(
-                x_status + 2.2 * cm,
-                yy - 0.05 * cm,
-                x_status + 5.5 * cm,
-                yy - 0.05 * cm,
-            )
+            # Coret tulisan "ADA"
+            c.line(x_status - 0.1 * cm, yy + 0.1 * cm, x_status + 0.8 * cm, yy + 0.1 * cm)
+        yy -= 0.7 * cm
 
-        yy -= 0.65 * cm
-
-    # Garis pemisah tanda tangan
+    # Area Tanda Tangan
     c.setLineWidth(1)
-    c.line(
-        X_POS + 0.15 * cm,
-        Y_POS + 2.8 * cm,
-        X_POS + 19.85 * cm,
-        Y_POS + 2.8 * cm,
-    )
-    c.line(TENGAH, Y_POS + 0.15 * cm, TENGAH, Y_POS + 2.8 * cm)
+    c.line(X_POS + 0.15 * cm, Y_POS + 3.0 * cm, X_POS + 19.85 * cm, Y_POS + 3.0 * cm) # Garis atas TTD
+    c.line(TENGAH, Y_POS + 0.15 * cm, TENGAH, Y_POS + 3.0 * cm) # Garis tengah TTD
 
-    # Label tanda tangan
     c.setFont("Helvetica-Bold", 9)
-    c.drawCentredString(X_POS + 5 * cm, Y_POS + 2.4 * cm, "PENGANTAR BERKAS")
-    c.drawCentredString(X_POS + 15 * cm, Y_POS + 2.4 * cm, "PETUGAS PENERIMA")
+    c.drawCentredString(X_POS + 5 * cm, Y_POS + 2.5 * cm, "PENGANTAR BERKAS")
+    c.drawCentredString(X_POS + 15 * cm, Y_POS + 2.5 * cm, "PETUGAS PENERIMA")
 
-    # Nama tanda tangan
-    c.setFont("Helvetica-Bold", 10)
-    nama_pengantar = str(data.get("Nama_Pengantar_Berkas", "-")).upper()
-    nama_penerima = str(data.get("Penerima_Berkas", "-")).upper()
-    c.drawCentredString(X_POS + 5 * cm, Y_POS + 0.5 * cm, f"( {nama_pengantar} )")
-    c.drawCentredString(X_POS + 15 * cm, Y_POS + 0.5 * cm, f"( {nama_penerima} )")
+    c.setFont("Helvetica-Bold", 11)
+    c.drawCentredString(X_POS + 5 * cm, Y_POS + 0.6 * cm, f"( {str(data.get('Nama_Pengantar_Berkas', '')).upper()} )")
+    c.drawCentredString(X_POS + 15 * cm, Y_POS + 0.6 * cm, f"( {str(data.get('Penerima_Berkas', '')).upper()} )")
 
     c.showPage()
 
     # ------------------------------------------
-    # HALAMAN 2 - BELAKANG
+    # HALAMAN 2 - BELAKANG (Detail & Perhatian)
     # ------------------------------------------
-    gambar_border()
+    # Bingkai Tetap Sama
+    c.setLineWidth(1.5)
+    c.rect(X_POS, Y_POS, 20 * cm, 10 * cm)
+    c.setLineWidth(0.5)
+    c.rect(X_POS + 0.15 * cm, Y_POS + 0.15 * cm, 19.7 * cm, 9.7 * cm)
 
-    # Judul halaman belakang
-    c.setFont("Helvetica-Bold", 11)
-    c.drawCentredString(TENGAH, Y_POS + 9.3 * cm, "DETAIL PENGANTARAN BERKAS")
-
-    # Tabel informasi
-    ROWS = [
-        ("NO. URUT", data.get("No", "-")),
+    # Tabel Detail (Dibuat ringkas agar muat Perhatian)
+    y_tab = Y_POS + 9.4 * cm
+    TINGGI_B = 1.05 * cm
+    DETAIL_ROWS = [
+        ("NOMOR URUT", data.get("No", "-")),
         ("TGL TERIMA", data.get("Tanggal_Pengantaran", "-")),
         ("TGL AMBIL", data.get("Tanggal_Pengambilan", "-")),
-        ("NAMA TOKO", str(data.get("Nama_Toko", "-")).upper()),
-        ("NO. TOKO", str(data.get("No_Toko", "-")).upper()),
-        ("PEMILIK SK", str(data.get("Nama_Pemilik_Asli", "-")).upper()),
-        ("PENGANTAR", str(data.get("Nama_Pengantar_Berkas", "-")).upper()),
-        ("PENERIMA", str(data.get("Penerima_Berkas", "-")).upper()),
+        ("NAMA TOKO", data.get("Nama_Toko", "-")),
+        ("NOMOR TOKO", data.get("No_Toko", "-")),
+        ("PEMILIK (SK)", data.get("Nama_Pemilik_Asli", "-"))
     ]
 
-    TINGGI_BARIS = 0.75 * cm
-    LEBAR_LABEL = 4.5 * cm
-    LEBAR_NILAI = 14.5 * cm
-    y_tab = Y_POS + 8.8 * cm
+    for label, val in DETAIL_ROWS:
+        # Kotak Label
+        c.rect(X_POS + 0.15 * cm, y_tab - TINGGI_B, 6 * cm, TINGGI_B)
+        # Kotak Isi
+        c.rect(X_POS + 6.15 * cm, y_tab - TINGGI_B, 13.7 * cm, TINGGI_B)
+        
+        c.setFont("Helvetica-Bold", 9)
+        c.drawString(X_POS + 0.5 * cm, y_tab - 0.7 * cm, label)
+        c.setFont("Helvetica-Bold", 10)
+        c.drawString(X_POS + 6.5 * cm, y_tab - 0.7 * cm, str(val).upper())
+        y_tab -= TINGGI_B
 
-    for label, val in ROWS:
-        # Sel label
-        c.setLineWidth(0.5)
-        c.rect(X_POS + 0.15 * cm, y_tab - TINGGI_BARIS, LEBAR_LABEL, TINGGI_BARIS)
-        # Sel nilai
-        c.rect(
-            X_POS + 0.15 * cm + LEBAR_LABEL,
-            y_tab - TINGGI_BARIS,
-            LEBAR_NILAI,
-            TINGGI_BARIS,
-        )
-
-        c.setFont("Helvetica-Bold", 8)
-        c.drawString(X_POS + 0.3 * cm, y_tab - 0.52 * cm, label)
-
-        c.setFont("Helvetica", 9)
-        c.drawString(
-            X_POS + 0.15 * cm + LEBAR_LABEL + 0.2 * cm,
-            y_tab - 0.52 * cm,
-            str(val),
-        )
-
-        y_tab -= TINGGI_BARIS
-
-    # Berkas yang dibawa (ringkasan)
-    berkas_str = ", ".join(berkas_list) if berkas_list else "TIDAK ADA"
-    c.setFont("Helvetica-Bold", 8)
-    c.drawString(X_POS + 0.5 * cm, Y_POS + 2.6 * cm, "BERKAS YANG DIBAWA:")
-    c.setFont("Helvetica", 7.5)
-
-    # Wrap text jika panjang
-    maks_char = 90
-    if len(berkas_str) > maks_char:
-        c.drawString(X_POS + 0.5 * cm, Y_POS + 2.2 * cm, berkas_str[:maks_char])
-        c.drawString(X_POS + 0.5 * cm, Y_POS + 1.8 * cm, berkas_str[maks_char:])
-    else:
-        c.drawString(X_POS + 0.5 * cm, Y_POS + 2.2 * cm, berkas_str)
-
-    # Catatan perhatian
-    c.setFont("Helvetica-Bold", 8)
-    c.drawString(X_POS + 0.5 * cm, Y_POS + 1.5 * cm, "PERHATIAN:")
-    c.setFont("Helvetica", 7.5)
-    c.drawString(
-        X_POS + 0.5 * cm,
-        Y_POS + 1.1 * cm,
-        "1. Simpan tanda terima ini untuk mengambil SK asli.",
-    )
-    c.drawString(
-        X_POS + 0.5 * cm,
-        Y_POS + 0.75 * cm,
-        "2. Kehilangan tanda terima harap melapor ke petugas UPTD.",
-    )
-    c.drawString(
-        X_POS + 0.5 * cm,
-        Y_POS + 0.4 * cm,
-        "3. Pengambilan tidak dapat diwakilkan tanpa surat kuasa.",
-    )
+    # Teks Perhatian (Di bagian bawah)
+    c.setFont("Helvetica-Bold", 10)
+    c.drawString(X_POS + 0.6 * cm, Y_POS + 2.5 * cm, "PERHATIAN:")
+    c.setFont("Helvetica", 9)
+    c.drawString(X_POS + 0.6 * cm, Y_POS + 2.0 * cm, "1. Simpan tanda terima ini sebagai syarat pengambilan SK asli.")
+    c.drawString(X_POS + 0.6 * cm, Y_POS + 1.5 * cm, "2. Kehilangan tanda terima harap melapor ke petugas UPTD Pasar.")
+    c.drawString(X_POS + 0.6 * cm, Y_POS + 1.0 * cm, "3. Pengambilan SK tidak dapat diwakilkan tanpa Surat Kuasa bermaterai.")
 
     c.save()
     buffer.seek(0)
