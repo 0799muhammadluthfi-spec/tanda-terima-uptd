@@ -84,16 +84,14 @@ def cetak_tanda_terima_parkir(data):
     return buffer
 
 # ==========================================
-# 1. KONFIGURASI & LOGO
+# 2. KONFIGURASI & LOGO
 # ==========================================
 st.set_page_config(page_title="UPTD PASAR KANDANGAN", page_icon="🏪", layout="wide")
-
 URL_LOGO_HSS = "https://hsskab.go.id/wp-content/uploads/2021/04/Logo-HSS-min.png"
-
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 # ==========================================
-# 2. FUNGSI HELPER
+# 3. FUNGSI HELPER
 # ==========================================
 def load_data(worksheet: str) -> pd.DataFrame:
     try:
@@ -129,6 +127,40 @@ def get_next_no(df: pd.DataFrame, col: str = "No") -> int:
         return int(nums.max()) + 1 if not nums.empty else 1
     except: return 1
 
+def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
+    buffer = BytesIO(); UKURAN_KERTAS = (21.5 * cm, 33 * cm); c = canvas.Canvas(buffer, pagesize=UKURAN_KERTAS)
+    M = 0.75 * cm; TINGGI_POTONG = 12 * cm; Y_POTONG = 33 * cm - TINGGI_POTONG
+    Y_BASE = Y_POTONG + M; X_POS = M; LEBAR_BOX = 21.5 * cm - (2 * M); TINGGI_BOX = TINGGI_POTONG - (2 * M); TENGAH = 21.5 * cm / 2
+    def gambar_garis_potong():
+        c.setLineWidth(1); c.setDash(4, 4); c.line(0, Y_POTONG, 21.5 * cm, Y_POTONG)
+        c.setFont("Helvetica-Oblique", 8); c.drawString(0.5 * cm, Y_POTONG + 0.15 * cm, "✂ --- Batas potong (Tinggi 12 cm) ---"); c.setDash()
+    gambar_garis_potong(); c.setLineWidth(1.5); c.rect(X_POS, Y_BASE, LEBAR_BOX, TINGGI_BOX); c.rect(X_POS + 0.15 * cm, Y_BASE + 0.15 * cm, LEBAR_BOX - 0.3 * cm, TINGGI_BOX - 0.3 * cm)
+    c.setFont("Helvetica-Bold", 13); c.drawCentredString(TENGAH, Y_BASE + 9.3 * cm, "TANDA TERIMA BERKAS PERPANJANGAN IZIN TOKO")
+    c.setLineWidth(2); c.line(TENGAH - 5.5*cm, Y_BASE + 9.0*cm, TENGAH + 5.5*cm, Y_BASE + 9.0*cm)
+    yy = Y_BASE + 8.0 * cm; SEMUA_BERKAS = ["SK ASLI MENEMPATI", "PAS FOTO 3X4 (2 LBR)", "FC KTP PEMILIK", "FC KARTU SEWA", "SURAT KUASA", "SURAT KEHILANGAN"]
+    for i, item in enumerate(SEMUA_BERKAS, 1):
+        c.setFont("Helvetica-BoldOblique", 10); c.drawString(X_POS + 1 * cm, yy, f"{i}. {item}")
+        c.setFont("Helvetica-Bold", 10); x_status = X_POS + 14 * cm; c.drawString(x_status, yy, "ADA   /   TIDAK ADA")
+        c.setLineWidth(1.5); y_strike = yy + 0.11 * cm
+        if item in berkas_list: c.line(x_status + 1.4 * cm, y_strike, x_status + 3.5 * cm, y_strike)
+        else: c.line(x_status - 0.1 * cm, y_strike, x_status + 0.8 * cm, y_strike)
+        yy -= 0.7 * cm
+    c.setLineWidth(1.5); c.line(X_POS + 0.15 * cm, Y_BASE + 3.0 * cm, X_POS + LEBAR_BOX - 0.15 * cm, Y_BASE + 3.0 * cm); c.line(TENGAH, Y_BASE + 0.15 * cm, TENGAH, Y_BASE + 3.0 * cm)
+    c.setFont("Helvetica-Bold", 9); c.drawCentredString(X_POS + 5 * cm, Y_BASE + 2.5 * cm, "PENGANTAR BERKAS"); c.drawCentredString(X_POS + 15 * cm, Y_BASE + 2.5 * cm, "PETUGAS PENERIMA")
+    c.setFont("Helvetica-Bold", 11); c.drawCentredString(X_POS + 5 * cm, Y_BASE + 0.6 * cm, f"( {str(data.get('Nama_Pengantar_Berkas', '')).upper()} )"); c.drawCentredString(X_POS + 15 * cm, Y_BASE + 0.6 * cm, f"( {str(data.get('Penerima_Berkas', '')).upper()} )")
+    c.showPage(); gambar_garis_potong(); c.saveState(); c.setFillColorRGB(0.9, 0.9, 0.9); c.setFont("Helvetica-Bold", 35); c.translate(TENGAH, Y_BASE + (TINGGI_BOX / 2)); c.rotate(25); c.drawCentredString(0, 0, "UPTD PASAR KANDANGAN"); c.restoreState()
+    c.setLineWidth(1.5); c.rect(X_POS, Y_BASE, LEBAR_BOX, TINGGI_BOX); c.rect(X_POS + 0.15 * cm, Y_BASE + 0.15 * cm, LEBAR_BOX - 0.3 * cm, TINGGI_BOX - 0.3 * cm)
+    y_tab = Y_BASE + 10.35 * cm; TINGGI_B = 1.05 * cm; DETAIL_ROWS = [("NOMOR URUT", data.get("No", "-")), ("TANGGAL TERIMA", format_tgl_hari_indo(data.get("Tanggal_Pengantaran", "-"))), ("TANGGAL PENGAMBILAN", format_tgl_hari_indo(data.get("Tanggal_Pengambilan", "-"))), ("NAMA & NOMOR TOKO", f"{data.get('Nama_Toko', '-')} - {data.get('No_Toko', '-')}"), ("NAMA PEMILIK (SK)", data.get("Nama_Pemilik_Asli", "-")), ("NAMA PENGANTAR", data.get("Nama_Pengantar_Berkas", "-"))]
+    for label, val in DETAIL_ROWS:
+        c.setLineWidth(1.5); c.rect(X_POS + 0.15 * cm, y_tab - TINGGI_B, 6.5 * cm, TINGGI_B); c.rect(X_POS + 6.65 * cm, y_tab - TINGGI_B, 13.2 * cm, TINGGI_B)
+        c.setFont("Helvetica-Bold", 10); c.drawString(X_POS + 0.4 * cm, y_tab - 0.7 * cm, label); c.setFont("Helvetica-Bold", 10); c.drawString(X_POS + 7.0 * cm, y_tab - 0.7 * cm, str(val).upper()); y_tab -= TINGGI_B
+    c.setFont("Helvetica-Bold", 10); c.drawString(X_POS + 0.6 * cm, Y_BASE + 2.8 * cm, "PERHATIAN:"); c.setFont("Helvetica", 9); c.drawString(X_POS + 0.6 * cm, Y_BASE + 2.2 * cm, "1. Simpan tanda terima ini sebagai syarat pengambilan SK asli."); c.drawString(X_POS + 0.6 * cm, Y_BASE + 1.6 * cm, "2. Pengambilan SK hanya dapat dilakukan di jam kerja UPTD."); c.save(); buffer.seek(0); return buffer
+
+def cetak_overprint(tgl_ambil: str) -> BytesIO:
+    buffer = BytesIO(); c = canvas.Canvas(buffer, pagesize=(21.5 * cm, 33 * cm)); c.setFont("Helvetica-Bold", 10); X_POS = 0.75 * cm
+    y_target = 21.5 * cm + 0.75 * cm + 9.85 * cm - (1.05 * cm * 2) - 0.7 * cm 
+    c.drawString(X_POS + 7.0 * cm, y_target, format_tgl_hari_indo(tgl_ambil).upper()); c.save(); buffer.seek(0); return buffer
+
 # ==========================================
 # 4. MODUL PENGANTARAN & PENGAMBILAN
 # ==========================================
@@ -138,10 +170,7 @@ def halaman_pengantaran():
     col_stat1, col_stat2, col_stat3 = st.columns(3)
     total = len(df_sk) if not df_sk.empty else 0
     sudah_ambil = len(df_sk[df_sk["Tanggal_Pengambilan"] != "-"]) if not df_sk.empty else 0
-    col_stat1.metric("📦 Total Berkas", total)
-    col_stat2.metric("✅ Sudah Diambil", sudah_ambil)
-    col_stat3.metric("⏳ Belum Diambil", total - sudah_ambil)
-    
+    col_stat1.metric("📦 Total Berkas", total); col_stat2.metric("✅ Sudah Diambil", sudah_ambil); col_stat3.metric("⏳ Belum Diambil", total - sudah_ambil)
     SEMUA_BERKAS = ["SK ASLI MENEMPATI", "PAS FOTO 3X4 (2 LBR)", "FC KTP PEMILIK", "FC KARTU SEWA", "SURAT KUASA", "SURAT KEHILANGAN"]
     st.subheader("☑️ Pilih Berkas yang Dibawa:")
     cols_berkas = st.columns(3)
@@ -149,7 +178,6 @@ def halaman_pengantaran():
     for i, item in enumerate(SEMUA_BERKAS):
         with cols_berkas[i % 3]:
             if st.checkbox(item, key=f"cb_{item}"): sel_berkas.append(item)
-    
     st.divider()
     with st.form("form_pengantaran", clear_on_submit=False):
         st.subheader("📋 Data Pengantaran")
@@ -230,22 +258,22 @@ def halaman_parkir(menu_aktif):
         st.subheader("📝 FORM REKAP SETORAN")
         raw_tgl = st.text_input("MASUKKAN TANGGAL (Bisa 1/1/26 atau 01-01-2026)", value=datetime.now().strftime("%d-%m-%Y"))
         tgl_bersih = raw_tgl.replace("/", "-").strip()
+        
+        # --- PERBAIKAN PENCARIAN TANGGAL ---
         try:
-            if len(tgl_bersih.split("-")[-1]) == 2: 
-                tgl_obj = datetime.strptime(tgl_bersih, "%d-%m-%y")
-            else: 
-                tgl_obj = datetime.strptime(tgl_bersih, "%d-%m-%Y")
-            tgl_std = tgl_obj.strftime("%d-%m-%Y")
-            tgl_alt = f"{tgl_obj.day}-{tgl_obj.month}-{tgl_obj.year}"
-        except: 
-            tgl_std = tgl_bersih
-            tgl_alt = tgl_bersih
+            # Ubah input user jadi format tanggal mesin
+            tgl_input_dt = pd.to_datetime(tgl_bersih, dayfirst=True)
+            # Ubah kolom Tanggal di Excel jadi format tanggal mesin juga
+            df_parkir['temp_tgl'] = pd.to_datetime(df_parkir['Tanggal'], dayfirst=True, errors='coerce')
+            # Cari yang tanggalnya persis sama
+            baris_cocok = df_parkir[df_parkir['temp_tgl'].dt.date == tgl_input_dt.date()]
+        except:
+            baris_cocok = df_parkir[df_parkir["Tanggal"].str.strip() == tgl_bersih]
             
-        baris_cocok = df_parkir[(df_parkir["Tanggal"].astype(str) == tgl_std) | (df_parkir["Tanggal"].astype(str) == tgl_alt)]
         if not baris_cocok.empty:
             idx = baris_cocok.index[0]
             nama_ptgs = baris_cocok.iloc[0]["Nama_Petugas"]
-            st.success(f"👤 PETUGAS: **{nama_ptgs}** | 📅 **{tgl_std}**")
+            st.success(f"👤 PETUGAS: **{nama_ptgs}** | 📅 **{tgl_bersih}**")
             
             try: sisa_r2_lama = int(float(df_parkir.iloc[idx - 1].get("Sisa_Karcis_r2", 0))) if idx > 0 else 0
             except: sisa_r2_lama = 0
@@ -268,6 +296,9 @@ def halaman_parkir(menu_aktif):
                 if st.form_submit_button("💾 UPDATE DATA", type="primary"):
                     sisa_n_r2 = (pk_r2 + sisa_r2_lama) - tot_r2
                     sisa_n_r4 = (pk_r4 + sisa_r4_lama) - tot_r4
+                    # Buang kolom temp sebelum simpan
+                    if 'temp_tgl' in df_parkir.columns: df_parkir = df_parkir.drop(columns=['temp_tgl'])
+                    
                     df_parkir.loc[idx, ["Pengambilan_Karcis_R2", "Total_Karcis_R2", "MPP_Roda_R2", "Sisa_Karcis_r2", "Khusus_Roda_R2"]] = [str(pk_r2), str(tot_r2), str(mpp_r2), str(sisa_n_r2), str(tot_r2-mpp_r2)]
                     df_parkir.loc[idx, ["Pengambilan_Karcis_R4", "Total_Karcis_R4", "MPP_Roda_R4", "Sisa_Karcis_r4", "Khusus_Roda_R4"]] = [str(pk_r4), str(tot_r4), str(mpp_r4), str(sisa_n_r4), str(tot_r4-mpp_r4)]
                     df_parkir.loc[idx, ["Status_Khusus", "Status_MPP"]] = ["BELUM", "BELUM"]
