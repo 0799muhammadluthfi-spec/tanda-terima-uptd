@@ -23,33 +23,25 @@ conn = st.connection("gsheets", type=GSheetsConnection)
 # FUNGSI LOGO HSS - PASTI MUNCUL
 # ==========================================
 def get_logo_base64():
-    """Ambil logo HSS dan convert ke base64 agar pasti muncul via HTML img tag"""
-    
-    # Coba file lokal dulu
     for nama_file in ["logo_hss.png", "logo.png", "Logo_HSS.png"]:
         if os.path.exists(nama_file):
             with open(nama_file, "rb") as f:
                 return base64.b64encode(f.read()).decode()
-    
-    # Kalau tidak ada file lokal, download dari URL dan cache
     urls = [
         "https://upload.wikimedia.org/wikipedia/commons/3/3e/Lambang_Kabupaten_Hulu_Sungai_Selatan.png",
         "https://raw.githubusercontent.com/pfrfrfr/logo-pemda/main/hulu_sungai_selatan.png",
     ]
-    
     for url in urls:
         try:
             req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
             with urllib.request.urlopen(req, timeout=5) as response:
                 img_data = response.read()
-                if len(img_data) > 100:  # Pastikan bukan error page
+                if len(img_data) > 100:
                     return base64.b64encode(img_data).decode()
         except Exception:
             continue
-    
     return None
 
-# Cache logo agar tidak download berulang
 if "logo_b64" not in st.session_state:
     st.session_state["logo_b64"] = get_logo_base64()
 
@@ -67,45 +59,88 @@ st.markdown("""
         background: linear-gradient(160deg, #f8fafc 0%, #f1f5f9 100%);
     }
 
-    /* ===== HAPUS TOOLTIP DOUBLE / KEYBOARD SHORTCUT POPUP ===== */
-    [data-testid="stSidebar"] [title],
-    [data-testid="stSidebar"] [data-tooltip],
-    [data-testid="stSidebar"] .stTooltipIcon,
-    [data-testid="stSidebar"] button[kind="header"],
-    [data-testid="stSidebar"] [data-testid="collapsedControl"],
-    .stAppDeployButton,
-    [data-testid="stToolbar"],
-    [data-testid="stDecoration"],
-    [data-testid="stStatusWidget"],
-    div[data-testid="stToolbar"],
-    div[data-testid="stDecoration"],
-    button[title="View fullscreen"],
-    .viewerBadge_container__r5tak,
-    .styles_viewerBadge__CvC9N {
+    /* ==============================================
+       HAPUS SEMUA TOOLBAR / HEADER / KEYBOARD HINT
+       ============================================== */
+    /* Header bar Streamlit sepenuhnya */
+    header,
+    header[data-testid="stHeader"],
+    [data-testid="stHeader"] {
         display: none !important;
         visibility: hidden !important;
-        pointer-events: none !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        max-height: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: hidden !important;
+        position: absolute !important;
+        top: -9999px !important;
+    }
+
+    /* Toolbar (titik tiga pojok kanan) */
+    [data-testid="stToolbar"],
+    div[data-testid="stToolbar"],
+    [data-testid="stDecoration"],
+    div[data-testid="stDecoration"],
+    [data-testid="stStatusWidget"],
+    div[data-testid="stStatusWidget"] {
+        display: none !important;
+        visibility: hidden !important;
         height: 0 !important;
         width: 0 !important;
         overflow: hidden !important;
+        position: absolute !important;
+        pointer-events: none !important;
     }
-    
-    /* Hapus keyboard shortcut overlay yang muncul di hover */
-    iframe[title="streamlit_shortcuts"],
-    div[data-testid="stMainMenu"],
+
+    /* Main menu hamburger */
     #MainMenu,
-    header[data-testid="stHeader"] button,
-    header button {
+    button[kind="header"],
+    [data-testid="stMainMenu"],
+    div[data-testid="stMainMenu"] {
         display: none !important;
         visibility: hidden !important;
     }
 
-    /* Hapus header bar streamlit sepenuhnya */
-    header[data-testid="stHeader"] {
+    /* Keyboard shortcut overlay/iframe */
+    iframe[title*="shortcut"],
+    iframe[title*="keyboard"],
+    iframe[title*="Keyboard"],
+    iframe[title="streamlit_shortcuts"] {
+        display: none !important;
+        visibility: hidden !important;
         height: 0 !important;
-        min-height: 0 !important;
-        padding: 0 !important;
-        overflow: hidden !important;
+        width: 0 !important;
+    }
+
+    /* Deploy button & badge */
+    .stAppDeployButton,
+    .viewerBadge_container__r5tak,
+    .styles_viewerBadge__CvC9N,
+    [data-testid="manage-app-button"] {
+        display: none !important;
+        visibility: hidden !important;
+    }
+
+    /* Tooltip di sidebar */
+    [data-testid="stSidebar"] [title],
+    [data-testid="stSidebar"] .stTooltipIcon,
+    [data-testid="collapsedControl"] {
+        display: none !important;
+        visibility: hidden !important;
+    }
+
+    /* Footer bawaan */
+    footer,
+    .reportview-container .main footer {
+        display: none !important;
+        visibility: hidden !important;
+    }
+
+    /* Fullscreen button on widgets */
+    button[title="View fullscreen"] {
+        display: none !important;
     }
 
     /* ============================================
@@ -116,7 +151,6 @@ st.markdown("""
         border-right: 1px solid rgba(255,255,255,0.05);
     }
 
-    /* --- SEMUA TEKS SIDEBAR: WARNA TERANG --- */
     [data-testid="stSidebar"] *:not(input):not(textarea) {
         font-family: 'Inter', sans-serif !important;
     }
@@ -132,7 +166,7 @@ st.markdown("""
         color: #e2e8f0 !important;
     }
 
-    /* --- SELECTBOX LABEL ("PILIH MODUL:") --- */
+    /* SELECTBOX LABEL */
     [data-testid="stSidebar"] .stSelectbox > label,
     [data-testid="stSidebar"] .stSelectbox [data-testid="stWidgetLabel"],
     [data-testid="stSidebar"] .stSelectbox [data-testid="stWidgetLabel"] p,
@@ -144,7 +178,7 @@ st.markdown("""
         color: #cbd5e1 !important;
     }
 
-    /* --- SELECTBOX VALUE (teks yang dipilih di dalam kotak) --- */
+    /* SELECTBOX VALUE */
     [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"],
     [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] span,
     [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] div,
@@ -152,21 +186,19 @@ st.markdown("""
     [data-testid="stSidebar"] .stSelectbox [role="combobox"],
     [data-testid="stSidebar"] .stSelectbox [role="combobox"] span,
     [data-testid="stSidebar"] .stSelectbox [role="option"],
-    [data-testid="stSidebar"] [data-baseweb="select"] .css-1dimb5e-singleValue,
     [data-testid="stSidebar"] [data-baseweb="select"] > div > div {
         color: #f8fafc !important;
         font-size: 0.88rem !important;
         font-weight: 600 !important;
     }
 
-    /* --- SELECTBOX BOX BORDER --- */
     [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div {
         background: rgba(255,255,255,0.06) !important;
         border: 1px solid rgba(255,255,255,0.15) !important;
         border-radius: 8px !important;
     }
 
-    /* --- RADIO LABEL ("MENU SK:" / "MENU PARKIR:") --- */
+    /* RADIO LABEL */
     [data-testid="stSidebar"] .stRadio > label,
     [data-testid="stSidebar"] .stRadio > [data-testid="stWidgetLabel"],
     [data-testid="stSidebar"] .stRadio > [data-testid="stWidgetLabel"] p {
@@ -177,7 +209,7 @@ st.markdown("""
         color: #94a3b8 !important;
     }
 
-    /* --- RADIO OPTIONS (item yang bisa diklik) --- */
+    /* RADIO OPTIONS */
     [data-testid="stSidebar"] .stRadio [role="radiogroup"] label,
     [data-testid="stSidebar"] .stRadio [role="radiogroup"] label span,
     [data-testid="stSidebar"] .stRadio [role="radiogroup"] label p,
@@ -193,12 +225,10 @@ st.markdown("""
         color: #60a5fa !important;
     }
 
-    /* --- SIDEBAR DIVIDER --- */
     [data-testid="stSidebar"] hr {
         border-color: rgba(255,255,255,0.08) !important;
     }
 
-    /* --- SIDEBAR BUTTON --- */
     [data-testid="stSidebar"] .stButton > button {
         color: #e2e8f0 !important;
         border: 1px solid rgba(255,255,255,0.15) !important;
@@ -213,14 +243,13 @@ st.markdown("""
     }
 
     /* ============================================
-       MAIN CONTENT - FONT GLOBAL
+       MAIN CONTENT
        ============================================ */
     .main *,
     [data-testid="stMainBlockContainer"] * {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
     }
 
-    /* --- HEADINGS --- */
     .main h1, [data-testid="stMainBlockContainer"] h1 {
         font-size: 1.55rem !important;
         font-weight: 800 !important;
@@ -240,7 +269,6 @@ st.markdown("""
         color: #334155 !important;
     }
 
-    /* --- BODY TEXT --- */
     .main p, .main span, .main li,
     [data-testid="stMainBlockContainer"] p {
         font-size: 0.88rem !important;
@@ -253,7 +281,6 @@ st.markdown("""
         color: #1e293b !important;
     }
 
-    /* --- FORM LABELS (MAIN AREA) --- */
     .main .stTextInput label,
     .main .stNumberInput label,
     .main .stSelectbox label,
@@ -269,7 +296,6 @@ st.markdown("""
         color: #374151 !important;
     }
 
-    /* --- INPUT FIELDS --- */
     .main .stTextInput input,
     .main .stNumberInput input {
         font-size: 0.88rem !important;
@@ -290,7 +316,6 @@ st.markdown("""
         color: #9ca3af !important;
     }
 
-    /* --- METRIC CARDS --- */
     [data-testid="stMetric"] {
         background: #ffffff;
         border: 1px solid #e5e7eb;
@@ -312,7 +337,7 @@ st.markdown("""
         color: #111827 !important;
     }
 
-    /* --- BUTTONS MAIN --- */
+    /* BUTTONS */
     .main .stButton > button {
         font-size: 0.82rem !important;
         font-weight: 600 !important;
@@ -336,6 +361,8 @@ st.markdown("""
         background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
         color: #ffffff !important;
     }
+
+    /* DOWNLOAD BUTTON - PERBAIKI TEKS TIDAK TERTIMPA */
     .main .stDownloadButton > button {
         font-size: 0.82rem !important;
         font-weight: 600 !important;
@@ -343,9 +370,28 @@ st.markdown("""
         background: linear-gradient(135deg, #10b981, #059669) !important;
         color: #ffffff !important;
         border: none !important;
+        padding: 8px 16px !important;
+        line-height: 1.4 !important;
+        white-space: nowrap !important;
+        overflow: visible !important;
+        text-overflow: unset !important;
+        min-height: 38px !important;
+    }
+    .main .stDownloadButton > button:hover {
+        background: linear-gradient(135deg, #059669, #047857) !important;
+        color: #ffffff !important;
+    }
+    .main .stDownloadButton > button p,
+    .main .stDownloadButton > button span,
+    .main .stDownloadButton > button div {
+        color: #ffffff !important;
+        font-size: 0.82rem !important;
+        overflow: visible !important;
+        white-space: nowrap !important;
+        text-overflow: unset !important;
     }
 
-    /* --- FORM CONTAINER --- */
+    /* FORM */
     [data-testid="stForm"] {
         background: #ffffff;
         border: 1px solid #e5e7eb;
@@ -353,12 +399,13 @@ st.markdown("""
         padding: 20px !important;
     }
 
-    /* --- EXPANDER --- */
+    /* EXPANDER */
     [data-testid="stExpander"] {
         border: 1px solid #e5e7eb !important;
         border-radius: 10px !important;
         background: #ffffff !important;
         margin-bottom: 6px !important;
+        overflow: visible !important;
     }
     .streamlit-expanderHeader {
         font-size: 0.86rem !important;
@@ -366,7 +413,7 @@ st.markdown("""
         color: #1e293b !important;
     }
 
-    /* --- DATAFRAME --- */
+    /* DATAFRAME */
     [data-testid="stDataFrame"] {
         border-radius: 10px;
         border: 1px solid #e5e7eb;
@@ -385,19 +432,19 @@ st.markdown("""
         color: #374151 !important;
     }
 
-    /* --- ALERTS --- */
+    /* ALERTS */
     .main [data-testid="stAlert"] p {
         font-size: 0.84rem !important;
         font-weight: 500 !important;
     }
 
-    /* --- DIVIDER --- */
+    /* DIVIDER */
     .main hr {
         border: none !important;
         border-top: 1px solid #e5e7eb !important;
     }
 
-    /* --- ANIMATION --- */
+    /* ANIMATION */
     .main .block-container {
         animation: fadeIn 0.3s ease-out;
         max-width: 1100px;
@@ -407,14 +454,9 @@ st.markdown("""
         to { opacity: 1; transform: translateY(0); }
     }
 
-    /* --- SCROLLBAR --- */
+    /* SCROLLBAR */
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-
-    /* --- HIDE STREAMLIT DEFAULT --- */
-    #MainMenu { display: none !important; }
-    footer { display: none !important; }
-    header { display: none !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -823,11 +865,10 @@ def halaman_parkir(menu):
 # ==========================================
 def main():
     with st.sidebar:
-        # ===== LOGO HSS - 3 METODE FALLBACK =====
+        # ===== LOGO HSS =====
         logo_b64 = st.session_state.get("logo_b64")
         
         if logo_b64:
-            # Base64 embedded - PASTI muncul, tidak butuh akses internet lagi
             st.markdown(f"""
             <div style="text-align:center; padding:18px 0 6px 0;">
                 <img src="data:image/png;base64,{logo_b64}" 
@@ -836,28 +877,25 @@ def main():
             </div>
             """, unsafe_allow_html=True)
         else:
-            # Fallback: Emoji sebagai pengganti logo
             st.markdown("""
             <div style="text-align:center; padding:18px 0 6px 0;">
                 <div style="font-size:3rem; line-height:1;">🏛️</div>
             </div>
             """, unsafe_allow_html=True)
 
-        # ===== HEADER TEXT =====
+        # ===== HEADER: UPTD PASAR KANDANGAN + KAB HSS (1 baris, tanpa emoji) =====
         st.markdown("""
-        <div style="text-align:center; padding:4px 0 6px 0;">
-            <p style="font-family:'Inter',sans-serif; font-size:0.58rem; font-weight:600; 
-                      color:#94a3b8 !important; letter-spacing:0.1em; 
-                      text-transform:uppercase; margin:0; line-height:1.6;">
-                KABUPATEN HULU SUNGAI SELATAN
-            </p>
-        </div>
-        <div style="text-align:center; padding:0 0 14px 0; 
+        <div style="text-align:center; padding:4px 0 14px 0; 
                     border-bottom:1px solid rgba(255,255,255,0.08); margin-bottom:14px;">
-            <p style="font-family:'Inter',sans-serif; font-size:1rem; font-weight:800; 
+            <p style="font-family:'Inter',sans-serif; font-size:1.05rem; font-weight:800; 
                       color:#f1f5f9 !important; letter-spacing:-0.02em; 
-                      margin:0; line-height:1.35;">
-                🏪 UPTD PASAR<br>KANDANGAN
+                      margin:0 0 4px 0; line-height:1.3;">
+                UPTD PASAR KANDANGAN
+            </p>
+            <p style="font-family:'Inter',sans-serif; font-size:0.78rem; font-weight:600; 
+                      color:#94a3b8 !important; letter-spacing:0.04em; 
+                      margin:0; line-height:1.4;">
+                KABUPATEN HULU SUNGAI SELATAN
             </p>
         </div>
         """, unsafe_allow_html=True)
