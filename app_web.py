@@ -211,7 +211,7 @@ def halaman_pengambilan_sk():
     st.divider(); st.subheader(f"📊 BELUM DIAMBIL ({len(df_b)})"); st.dataframe(df_b.sort_values(by="No", ascending=True), use_container_width=True, hide_index=True)
 
 # ==========================================
-# 5. MODUL PARKIR (PERBAIKAN PENCARIAN TGL)
+# 5. MODUL PARKIR (SUDAH FINAL BEBAS ERROR)
 # ==========================================
 def halaman_parkir(menu):
     st.header(f"🚗 {menu}"); df_p = load_data("DATA_PARKIR")
@@ -221,7 +221,6 @@ def halaman_parkir(menu):
         tgl_input_user = st.text_input("MASUKKAN TANGGAL", value=datetime.now().strftime("%d-%m-%Y"))
         
         # --- LOGIKA PENCARIAN TANGGAL SAKTI ---
-        # 1. Ubah input user jadi objek tanggal
         try:
             tgl_bersih = str(tgl_input_user).strip().replace('/', '-')
             if len(tgl_bersih.split('-')[-1]) == 2:
@@ -229,11 +228,7 @@ def halaman_parkir(menu):
             else:
                 dt_user = datetime.strptime(tgl_bersih, "%d-%m-%Y").date()
             
-            # 2. Ubah kolom Tanggal di Sheets jadi objek tanggal untuk dibandingkan
-            # pd.to_datetime sangat pintar mendeteksi format Sheets (1/4/2026 atau 2026-04-01)
             df_p['Tgl_Temp'] = pd.to_datetime(df_p['Tanggal'], dayfirst=True, errors='coerce').dt.date
-            
-            # 3. Cari baris yang tanggalnya SAMA
             baris = df_p[df_p['Tgl_Temp'] == dt_user]
         except:
             baris = pd.DataFrame()
@@ -246,8 +241,6 @@ def halaman_parkir(menu):
             # AMBIL SISA KEMARIN (idx - 1) - ANTI ERROR
             sisa_r2 = pd.to_numeric(df_p.iloc[idx - 1].get("Sisa_Stok_R2", 0), errors='coerce') if idx > 0 else 0
             sisa_r4 = pd.to_numeric(df_p.iloc[idx - 1].get("Sisa_Stok_R4", 0), errors='coerce') if idx > 0 else 0
-            
-            # Jika kosong/tidak terbaca, paksa jadi angka 0
             sisa_r2 = 0 if pd.isna(sisa_r2) else sisa_r2
             sisa_r4 = 0 if pd.isna(sisa_r4) else sisa_r4
             
@@ -268,12 +261,11 @@ def halaman_parkir(menu):
                     sn2 = (pk2 + sisa_r2) - tr2
                     sn4 = (pk4 + sisa_r4) - tr4
                     
-                    # TAMBAHKAN str() UNTUK SEMUA ANGKA
+                    # TAMBAHKAN str() UNTUK SEMUA ANGKA AGAR TIDAK TYPE ERROR
                     df_p.loc[idx, ["Pengambilan_Karcis_R2", "Total_Karcis_R2", "MPP_Roda_R2", "Sisa_Stok_R2", "Khusus_Roda_R2"]] = [str(pk2), str(tr2), str(mr2), str(sn2), str(tr2-mr2)]
                     df_p.loc[idx, ["Pengambilan_Karcis_R4", "Total_Karcis_R4", "MPP_Roda_R4", "Sisa_Stok_R4", "Khusus_Roda_R4"]] = [str(pk4), str(tr4), str(mr4), str(sn4), str(tr4-mr4)]
                     df_p.loc[idx, ["Status_Khusus", "Status_MPP"]] = ["BELUM", "BELUM"]
                     
-                    # Hapus kolom temp sebelum save
                     if 'Tgl_Temp' in df_p.columns: df_p = df_p.drop(columns=['Tgl_Temp'])
                     
                     if safe_update("DATA_PARKIR", df_p): 
@@ -282,33 +274,41 @@ def halaman_parkir(menu):
             st.warning("⚠️ Tanggal belum ada di jadwal Sheet. Pastikan jadwal di Sheets sudah terisi.")
 
     elif menu == "KONFIRMASI":
-        df_pen = df_p[(df_p["Status_Khusus"] == "BELUM") | (df_p["Status_MPP"] == "BELUM")].copy()
-        # Filter baris yang sudah diisi datanya (Total tidak '-')
-        df_pen = df_pen[df_pen["Total_Karcis_R2"] != "-"]
+        # Ambil data yang "Total_Karcis_R2" nya sudah terisi angka (bukan strip atau kosong)
+        df_pen = df_p[(df_p["Total_Karcis_R2"] != "-") & (df_p["Total_Karcis_R2"] != "nan") & (df_p["Total_Karcis_R2"].notna())].copy()
         
         if df_pen.empty: 
             st.info("TIDAK ADA DATA KONFIRMASI.")
         else:
+            # Urutkan dari data terbaru (15 hari terakhir) agar bisa diprint kapan saja
+            df_pen = df_pen.sort_index(ascending=False).head(15)
+            
             for i, row in df_pen.iterrows():
-                with st.expander(f"📦 {row['Tanggal']} - {row['Nama_Petugas']}"):
+                lunas = (row["Status_Khusus"] == "SUDAH") and (row["Status_MPP"] == "SUDAH")
+                ikon = "✅" if lunas else "📦"
+                
+                with st.expander(f"{ikon} {row['Tanggal']} - {row['Nama_Petugas']}"):
                     ck, cm = st.columns(2)
                     with ck:
-                        st.write(f"**KHUSUS**\nR2: {row['Khusus_Roda_R2']}\nR4: {row['Khusus_Roda_R4']}")
-                        if st.button("TERIMA KHUSUS", key=f"k{i}", use_container_width=True):
-                            df_p.loc[i, "Status_Khusus"] = "SUDAH"
-                            if safe_update("DATA_PARKIR", df_p): st.rerun()
+                        st.write(f"**KHUSUS**\nR2: {row['Khusus_Roda_R2']} | R4: {row['Khusus_Roda_R4']}")
+                        if row["Status_Khusus"] == "BELUM":
+                            if st.button("TERIMA KHUSUS", key=f"k{i}", use_container_width=True):
+                                df_p.loc[i, "Status_Khusus"] = "SUDAH"
+                                if safe_update("DATA_PARKIR", df_p): st.rerun()
+                        else:
+                            st.success("✅ Telah Diterima")
+                            
                     with cm:
-                        st.write(f"**MPP**\nR2: {row['MPP_Roda_R2']}\nR4: {row['MPP_Roda_R4']}")
+                        st.write(f"**MPP**\nR2: {row['MPP_Roda_R2']} | R4: {row['MPP_Roda_R4']}")
                         if row["Status_MPP"] == "BELUM":
                             if st.button("TERIMA MPP", key=f"m{i}", type="primary", use_container_width=True):
                                 df_p.loc[i, "Status_MPP"] = "SUDAH"
                                 if safe_update("DATA_PARKIR", df_p): st.rerun()
                         else: 
-                            st.download_button("🖨️ CETAK PDF", data=cetak_tanda_terima_parkir(row), file_name=f"MPP_{row['Tanggal']}.pdf", key=f"p{i}", use_container_width=True)
+                            st.download_button("🖨️ CETAK PDF MPP", data=cetak_tanda_terima_parkir(row), file_name=f"MPP_{row['Tanggal']}.pdf", key=f"p{i}", use_container_width=True)
     
     st.divider()
     st.subheader("📊 LOG DATA TERAKHIR")
-    # Hapus kolom temp jika ada sebelum tampil
     if 'Tgl_Temp' in df_p.columns: df_p = df_p.drop(columns=['Tgl_Temp'])
     st.dataframe(df_p.sort_values(by="Tanggal", ascending=False).head(10), hide_index=True)
 
@@ -316,7 +316,6 @@ def halaman_parkir(menu):
 # 6. MAIN RUNNER (MODUL SELECTOR)
 # ==========================================
 def main():
-    # Menampilkan Logo HSS di Sidebar jika ada
     path_logo = "logo_hss.png" 
     if os.path.exists(path_logo):
         st.sidebar.image(path_logo, width=100)
