@@ -443,7 +443,7 @@ def halaman_parkir(menu_aktif):
     st.header(f"🚗 {menu_aktif}")
     df_parkir = load_data("DATA_PARKIR")
 
-if menu_aktif == "INPUT REKAP":
+    if menu_aktif == "INPUT REKAP":
         st.subheader("📝 FORM REKAP SETORAN")
         # Input tanggal untuk mencari jadwal di spreadsheet
         tgl_input = st.text_input("MASUKKAN TANGGAL (CONTOH: 20-04-2026)", value=datetime.now().strftime("%d-%m-%Y"))
@@ -454,7 +454,7 @@ if menu_aktif == "INPUT REKAP":
         if not baris_cocok.empty:
             idx = baris_cocok.index[0]
             nama_ptgs = baris_cocok.iloc[0]["Nama_Petugas"]
-            st.success(f"👤 PETUGAS: **{nama_ptgs}** | 📅 **{format_tgl_indo(tgl_input)}**")
+            st.success(f"👤 PETUGAS: **{nama_ptgs}** | 📅 **{tgl_input}**")
             
             # AMBIL SISA KEMARIN dari baris sebelumnya (idx - 1)
             sisa_r2_lama = df_parkir.iloc[idx - 1]["Sisa_Stok_R2"] if idx > 0 else 0
@@ -483,14 +483,16 @@ if menu_aktif == "INPUT REKAP":
                     df_parkir.loc[idx, ["Status_Khusus", "Status_MPP"]] = ["BELUM", "BELUM"]
                     
                     if safe_update("DATA_PARKIR", df_parkir):
-                        st.success("✅ BERHASIL DIUPDATE!"); st.rerun()
+                        st.success("✅ BERHASIL DIUPDATE!")
+                        st.rerun()
         else:
             st.warning("⚠️ TANGGAL TIDAK DITEMUKAN DI JADWAL SPREADSHEET.")
             
-        elif menu_aktif == "KONFIRMASI":
+    elif menu_aktif == "KONFIRMASI":
         st.subheader("✅ Verifikasi Penerimaan Karcis")
         for col in ["Status_Khusus", "Status_MPP"]:
-            if col not in df_parkir.columns: df_parkir[col] = "BELUM"
+            if col not in df_parkir.columns: 
+                df_parkir[col] = "BELUM"
             
         df_pending = df_parkir[(df_parkir["Status_Khusus"] == "BELUM") | (df_parkir["Status_MPP"] == "BELUM")]
         
@@ -506,7 +508,8 @@ if menu_aktif == "INPUT REKAP":
                         if row["Status_Khusus"] == "BELUM":
                             if st.button(f"TERIMA KHUSUS #{row['No']}", key=f"kh_{row['No']}", type="primary", use_container_width=True):
                                 df_parkir.loc[df_parkir["No"] == row["No"], "Status_Khusus"] = "SUDAH"
-                                if safe_update("DATA_PARKIR", df_parkir): st.rerun()
+                                if safe_update("DATA_PARKIR", df_parkir): 
+                                    st.rerun()
                         else: 
                             st.success("✅ KHUSUS OKE")
 
@@ -516,7 +519,8 @@ if menu_aktif == "INPUT REKAP":
                         if row["Status_MPP"] == "BELUM":
                             if st.button(f"TERIMA MPP #{row['No']}", key=f"mpp_{row['No']}", type="primary", use_container_width=True):
                                 df_parkir.loc[df_parkir["No"] == row["No"], "Status_MPP"] = "SUDAH"
-                                if safe_update("DATA_PARKIR", df_parkir): st.rerun()
+                                if safe_update("DATA_PARKIR", df_parkir): 
+                                    st.rerun()
                         else: 
                             st.success("✅ MPP OKE")
                             pdf_file = cetak_tanda_terima_parkir(row)
