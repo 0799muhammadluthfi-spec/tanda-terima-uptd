@@ -114,6 +114,18 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
 
     # HALAMAN 2 - BELAKANG
     gambar_garis_potong()
+
+    # --- KODE WATERMARK TIPIS ---
+    c.saveState()
+    c.setFillColorRGB(0.9, 0.9, 0.9) # Warna abu-abu sangat muda/tipis
+    c.setFont("Helvetica-Bold", 35) # Ukuran font besar
+    # Geser titik pusat ke tengah-tengah kotak
+    c.translate(TENGAH, Y_BASE + (TINGGI_BOX / 2)) 
+    c.rotate(25) # Putar tulisan jadi miring 25 derajat
+    c.drawCentredString(0, 0, "UPTD PASAR KANDANGAN")
+    c.restoreState()
+    # ----------------------------
+    
     c.setLineWidth(1.5)
     c.rect(X_POS, Y_BASE, LEBAR_BOX, TINGGI_BOX)
     c.rect(X_POS + 0.15 * cm, Y_BASE + 0.15 * cm, LEBAR_BOX - 0.3 * cm, TINGGI_BOX - 0.3 * cm)
