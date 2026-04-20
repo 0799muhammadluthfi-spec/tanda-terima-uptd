@@ -53,9 +53,13 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-    /* ===== BACKGROUND ===== */
-    .stApp {
-        background: linear-gradient(160deg, #f8fafc 0%, #f1f5f9 100%);
+    /* ===== PAKSA LIGHT MODE ===== */
+    .stApp,
+    [data-testid="stAppViewContainer"],
+    [data-testid="stMainBlockContainer"],
+    .main {
+        background: linear-gradient(160deg, #f8fafc 0%, #f1f5f9 100%) !important;
+        color-scheme: light !important;
     }
 
     /* ==============================================
@@ -69,54 +73,75 @@ st.markdown("""
     button[title="View fullscreen"] { display: none !important; }
 
     /* ==============================================
-       TOMBOL MINIMIZE SIDEBAR - PUTIH CERAH
+       TOMBOL MINIMIZE SIDEBAR - PAKSA PUTIH
        ============================================== */
-    /* Tombol collapse di dalam sidebar */
     [data-testid="stSidebar"] button[kind="header"],
-    [data-testid="stSidebar"] > div:first-child > button,
     [data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"],
-    [data-testid="stSidebarCollapseButton"] {
+    [data-testid="stSidebar"] button[aria-label*="sidebar"],
+    [data-testid="stSidebar"] button[title*="sidebar"] {
         color: #ffffff !important;
-        background: rgba(255, 255, 255, 0.12) !important;
-        border: 1px solid rgba(255, 255, 255, 0.25) !important;
-        border-radius: 6px !important;
-    }
-    [data-testid="stSidebar"] button[kind="header"]:hover,
-    [data-testid="stSidebar"] > div:first-child > button:hover,
-    [data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"]:hover,
-    [data-testid="stSidebarCollapseButton"]:hover {
-        background: rgba(255, 255, 255, 0.25) !important;
+        background: rgba(255, 255, 255, 0.16) !important;
+        border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
+        border-radius: 8px !important;
+        opacity: 1 !important;
+        visibility: visible !important;
     }
 
-    /* SVG icon di dalam tombol collapse */
+    [data-testid="stSidebar"] button[kind="header"]:hover,
+    [data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"]:hover,
+    [data-testid="stSidebar"] button[aria-label*="sidebar"]:hover,
+    [data-testid="stSidebar"] button[title*="sidebar"]:hover {
+        background: rgba(255, 255, 255, 0.28) !important;
+    }
+
+    /* Paksa semua isi ikon jadi putih */
+    [data-testid="stSidebar"] button[kind="header"] *,
+    [data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] *,
+    [data-testid="stSidebar"] button[aria-label*="sidebar"] *,
+    [data-testid="stSidebar"] button[title*="sidebar"] *,
     [data-testid="stSidebar"] button[kind="header"] svg,
-    [data-testid="stSidebar"] > div:first-child > button svg,
+    [data-testid="stSidebar"] button[kind="header"] svg *,
     [data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] svg,
-    [data-testid="stSidebarCollapseButton"] svg,
-    [data-testid="stSidebar"] button[kind="header"] svg path,
-    [data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] svg path {
+    [data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] svg *,
+    [data-testid="stSidebar"] button[aria-label*="sidebar"] svg,
+    [data-testid="stSidebar"] button[aria-label*="sidebar"] svg *,
+    [data-testid="stSidebar"] button[title*="sidebar"] svg,
+    [data-testid="stSidebar"] button[title*="sidebar"] svg * {
         color: #ffffff !important;
         fill: #ffffff !important;
         stroke: #ffffff !important;
+        -webkit-text-fill-color: #ffffff !important;
     }
 
-    /* Tombol expand (muncul saat sidebar tertutup) */
+    /* Tombol munculkan sidebar saat sidebar tertutup */
     [data-testid="collapsedControl"],
-    [data-testid="collapsedControl"] > button {
-        color: #0f172a !important;
+    [data-testid="collapsedControl"] > button,
+    [data-testid="stSidebarCollapsedControl"],
+    [data-testid="stSidebarCollapsedControl"] > button {
+        color: #111827 !important;
         background: #ffffff !important;
-        border: 1px solid #d1d5db !important;
-        border-radius: 6px !important;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+        border: 1.5px solid #d1d5db !important;
+        border-radius: 8px !important;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.12) !important;
+        opacity: 1 !important;
+        visibility: visible !important;
     }
-    [data-testid="collapsedControl"] > button:hover {
-        background: #f1f5f9 !important;
+
+    [data-testid="collapsedControl"] > button:hover,
+    [data-testid="stSidebarCollapsedControl"] > button:hover {
+        background: #f3f4f6 !important;
     }
+
+    [data-testid="collapsedControl"] *,
     [data-testid="collapsedControl"] svg,
-    [data-testid="collapsedControl"] svg path {
-        color: #0f172a !important;
-        fill: #0f172a !important;
-        stroke: #0f172a !important;
+    [data-testid="collapsedControl"] svg *,
+    [data-testid="stSidebarCollapsedControl"] *,
+    [data-testid="stSidebarCollapsedControl"] svg,
+    [data-testid="stSidebarCollapsedControl"] svg * {
+        color: #111827 !important;
+        fill: #111827 !important;
+        stroke: #111827 !important;
+        -webkit-text-fill-color: #111827 !important;
     }
 
     /* ==============================================
@@ -124,8 +149,8 @@ st.markdown("""
        ============================================== */
     [data-testid="stExpanderToggleIcon"],
     [data-testid="stExpanderToggleIcon"] *,
-    [data-testid="collapsedControl"],
     [data-testid="collapsedControl"] *,
+    [data-testid="stSidebarCollapsedControl"] *,
     .material-icons,
     .material-symbols-outlined,
     .material-symbols-rounded,
@@ -137,8 +162,9 @@ st.markdown("""
     [data-testid="stHeader"] *,
     [data-testid="stHeader"] button,
     [data-testid="stHeader"] span,
-    [data-testid="stSidebar"] > div:first-child > button,
-    [data-testid="stSidebar"] > div:first-child > button * {
+    [data-testid="stSidebar"] > div:first-child > button *,
+    [data-testid="stSidebar"] button[kind="header"] *,
+    [data-testid="stSidebar"] button[kind="headerNoPadding"] * {
         font-family: 'Material Symbols Rounded', 'Material Icons', system-ui, sans-serif !important;
     }
 
@@ -146,11 +172,15 @@ st.markdown("""
        SIDEBAR
        ============================================ */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-        border-right: 1px solid rgba(255,255,255,0.05);
+        background: linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #0f172a 100%) !important;
+        border-right: 1px solid rgba(255,255,255,0.05) !important;
     }
 
-    /* Sidebar font - TARGET SPESIFIK */
+    [data-testid="stSidebar"] > div {
+        background: transparent !important;
+    }
+
+    /* Sidebar font */
     [data-testid="stSidebar"] label,
     [data-testid="stSidebar"] p,
     [data-testid="stSidebar"] h1,
@@ -190,12 +220,14 @@ st.markdown("""
         border-radius: 8px !important;
     }
 
-    /* SELECTBOX DROPDOWN ICON - JANGAN TIMPA */
+    /* SELECTBOX DROPDOWN ICON */
     [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] svg,
     [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] svg *,
     [data-testid="stSidebar"] .stSelectbox [data-baseweb="icon"],
     [data-testid="stSidebar"] .stSelectbox [data-baseweb="icon"] * {
         font-family: 'Material Symbols Rounded', 'Material Icons', system-ui !important;
+        color: #e2e8f0 !important;
+        fill: #e2e8f0 !important;
     }
 
     /* RADIO LABEL */
@@ -242,7 +274,7 @@ st.markdown("""
     }
 
     /* ============================================
-       MAIN CONTENT FONT - TARGET SPESIFIK
+       MAIN CONTENT FONT
        ============================================ */
     .main h1, .main h2, .main h3,
     .main p, .main li, .main td, .main th,
@@ -271,7 +303,6 @@ st.markdown("""
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
     }
 
-    /* ===== HEADINGS ===== */
     .main h1 {
         font-size: 1.55rem !important;
         font-weight: 800 !important;
@@ -291,7 +322,6 @@ st.markdown("""
         color: #334155 !important;
     }
 
-    /* ===== BODY TEXT ===== */
     .main p,
     .main [data-testid="stMarkdownContainer"] p {
         font-size: 0.88rem !important;
@@ -304,7 +334,6 @@ st.markdown("""
         color: #1e293b !important;
     }
 
-    /* ===== FORM LABELS ===== */
     .main .stTextInput label,
     .main .stNumberInput label,
     .main .stSelectbox label,
@@ -319,7 +348,6 @@ st.markdown("""
         color: #374151 !important;
     }
 
-    /* ===== INPUT FIELDS ===== */
     .main .stTextInput input,
     .main .stNumberInput input {
         font-size: 0.88rem !important;
@@ -340,9 +368,8 @@ st.markdown("""
         color: #9ca3af !important;
     }
 
-    /* ===== METRIC ===== */
     [data-testid="stMetric"] {
-        background: #ffffff;
+        background: #ffffff !important;
         border: 1px solid #e5e7eb;
         border-radius: 10px;
         padding: 14px 18px !important;
@@ -362,7 +389,6 @@ st.markdown("""
         color: #111827 !important;
     }
 
-    /* ===== BUTTONS ===== */
     .main .stButton > button {
         font-size: 0.82rem !important;
         font-weight: 600 !important;
@@ -387,7 +413,6 @@ st.markdown("""
         color: #ffffff !important;
     }
 
-    /* ===== DOWNLOAD BUTTON ===== */
     .main .stDownloadButton > button {
         font-size: 0.82rem !important;
         font-weight: 600 !important;
@@ -413,15 +438,13 @@ st.markdown("""
         white-space: nowrap !important;
     }
 
-    /* ===== FORM CONTAINER ===== */
     [data-testid="stForm"] {
-        background: #ffffff;
+        background: #ffffff !important;
         border: 1px solid #e5e7eb;
         border-radius: 12px;
         padding: 20px !important;
     }
 
-    /* ===== EXPANDER ===== */
     [data-testid="stExpander"] {
         border: 1px solid #e5e7eb !important;
         border-radius: 10px !important;
@@ -439,7 +462,6 @@ st.markdown("""
         color: #1e293b !important;
     }
 
-    /* ===== DATAFRAME ===== */
     [data-testid="stDataFrame"] {
         border-radius: 10px;
         border: 1px solid #e5e7eb;
@@ -458,19 +480,16 @@ st.markdown("""
         color: #374151 !important;
     }
 
-    /* ===== ALERTS ===== */
     .main [data-testid="stAlert"] p {
         font-size: 0.84rem !important;
         font-weight: 500 !important;
     }
 
-    /* ===== DIVIDER ===== */
     .main hr {
         border: none !important;
         border-top: 1px solid #e5e7eb !important;
     }
 
-    /* ===== ANIMATION ===== */
     .main .block-container {
         animation: fadeIn 0.3s ease-out;
         max-width: 1100px;
@@ -480,7 +499,6 @@ st.markdown("""
         to { opacity: 1; transform: translateY(0); }
     }
 
-    /* ===== SCROLLBAR ===== */
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 </style>
