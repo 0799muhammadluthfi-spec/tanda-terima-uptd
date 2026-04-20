@@ -397,7 +397,7 @@ def halaman_parkir():
                         st.success(f"✅ Rekap dikirim! (Khusus R2 otomatis: {ks_r2}, Khusus R4: {ks_r4})")
                         st.rerun()
 
-        elif menu_parkir == "KONFIRMASI PENERIMAAN":
+    elif menu_parkir == "KONFIRMASI PENERIMAAN":
         st.subheader("✅ Verifikasi Karcis Masuk")
         
         # Pengaman jika kolom belum ada
