@@ -455,12 +455,21 @@ def main():
     with st.sidebar:
         st.title("🏪 UPTD PASAR")
         modul = st.selectbox("PILIH MODUL:", ["SK TOKO", "PARKIR"])
-        menu = st.radio("MENU:", ["PENGANTARAN", "PENGAMBILAN"]) if modul == "SK TOKO" else None
+        
+        # Menu dinamis: Kalau pilih PARKIR, muncul pilihan INPUT & KONFIRMASI
+        if modul == "SK TOKO":
+            menu = st.radio("MENU SK:", ["PENGANTARAN", "PENGAMBILAN"])
+        else:
+            menu = st.radio("MENU PARKIR:", ["INPUT REKAP", "KONFIRMASI"])
     
     if modul == "SK TOKO":
-        if menu == "PENGANTARAN": halaman_pengantaran()
-        else: halaman_pengambilan()
-    else: halaman_parkir()
+        if menu == "PENGANTARAN": 
+            halaman_pengantaran()
+        else: 
+            halaman_pengambilan()
+    else:
+        # PENTING: Kita kirim pilihan menu ke fungsi halaman_parkir
+        halaman_parkir(menu)
 
 if __name__ == "__main__":
     main()
