@@ -193,29 +193,61 @@ def halaman_pengantaran():
             nama_penerima = st.text_input("NAMA PENERIMA *").strip().upper()
 
         submitted = st.form_submit_button("💾 SIMPAN DATA", type="primary")
+
         if submitted:
             if not no_urut.strip() or not nama_toko or not nama_pemilik:
                 st.error("❌ Data Bintang (*) Wajib Diisi!")
             else:
-                # LOGIKA TIMPA DATA
-                is_update = False
-                if not df_sk.empty and no_urut.strip() in df_sk["No"].str.strip().values:
-                    is_update = True
-                    st.warning(f"⚠️ Nomor {no_urut} sudah ada. Data lama ditimpa!")
-                    df_sk = df_sk[df_sk["No"].str.strip() != no_urut.strip()]
+                # 1. Cek apakah nomor sudah ada
+                is_exist = not df_sk.empty and no_urut.strip() in df_sk["No"].str.strip().values
+                
+                if is_exist:
+                    # Jika ada, jangan langsung simpan, tapi minta konfirmasi lewat session_state
+                    st.session_state["pending_data"] = {
+                        "No": no_urut.strip(), "Tanggal_Pengantaran": tgl_terima,
+                        "Tanggal_Pengambilan": "-", "Nama_Toko": nama_toko, "No_Toko": no_toko,
+                        "Nama_Pemilik_Asli": nama_pemilik, "Nama_Pengantar_Berkas": nama_pengantar,
+                        "Penerima_Berkas": nama_penerima,
+                    }
+                    st.session_state["show_confirm"] = True
+                else:
+                    # Jika nomor baru, langsung simpan seperti biasa
+                    new_row = {
+                        "No": no_urut.strip(), "Tanggal_Pengantaran": tgl_terima,
+                        "Tanggal_Pengambilan": "-", "Nama_Toko": nama_toko, "No_Toko": no_toko,
+                        "Nama_Pemilik_Asli": nama_pemilik, "Nama_Pengantar_Berkas": nama_pengantar,
+                        "Penerima_Berkas": nama_penerima,
+                    }
+                    df_baru = pd.concat([df_sk, pd.DataFrame([new_row])], ignore_index=True)
+                    if safe_update("DATA_SK", df_baru):
+                        st.session_state["last_data"] = new_row
+                        st.session_state["last_berkas"] = sel_berkas
+                        st.success("✅ Berhasil Disimpan!")
+                        st.rerun()
 
-                new_row = {
-                    "No": no_urut.strip(), "Tanggal_Pengantaran": tgl_terima,
-                    "Tanggal_Pengambilan": "-", "Nama_Toko": nama_toko, "No_Toko": no_toko,
-                    "Nama_Pemilik_Asli": nama_pemilik, "Nama_Pengantar_Berkas": nama_pengantar,
-                    "Penerima_Berkas": nama_penerima,
-                }
-                df_baru = pd.concat([df_sk, pd.DataFrame([new_row])], ignore_index=True)
-                if safe_update("DATA_SK", df_baru):
-                    st.session_state["last_data"] = new_row
-                    st.session_state["last_berkas"] = sel_berkas
-                    st.success("✅ Berhasil Disimpan!")
-                    st.rerun()
+    # 2. Tampilkan Dialog Konfirmasi (di luar form)
+    if st.session_state.get("show_confirm"):
+        st.warning(f"⚠️ Nomor Urut {no_urut} sudah ada di database!")
+        col_conf1, col_conf2 = st.columns(2)
+        
+        if col_conf1.button("✅ YA, TIMPA DATA LAMA", type="primary", use_container_width=True):
+            # Proses Menimpa
+            data_baru = st.session_state["pending_data"]
+            # Filter buang yang lama
+            df_sk = df_sk[df_sk["No"].str.strip() != data_baru["No"]]
+            # Gabung yang baru
+            df_final = pd.concat([df_sk, pd.DataFrame([data_baru])], ignore_index=True)
+            
+            if safe_update("DATA_SK", df_final):
+                st.session_state["last_data"] = data_baru
+                st.session_state["last_berkas"] = sel_berkas
+                st.session_state["show_confirm"] = False
+                st.success("✅ Data Berhasil Diupdate!")
+                st.rerun()
+                
+        if col_conf2.button("❌ BATAL", type="secondary", use_container_width=True):
+            st.session_state["show_confirm"] = False
+            st.rerun()
 
     if "last_data" in st.session_state:
         st.divider()
