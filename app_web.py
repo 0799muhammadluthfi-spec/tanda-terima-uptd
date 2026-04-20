@@ -14,82 +14,85 @@ def cetak_tanda_terima_parkir(data):
     # UKURAN F4 PORTRAIT (21.5cm x 33cm)
     c = canvas.Canvas(buffer, pagesize=(21.5 * cm, 33 * cm))
     
-    # PENGATURAN DIMENSI
-    lebar_kertas = 21.5 * cm
-    tinggi_box = 6.5 * cm
-    margin_samping = 1.0 * cm
-    lebar_tabel = lebar_kertas - (2 * margin_samping)
+    # PENGATURAN DIMENSI BARU (KECIL)
+    lebar_box = 6.8 * cm
+    tinggi_box = 4.6 * cm
+    margin_kertas_samping = 1.0 * cm # Jarak dari pinggir kertas kiri
     
-    # POSISI VERTIKAL (Margin atas dibuat 1cm agar simetris)
-    y_kertas_atas = 33 * cm
-    margin_atas = 1.0 * cm
-    y_top = y_kertas_atas - margin_atas
+    # POSISI VERTIKAL (Margin atas 1cm)
+    y_top = 32 * cm 
     y_bottom = y_top - tinggi_box
     
     # 1. BINGKAI LUAR BOX (GARIS UTUH)
-    c.setLineWidth(1.5)
-    c.rect(margin_samping, y_bottom, lebar_tabel, tinggi_box)
+    c.setLineWidth(1.2)
+    c.rect(margin_kertas_samping, y_bottom, lebar_box, tinggi_box)
     
     # 2. GARIS POTONG DI BAWAH BOX (PUTUS-PUTUS)
-    # Jaraknya disamakan dengan margin atas (1cm di bawah box)
     y_garis_potong = y_bottom - 1.0 * cm
     c.setDash(1, 3)
     c.setLineWidth(0.5)
-    c.line(0, y_garis_potong, lebar_kertas, y_garis_potong)
-    c.setDash() # Kembalikan ke garis utuh
+    c.line(0, y_garis_potong, 21.5 * cm, y_garis_potong)
+    c.setDash() 
     
-    # 3. HEADER - HURUF BESAR SEMUA
-    center_x = lebar_kertas / 2
-    c.setFont("Helvetica-Bold", 14)
-    c.drawCentredString(center_x, y_top - 1.0 * cm, "UPTD PENGELOLAAN PASAR KANDANGAN")
-    
-    c.setFont("Helvetica-Bold", 11)
-    c.drawCentredString(center_x, y_top - 1.6 * cm, "TANDA TERIMA SETORAN PARKIR (MPP)")
-    
-    # GARIS BAWAH JUDUL
-    c.setLineWidth(1.5)
-    c.line(margin_samping + 1*cm, y_top - 1.9 * cm, lebar_kertas - margin_samping - 1*cm, y_top - 1.9 * cm)
-    
-    # 4. FORMAT TANGGAL
+    # 3. LOGIKA OTOMATIS TANGGAL (Pendeteksi Format 16/4/26 atau 16-04-2026)
+    tgl_input = data['Tanggal'].replace('/', '-') # Ubah / jadi - agar mudah dibaca sistem
     try:
-        tgl_obj = datetime.strptime(data['Tanggal'], "%d-%m-%Y")
+        # Cek jika formatnya singkat seperti 16-4-26
+        if len(tgl_input.split('-')[-1]) == 2:
+            tgl_obj = datetime.strptime(tgl_input, "%d-%m-%y")
+        else:
+            tgl_obj = datetime.strptime(tgl_input, "%d-%m-%Y")
+            
         hari_indo = ["SENIN", "SELASA", "RABU", "KAMIS", "JUMAT", "SABTU", "MINGGU"]
         nama_hari = hari_indo[tgl_obj.weekday()]
-        tgl_format = tgl_obj.strftime("%d - %m - %Y")
-        tgl_final = f"{nama_hari}, {tgl_format}"
+        tgl_final = f"{nama_hari}, {tgl_obj.strftime('%d - %m - %Y')}"
     except:
         tgl_final = data['Tanggal'].upper()
 
+    # 4. HEADER (UKURAN FONT DISESUAIKAN KARENA KOTAK KECIL)
+    center_x = margin_kertas_samping + (lebar_box / 2)
+    
+    c.setFont("Helvetica-Bold", 7)
+    c.drawCentredString(center_x, y_top - 0.5 * cm, "UPTD PENGELOLAAN PASAR KANDANGAN")
+    
+    c.setFont("Helvetica-Bold", 6)
+    c.drawCentredString(center_x, y_top - 0.9 * cm, "TANDA TERIMA SETORAN PARKIR (MPP)")
+    
+    c.setLineWidth(0.8)
+    c.line(margin_kertas_samping + 0.3*cm, y_top - 1.1 * cm, margin_kertas_samping + lebar_box - 0.3*cm, y_top - 1.1 * cm)
+    
     # 5. DATA IDENTITAS
-    c.setFont("Helvetica-Bold", 10)
-    c.drawString(margin_samping + 0.5*cm, y_top - 2.5 * cm, f"TANGGAL : {tgl_final}")
-    c.drawRightString(lebar_kertas - margin_samping - 0.5*cm, y_top - 2.5 * cm, f"NAMA : {data['Nama_Petugas'].upper()}")
+    c.setFont("Helvetica-Bold", 6)
+    c.drawString(margin_kertas_samping + 0.3*cm, y_top - 1.5 * cm, f"TGL : {tgl_final}")
+    c.drawString(margin_kertas_samping + 0.3*cm, y_top - 1.9 * cm, f"NAMA : {data['Nama_Petugas'].upper()}")
 
-    # 6. TABEL DATA
-    y_tab = y_top - 3.0 * cm
-    t_row = 0.9 * cm
+    # 6. TABEL DATA (UKURAN MINI)
+    y_tab = y_top - 2.2 * cm
+    t_row = 0.6 * cm
+    lebar_tabel_mini = lebar_box - 0.6 * cm
+    x_tab = margin_kertas_samping + 0.3 * cm
     
     # Header Tabel
-    c.setLineWidth(1)
-    c.rect(margin_samping + 0.5*cm, y_tab - t_row, lebar_tabel - 1*cm, t_row)
-    c.setFont("Helvetica-Bold", 10)
-    c.drawString(margin_samping + 1*cm, y_tab - 0.6*cm, "JENIS KENDARAAN")
-    c.drawCentredString(center_x + 2*cm, y_tab - 0.6*cm, "RINCIAN KARCIS")
-    c.drawRightString(lebar_kertas - margin_samping - 1*cm, y_tab - 0.6*cm, "KETERANGAN")
+    c.rect(x_tab, y_tab - t_row, lebar_tabel_mini, t_row)
+    c.setFont("Helvetica-Bold", 5.5)
+    c.drawString(x_tab + 0.1*cm, y_tab - 0.4*cm, "JENIS")
+    c.drawCentredString(x_tab + (lebar_tabel_mini/2), y_tab - 0.4*cm, "JUMLAH")
+    c.drawRightString(x_tab + lebar_tabel_mini - 0.1*cm, y_tab - 0.4*cm, "KET")
     
     # Baris RODA 2
     y_r2 = y_tab - (2 * t_row)
-    c.rect(margin_samping + 0.5*cm, y_r2, lebar_tabel - 1*cm, t_row)
-    c.drawString(margin_samping + 1*cm, y_r2 + 0.3*cm, "RODA 2 (MOTOR)")
-    c.drawCentredString(center_x + 2*cm, y_r2 + 0.3*cm, f"{data['MPP_Roda_R2']} LEMBAR")
-    c.drawRightString(lebar_kertas - margin_samping - 1*cm, y_r2 + 0.3*cm, "MPP")
+    c.rect(x_tab, y_r2, lebar_tabel_mini, t_row)
+    c.setFont("Helvetica", 6)
+    c.drawString(x_tab + 0.1*cm, y_r2 + 0.2*cm, "RODA 2")
+    c.drawCentredString(x_tab + (lebar_tabel_mini/2), y_r2 + 0.2*cm, f"{data['MPP_Roda_R2']} LBR")
+    c.drawRightString(x_tab + lebar_tabel_mini - 0.1*cm, y_r2 + 0.2*cm, "MPP")
 
     # Baris RODA 4
     y_r4 = y_tab - (3 * t_row)
-    c.rect(margin_samping + 0.5*cm, y_r4, lebar_tabel - 1*cm, t_row)
-    c.drawString(margin_samping + 1*cm, y_r4 + 0.3*cm, "RODA 4 (MOBIL)")
-    c.drawCentredString(center_x + 2*cm, y_r4 + 0.3*cm, f"{data['MPP_Roda_R4']} LEMBAR")
-    c.drawRightString(lebar_kertas - margin_samping - 1*cm, y_r4 + 0.3*cm, "MPP")
+    c.rect(x_tab, y_r4, lebar_tabel_mini, t_row)
+    c.drawString(x_tab + 0.1*cm, y_r4 + 0.2*cm, "RODA 4")
+    c.drawCentredString(x_tab + (lebar_tabel_mini/2), y_r4 + 0.2*cm, f"{data['MPP_Roda_R4']} LBR")
+    c.drawRightString(x_tab + lebar_tabel_mini - 0.1*cm, y_r4 + 0.2*cm, "MPP")
     
     c.showPage()
     c.save()
