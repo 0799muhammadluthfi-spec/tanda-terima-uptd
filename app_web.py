@@ -205,6 +205,22 @@ def halaman_pengantaran():
                     st.success("✅ Berhasil Disimpan!")
                     st.rerun()
 
+    # DIALOG KONFIRMASI (DI LUAR FORM)
+    if st.session_state["show_confirm"]:
+        st.warning(f"⚠️ Nomor Urut {st.session_state['pending_data']['No']} sudah ada di database!")
+        c_y, c_n = st.columns(2)
+        if c_y.button("✅ YA, TIMPA DATA LAMA", type="primary", use_container_width=True):
+            data_baru = st.session_state["pending_data"]
+            df_sk = df_sk[df_sk["No"].str.strip() != data_baru["No"]]
+            df_final = pd.concat([df_sk, pd.DataFrame([data_baru])], ignore_index=True)
+            if safe_update("DATA_SK", df_final):
+                st.session_state["show_confirm"] = False
+                st.success("✅ Data Berhasil Diupdate!")
+                st.rerun()
+        if c_n.button("❌ BATAL", use_container_width=True):
+            st.session_state["show_confirm"] = False
+            st.rerun()
+
     if "last_data" in st.session_state:
         st.divider()
         last = st.session_state["last_data"]
