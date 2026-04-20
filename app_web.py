@@ -21,10 +21,8 @@ conn = st.connection("gsheets", type=GSheetsConnection)
 # 2. FUNGSI HELPER
 # ==========================================
 def load_data(worksheet: str) -> pd.DataFrame:
-    """Load data dari Google Sheets dengan error handling."""
     try:
         df = conn.read(worksheet=worksheet, ttl=0)
-        # FIX PENCARIAN 1.0 -> 1 
         df = df.astype(str).replace(r'\.0$', '', regex=True).replace("nan", "-").replace("None", "-")
         return df
     except Exception as e:
@@ -32,7 +30,6 @@ def load_data(worksheet: str) -> pd.DataFrame:
         return pd.DataFrame()
 
 def get_next_no(df: pd.DataFrame, col: str = "No") -> int:
-    """Hitung nomor urut berikutnya."""
     try:
         if df.empty or col not in df.columns:
             return 1
@@ -42,7 +39,6 @@ def get_next_no(df: pd.DataFrame, col: str = "No") -> int:
         return 1
 
 def safe_update(worksheet: str, data: pd.DataFrame) -> bool:
-    """Update Google Sheets dengan error handling."""
     try:
         conn.update(worksheet=worksheet, data=data)
         st.cache_data.clear()
@@ -51,18 +47,28 @@ def safe_update(worksheet: str, data: pd.DataFrame) -> bool:
         st.error(f"Gagal menyimpan: {e}")
         return False
 
+# FUNGSI FORMAT TANGGAL + HARI (BAHASA INDONESIA)
+def format_tgl_hari_indo(tgl_str):
+    if not tgl_str or tgl_str in ["-", "nan", "NAN", ""]: return ""
+    try:
+        dt = datetime.strptime(str(tgl_str).strip(), "%d-%m-%Y")
+        hari = ["SENIN", "SELASA", "RABU", "KAMIS", "JUMAT", "SABTU", "MINGGU"][dt.weekday()]
+        return f"{hari}, {dt.strftime('%d - %m - %Y')}"
+    except:
+        return str(tgl_str).upper()
+
 # ==========================================
-# 3. FUNGSI PDF (F4 PORTRAIT + GARIS POTONG)
+# 3. FUNGSI PDF (F4 PORTRAIT + MENTOK KANAN)
 # ==========================================
 def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
     buffer = BytesIO()
     UKURAN_KERTAS = (21.5 * cm, 33 * cm)
     c = canvas.Canvas(buffer, pagesize=UKURAN_KERTAS)
     
-    # PERHITUNGAN MARGIN SIMETRIS
-    M = 0.75 * cm # Margin keliling
+    # PERHITUNGAN MARGIN
+    M = 0.75 * cm 
     TINGGI_POTONG = 12 * cm
-    Y_POTONG = 33 * cm - TINGGI_POTONG # Garis potong di 21 cm
+    Y_POTONG = 33 * cm - TINGGI_POTONG
     
     Y_BASE = Y_POTONG + M
     X_POS = M 
@@ -72,11 +78,11 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
 
     def gambar_garis_potong():
         c.setLineWidth(1)
-        c.setDash(4, 4) # Garis putus-putus
+        c.setDash(4, 4)
         c.line(0, Y_POTONG, 21.5 * cm, Y_POTONG)
         c.setFont("Helvetica-Oblique", 8)
         c.drawString(0.5 * cm, Y_POTONG + 0.15 * cm, "✂ --- Batas potong (Tinggi 12 cm) ---")
-        c.setDash() # Reset ke solid line
+        c.setDash() 
 
     # ------------------------------------------
     # HALAMAN 1 - DEPAN
@@ -136,30 +142,32 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
     c.rect(X_POS, Y_BASE, LEBAR_BOX, TINGGI_BOX)
     c.rect(X_POS + 0.15 * cm, Y_BASE + 0.15 * cm, LEBAR_BOX - 0.3 * cm, TINGGI_BOX - 0.3 * cm)
 
-    y_tab = Y_BASE + TINGGI_BOX - 0.15 * cm # 10.35 cm
-    TINGGI_B = 1.15 * cm
+    y_tab = Y_BASE + 9.85 * cm 
+    TINGGI_B = 1.05 * cm
     
-    tgl_ambil_pdf = data.get("Tanggal_Pengambilan", "-")
-    if tgl_ambil_pdf in ["-", "nan", "NAN", ""]:
-        tgl_ambil_pdf = ""
+    tgl_terima_pdf = format_tgl_hari_indo(data.get("Tanggal_Pengantaran", "-"))
+    tgl_ambil_pdf = format_tgl_hari_indo(data.get("Tanggal_Pengambilan", "-"))
 
     DETAIL_ROWS = [
-        ("NOMOR", data.get("No", "-")),
-        ("TGL TERIMA", data.get("Tanggal_Pengantaran", "-")),
-        ("TGL AMBIL", tgl_ambil_pdf),
-        ("NAMA & NO. TOKO", f"{data.get('Nama_Toko', '-')} - {data.get('No_Toko', '-')}"),
-        ("PEMILIK (SK)", data.get("Nama_Pemilik_Asli", "-"))
+        ("NOMOR URUT", data.get("No", "-")),
+        ("TANGGAL TERIMA", tgl_terima_pdf),
+        ("TANGGAL PENGAMBILAN", tgl_ambil_pdf),
+        ("NAMA & NOMOR TOKO", f"{data.get('Nama_Toko', '-')} - {data.get('No_Toko', '-')}"),
+        ("NAMA PEMILIK (SK)", data.get("Nama_Pemilik_Asli", "-")),
+        ("NAMA PENGANTAR", data.get("Nama_Pengantar_Berkas", "-"))
     ]
 
     for label, val in DETAIL_ROWS:
         c.setLineWidth(1.5) 
-        c.rect(X_POS + 0.15 * cm, y_tab - TINGGI_B, 6 * cm, TINGGI_B)
-        c.rect(X_POS + 6.15 * cm, y_tab - TINGGI_B, LEBAR_BOX - 6.45 * cm, TINGGI_B) # Mentok presisi
+        # Kolom Kiri: Lebar 6.5 cm
+        c.rect(X_POS + 0.15 * cm, y_tab - TINGGI_B, 6.5 * cm, TINGGI_B)
+        # Kolom Kanan: Lebar 13.2 cm (6.5 + 13.2 = 19.7 cm -> MENTOK SEMPURNA KANAN)
+        c.rect(X_POS + 6.65 * cm, y_tab - TINGGI_B, 13.2 * cm, TINGGI_B) 
         
         c.setFont("Helvetica-Bold", 9)
-        c.drawString(X_POS + 0.5 * cm, y_tab - 0.7 * cm, label)
+        c.drawString(X_POS + 0.4 * cm, y_tab - 0.7 * cm, label)
         c.setFont("Helvetica-Bold", 10)
-        c.drawString(X_POS + 6.5 * cm, y_tab - 0.7 * cm, str(val).upper())
+        c.drawString(X_POS + 7.0 * cm, y_tab - 0.7 * cm, str(val).upper())
         y_tab -= TINGGI_B
 
     # Teks Perhatian Baru
@@ -178,11 +186,15 @@ def cetak_overprint(tgl_ambil: str) -> BytesIO:
     c = canvas.Canvas(buffer, pagesize=(21.5 * cm, 33 * cm))
     c.setFont("Helvetica-Bold", 10)
     
-    # Koordinat presisi di dalam kotak TGL AMBIL
+    Y_BASE = 21.5 * cm + 0.75 * cm
     X_POS = 0.75 * cm
-    # Perhitungan: 33cm - 12cm (potong) + 0.75cm (margin) + 10.35cm (top inner border) - 2x1.15cm (dua baris di atasnya) - 0.7cm (jarak teks ke garis atas)
-    y_target = 29.1 * cm 
-    c.drawString(X_POS + 6.5 * cm, y_target, tgl_ambil.upper())
+    
+    # Menghitung koordinat Y untuk mengisi TANGGAL PENGAMBILAN (Baris ke-3)
+    y_target = 21.5 * cm + 0.75 * cm + 9.85 * cm - (1.05 * cm * 2) - 0.7 * cm 
+    tgl_format = format_tgl_hari_indo(tgl_ambil)
+    
+    # Koordinat X ditaruh di dalam kolom kanan
+    c.drawString(X_POS + 7.0 * cm, y_target, tgl_format.upper())
     
     c.save()
     buffer.seek(0)
@@ -231,7 +243,7 @@ def halaman_pengantaran():
         col1, col2 = st.columns(2)
 
         with col1:
-            no_urut = st.text_input("NO. URUT *", value=str(next_no), help="Nomor urut otomatis")
+            no_urut = st.text_input("NOMOR URUT *", value=str(next_no), help="Nomor urut otomatis")
             tgl_terima = st.text_input("TANGGAL TERIMA *", value=datetime.now().strftime("%d-%m-%Y"))
             nama_toko = st.text_input("NAMA TOKO *").strip().upper()
             no_toko = st.text_input("NOMOR TOKO *").strip().upper()
@@ -245,12 +257,12 @@ def halaman_pengantaran():
 
         if submitted:
             errors = []
-            if not no_urut.strip(): errors.append("No. Urut wajib diisi")
+            if not no_urut.strip(): errors.append("Nomor Urut wajib diisi")
             if not nama_toko: errors.append("Nama Toko wajib diisi")
             if not nama_pemilik: errors.append("Nama Pemilik wajib diisi")
 
             if not df_sk.empty and no_urut.strip() in df_sk["No"].str.strip().values:
-                errors.append(f"No. Urut {no_urut} sudah ada!")
+                errors.append(f"Nomor Urut {no_urut} sudah ada!")
 
             if errors:
                 for err in errors: st.error(f"❌ {err}")
@@ -267,14 +279,14 @@ def halaman_pengantaran():
                 if safe_update("DATA_SK", df_baru):
                     st.session_state["last_data"] = new_row
                     st.session_state["last_berkas"] = sel_berkas
-                    st.success(f"✅ Data No. {no_urut} berhasil disimpan!")
+                    st.success(f"✅ Data Nomor {no_urut} berhasil disimpan!")
                     st.balloons()
 
     if "last_data" in st.session_state and st.session_state["last_data"]:
         st.divider()
         st.subheader("📄 Download Tanda Terima")
         last = st.session_state["last_data"]
-        st.info(f"**No:** {last['No']} | **Toko:** {last['Nama_Toko']} | **Pemilik:** {last['Nama_Pemilik_Asli']}")
+        st.info(f"**Nomor:** {last['No']} | **Toko:** {last['Nama_Toko']} | **Pemilik:** {last['Nama_Pemilik_Asli']}")
 
         pdf_buffer = buat_pdf_full(last, st.session_state.get("last_berkas", []))
         st.download_button(
@@ -328,10 +340,10 @@ def halaman_pengambilan():
             col_info1, col_info2, col_info3 = st.columns(3)
             col_info1.metric("🏪 Nama Toko", data_row["Nama_Toko"])
             col_info2.metric("👤 Pemilik", data_row["Nama_Pemilik_Asli"])
-            col_info3.metric("📅 Tgl Terima", data_row["Tanggal_Pengantaran"])
+            col_info3.metric("📅 Tgl Terima", format_tgl_hari_indo(data_row["Tanggal_Pengantaran"]))
 
             if sudah_ambil:
-                st.success(f"✅ Berkas ini sudah diambil pada: **{data_row['Tanggal_Pengambilan']}**")
+                st.success(f"✅ Berkas ini sudah diambil pada: **{format_tgl_hari_indo(data_row['Tanggal_Pengambilan'])}**")
                 st.download_button(
                     label="🖨️ PRINT ULANG TANGGAL AMBIL",
                     data=cetak_overprint(data_row['Tanggal_Pengambilan']),
@@ -349,7 +361,7 @@ def halaman_pengambilan():
                     if safe_update("DATA_SK", df_sk):
                         st.session_state['ready_to_print_overprint'] = tgl_ambil
                         st.session_state['print_no'] = no_cari
-                        st.success(f"✅ Berkas No. {no_cari} berhasil diupdate!")
+                        st.success(f"✅ Berkas Nomor {no_cari} berhasil diupdate!")
 
             if st.session_state.get('print_no') == no_cari:
                 st.write("---")
@@ -393,7 +405,7 @@ def halaman_parkir():
         with st.form("form_parkir"):
             col1, col2 = st.columns(2)
             with col1:
-                no_urut = st.text_input("NO. URUT", value=str(next_no))
+                no_urut = st.text_input("NOMOR URUT", value=str(next_no))
                 tgl = st.text_input("TANGGAL", value=datetime.now().strftime("%d-%m-%Y"))
                 nama = st.text_input("NAMA").strip().upper()
             with col2:
