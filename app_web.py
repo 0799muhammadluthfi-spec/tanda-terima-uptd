@@ -25,49 +25,48 @@ def format_tgl_indo(tgl_input):
         return str(tgl_input).upper()
 
 # --- FUNGSI CETAK PDF (FULL & OVERPRINT) ---
-def buat_pdf_full(data, berkas_list):
+def generate_pdf(data):
     buffer = BytesIO()
-    UKURAN_CUSTOM = (22 * cm, 11 * cm)
-    c = canvas.Canvas(buffer, pagesize=UKURAN_CUSTOM)
-    x_pos, y_pos = 1 * cm, 1 * cm
-    lebar_kertas = 22 * cm
-    # HALAMAN 1 (DEPAN)
-    c.setLineWidth(1.5); c.rect(x_pos, y_pos, 20*cm, 9*cm)
-    c.setLineWidth(1.5); c.rect(x_pos + 0.15*cm, y_pos + 0.15*cm, 19.7*cm, 8.7*cm)
-    c.setFont("Helvetica-Bold", 14); c.drawCentredString(lebar_kertas/2, y_pos + 8.1 * cm, "TANDA TERIMA BERKAS PERMOHONAN PERPANJANGAN IZIN TOKO")
-    c.setLineWidth(1); c.line(x_pos + 0.4*cm, y_pos + 7.85*cm, x_pos + 19.6*cm, y_pos + 7.85*cm)
-    c.line(x_pos + 0.4*cm, y_pos + 7.75*cm, x_pos + 19.6*cm, y_pos + 7.75*cm)
-    c.setFont("Helvetica-Bold", 11); c.drawString(x_pos + 0.8 * cm, y_pos + 7.1 * cm, "DAFTAR KELENGKAPAN DOKUMEN PERMOHONAN:")
-    yy = y_pos + 6.3 * cm
-    items = ["SK ASLI MENEMPATI", "PAS FOTO 3X4 (2 LBR)", "FC KTP PEMILIK", "FC KARTU SEWA", "SURAT KUASA", "SURAT KEHILANGAN"]
-    for i, item in enumerate(items, 1):
-        c.setFont("Helvetica-BoldOblique", 10.5); c.drawString(x_pos + 1 * cm, yy, f"{i}. {item}")
-        c.setFont("Helvetica-Bold", 11); x_status = x_pos + 15.2 * cm; c.drawString(x_status, yy, "ADA   /   TIDAK ADA")
-        c.setLineWidth(1.5)
-        if item in berkas_list: c.line(x_status + 1.5 * cm, yy + 0.12 * cm, x_status + 3.8 * cm, yy + 0.12 * cm)
-        else: c.line(x_status - 0.1 * cm, yy + 0.12 * cm, x_status + 0.9 * cm, yy + 0.12 * cm)
-        yy -= 0.65 * cm
-    c.setLineWidth(1.5); c.line(x_pos + 0.15*cm, y_pos + 2.8 * cm, x_pos + 19.85*cm, y_pos + 2.8 * cm)
-    c.line(lebar_kertas/2, y_pos + 0.15*cm, lebar_kertas/2, y_pos + 2.8 * cm)
-    c.setFont("Helvetica-Bold", 10); c.drawCentredString(x_pos + 5 * cm, y_pos + 2.3 * cm, "PENGANTAR BERKAS")
-    c.drawCentredString(x_pos + 15 * cm, y_pos + 2.3 * cm, "PETUGAS PENERIMA BERKAS")
-    c.setFont("Helvetica-Bold", 12); c.drawCentredString(x_pos + 5 * cm, y_pos + 0.5 * cm, f"( {data['Nama_Pengantar_Berkas']} )")
-    c.drawCentredString(x_pos + 15 * cm, y_pos + 0.5 * cm, f"( {data['Penerima_Berkas']} )")
+    
+    # 1. SET UKURAN KERTAS (Lebar 22cm, Tinggi 12cm)
+    # Ini adalah kunci agar printer mencetak sesuai area potong Bapak
+    custom_size = (22 * cm, 12 * cm)
+    c = canvas.Canvas(buffer, pagesize=custom_size)
+    
+    # 2. SET MARGIN & POSISI TULISAN
+    # Kita geser-geser angka koordinatnya agar pas di tengah potongan
+    lebar_area = 22 * cm
+    tinggi_area = 12 * cm
+    
+    # Contoh Kop Surat (Posisi Tengah)
+    c.setFont("Helvetica-Bold", 14)
+    c.drawCentredString(lebar_area / 2, tinggi_area - 1.5 * cm, "UPTD PENGELOLAAN PASAR KANDANGAN")
+    
+    c.setFont("Helvetica-Bold", 12)
+    c.drawCentredString(lebar_area / 2, tinggi_area - 2.1 * cm, "DINAS PERDAGANGAN KAB. HSS")
+    
+    # Garis Pembatas (Opsional)
+    c.line(1 * cm, tinggi_area - 2.5 * cm, lebar_area - 1 * cm, tinggi_area - 2.5 * cm)
+    
+    # 3. ISI DATA BERKAS (Disusun ke bawah)
+    c.setFont("Helvetica", 11)
+    start_y = tinggi_area - 4 * cm
+    jarak_baris = 0.8 * cm
+    
+    c.drawString(2 * cm, start_y, f"NOMOR URUT     : {data['no_urut']}")
+    c.drawString(2 * cm, start_y - jarak_baris, f"NAMA PEMILIK   : {data['nama']}")
+    c.drawString(2 * cm, start_y - (2 * jarak_baris), f"LOKASI PASAR   : KANDANGAN")
+    c.drawString(2 * cm, start_y - (3 * jarak_baris), f"JENIS BERKAS   : SK MENEMPATI TOKO")
+    
+    # 4. INFO TANGGAL & TANDA TANGAN (Posisi Kanan Bawah)
+    tgl_sekarang = datetime.now().strftime("%d %B %Y")
+    c.drawString(14 * cm, 3 * cm, f"Kandangan, {tgl_sekarang}")
+    c.drawString(14 * cm, 2.5 * cm, "Petugas UPTD,")
+    c.drawString(14 * cm, 1 * cm, "___________________")
+    
     c.showPage()
-    # HALAMAN 2 (BELAKANG)
-    c.setLineWidth(1.5); c.rect(x_pos, y_pos, 20*cm, 9*cm)
-    c.setLineWidth(1.5); c.rect(x_pos + 0.15*cm, y_pos + 0.15*cm, 19.7*cm, 8.7*cm)
-    y_tab = y_pos + 8.85 * cm; tinggi_baris = 1.15 * cm
-    tgl_ambil_pdf = "" if data['Tanggal_Pengambilan'] in ["-", "nan", "NAN"] else data['Tanggal_Pengambilan']
-    rows = [("NO. URUT PENDAFTARAN", data['No']), ("TANGGAL TERIMA BERKAS", data['Tanggal_Pengantaran']),
-            ("TANGGAL PENGAMBILAN", tgl_ambil_pdf), ("NAMA & NOMOR TOKO / LAPAK", f"{data['Nama_Toko']} - {data['No_Toko']}"),
-            ("NAMA PEMILIK (SESUAI SK)", data['Nama_Pemilik_Asli']), ("NAMA PENGANTAR BERKAS", data['Nama_Pengantar_Berkas'])]
-    for label, val in rows:
-        c.rect(x_pos + 0.15*cm, y_tab - tinggi_baris, 9.85 * cm, tinggi_baris); c.rect(lebar_kertas/2, y_tab - tinggi_baris, 9.85 * cm, tinggi_baris)
-        c.setFont("Helvetica-Bold", 10); c.drawString(x_pos + 0.6 * cm, y_tab - 0.75 * cm, label)
-        c.setFont("Helvetica-Bold", 11); c.drawString(lebar_kertas/2 + 0.6 * cm, y_tab - 0.75 * cm, str(val).upper())
-        y_tab -= tinggi_baris
-    c.save(); buffer.seek(0)
+    c.save()
+    buffer.seek(0)
     return buffer
 
 def cetak_overprint(tgl_ambil):
