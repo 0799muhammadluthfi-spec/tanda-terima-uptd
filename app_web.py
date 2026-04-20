@@ -343,17 +343,98 @@ def halaman_pengambilan():
     )
 
 # ==========================================
-# 6. MODUL PARKIR & MAIN
+# 6. MODUL PARKIR
 # ==========================================
 def halaman_parkir():
-    st.header("🚗 PARKIR"); st.info("Modul Parkir Aktif.")
+    st.header("🚗 MANAJEMEN PARKIR UPTD")
+    
+    # Sub-menu di dalam modul Parkir
+    menu_parkir = st.radio("PILIH AKSI PARKIR:", ["INPUT REKAP HARIAN", "KONFIRMASI PENERIMAAN"], horizontal=True)
+    
+    df_parkir = load_data("DATA_PARKIR")
 
+    if menu_parkir == "INPUT REKAP HARIAN":
+        st.subheader("📝 Form Rekap Setoran Karcis")
+        
+        with st.form("form_rekap_parkir", clear_on_submit=True):
+            col1, col2 = st.columns(2)
+            with col1:
+                tgl = st.text_input("TANGGAL", value=datetime.now().strftime("%d-%m-%Y"))
+                nama = st.text_input("NAMA PETUGAS").upper()
+                pk_r2 = st.number_input("PENGAMBILAN KARCIS R2", min_value=0)
+                pk_r4 = st.number_input("PENGAMBILAN KARCIS R4", min_value=0)
+            with col2:
+                # Yang diinput petugas sekarang adalah Total dan MPP
+                tot_r2 = st.number_input("TOTAL KARCIS R2", min_value=0)
+                tot_r4 = st.number_input("TOTAL KARCIS R4", min_value=0)
+                mpp_r2 = st.number_input("MPP RODA R2", min_value=0)
+                mpp_r4 = st.number_input("MPP RODA R4", min_value=0)
+            
+            # Hitung otomatis KARCIS KHUSUS sesuai kondisi lapangan
+            ks_r2 = tot_r2 - mpp_r2
+            ks_r4 = tot_r4 - mpp_r4
+            
+            if st.form_submit_button("💾 KIRIM REKAP", type="primary"):
+                if ks_r2 < 0 or ks_r4 < 0:
+                    st.error("❌ Gagal! Total Karcis tidak boleh lebih kecil dari jumlah MPP.")
+                else:
+                    new_row = {
+                        "No": get_next_no(df_parkir),
+                        "Tanggal": tgl,
+                        "Nama_Petugas": nama,
+                        "Pengambilan_Karcis_R2": pk_r2,
+                        "Pengambilan_Karcis_R4": pk_r4,
+                        "Khusus_Roda_R2": ks_r2,
+                        "Khusus_Roda_R4": ks_r4,
+                        "MPP_Roda_R2": mpp_r2,
+                        "MPP_Roda_R4": mpp_r4,
+                        "Total_Karcis_R2": tot_r2,
+                        "Total_Karcis_R4": tot_r4,
+                        "Status_Terima": "BELUM"
+                    }
+                    df_up = pd.concat([df_parkir, pd.DataFrame([new_row])], ignore_index=True)
+                    if safe_update("DATA_PARKIR", df_up):
+                        st.success(f"✅ Rekap dikirim! (Khusus R2 otomatis: {ks_r2}, Khusus R4: {ks_r4})")
+                        st.rerun()
+
+    elif menu_parkir == "KONFIRMASI PENERIMAAN":
+        st.subheader("✅ Verifikasi Karcis Masuk")
+        
+        # Pengaman jika file Excel belum ditambahkan kolom Status_Terima
+        if "Status_Terima" not in df_parkir.columns:
+            df_parkir["Status_Terima"] = "SUDAH" 
+            
+        # Hanya tampilkan yang statusnya masih "BELUM"
+        df_pending = df_parkir[df_parkir["Status_Terima"] == "BELUM"]
+        
+        if df_pending.empty:
+            st.info("Semua rekap sudah dikonfirmasi. Tidak ada antrean.")
+        else:
+            for index, row in df_pending.iterrows():
+                with st.expander(f"📦 Nomor: {row['No']} - {row['Nama_Petugas']} ({row['Tanggal']})"):
+                    st.write(f"**Total R2:** {row['Total_Karcis_R2']} Lembar | **Total R4:** {row['Total_Karcis_R4']} Lembar")
+                    if st.button(f"KONFIRMASI PENERIMAAN #{row['No']}", type="primary", key=f"btn_{row['No']}"):
+                        df_parkir.loc[df_parkir["No"] == row["No"], "Status_Terima"] = "SUDAH"
+                        if safe_update("DATA_PARKIR", df_parkir):
+                            st.success(f"✅ Rekap #{row['No']} Telah Diterima!")
+                            st.rerun()
+
+    # Tampilkan tabel history di bawah
+    st.divider()
+    st.subheader("📊 LOG SELURUH REKAP PARKIR")
+    if not df_parkir.empty:
+        # Menampilkan tabel dan diurutkan agar yang terbaru ada di atas
+        st.dataframe(df_parkir.sort_values(by="No", ascending=False), use_container_width=True, hide_index=True)
+
+# ==========================================
+# 7. MAIN APP
+# ==========================================
 def main():
     with st.sidebar:
-        st.title("🗂️ UPTD PASAR")
+        st.title("🏪 UPTD PASAR")
         modul = st.selectbox("PILIH MODUL:", ["SK TOKO", "PARKIR"])
         menu = st.radio("MENU:", ["PENGANTARAN", "PENGAMBILAN"]) if modul == "SK TOKO" else None
-
+    
     if modul == "SK TOKO":
         if menu == "PENGANTARAN": halaman_pengantaran()
         else: halaman_pengambilan()
