@@ -162,7 +162,7 @@ def cetak_overprint(tgl_ambil: str) -> BytesIO:
     buffer = BytesIO(); c = canvas.Canvas(buffer, pagesize=(21.5 * cm, 33 * cm))
     c.setFont("Helvetica-Bold", 10); X_POS = 0.75 * cm
     # Koordinat presisi di baris TANGGAL PENGAMBILAN
-    y_target = 21.5 * cm + 0.75 * cm + 9.8 * cm - (1.05 * cm * 2) - 0.7 * cm 
+    y_target = 21.5 * cm + 0.75 * cm + 9.85 * cm - (1.05 * cm * 2) - 0.7 * cm 
     c.drawString(X_POS + 7.0 * cm, y_target, format_tgl_hari_indo(tgl_ambil).upper())
     c.save(); buffer.seek(0); return buffer
 
