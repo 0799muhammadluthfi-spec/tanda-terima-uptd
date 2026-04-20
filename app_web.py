@@ -24,6 +24,14 @@ def load_data(worksheet: str) -> pd.DataFrame:
     try:
         df = conn.read(worksheet=worksheet, ttl=0)
         df = df.astype(str).replace(r'\.0$', '', regex=True).replace("nan", "-").replace("None", "-")
+        
+        # --- BIKIN KOLOM STATUS CETAK OTOMATIS ---
+        if worksheet == "DATA_PARKIR" and not df.empty:
+            if "Status_Cetak" not in df.columns:
+                df["Status_Cetak"] = "BELUM"
+                conn.update(worksheet=worksheet, data=df)
+        # -----------------------------------------
+        
         return df
     except Exception as e:
         st.error(f"Gagal membaca data: {e}")
@@ -201,7 +209,6 @@ def halaman_pengambilan_sk():
 def halaman_parkir(menu):
     st.header(f"🚗 {menu}"); df_p = load_data("DATA_PARKIR")
 
-    # --- PENCARIAN TANGGAL (Global untuk Parkir) ---
     tgl_input_user = st.text_input("🔍 MASUKKAN TANGGAL", value=datetime.now().strftime("%d-%m-%Y"))
     try:
         tgl_bersih = str(tgl_input_user).strip().replace('/', '-')
@@ -253,7 +260,7 @@ def halaman_parkir(menu):
                 
                 df_p.loc[idx, ["Total_Karcis_R2", "MPP_Roda_R2", "Sisa_Stok_R2", "Khusus_Roda_R2"]] = [str(tr2), str(mr2), str(sn2), str(tr2-mr2)]
                 df_p.loc[idx, ["Total_Karcis_R4", "MPP_Roda_R4", "Sisa_Stok_R4", "Khusus_Roda_R4"]] = [str(tr4), str(mr4), str(sn4), str(tr4-mr4)]
-                df_p.loc[idx, ["Status_Khusus", "Status_MPP"]] = ["BELUM", "BELUM"]
+                df_p.loc[idx, ["Status_Khusus", "Status_MPP", "Status_Cetak"]] = ["BELUM", "BELUM", "BELUM"]
                 if 'Tgl_Temp' in df_p.columns: df_p = df_p.drop(columns=['Tgl_Temp'])
                 if safe_update("DATA_PARKIR", df_p): st.success("✅ Berhasil Diupdate!"); st.rerun()
 
@@ -275,35 +282,42 @@ def halaman_parkir(menu):
         else:
             df_pen = df_pen.sort_index(ascending=False).head(10)
             for i, row in df_pen.iterrows():
-                # Mengecek apakah sudah dikonfirmasi keduanya
-                lunas = (row["Status_Khusus"] == "SUDAH") and (row["Status_MPP"] == "SUDAH")
+                stat_k = row.get("Status_Khusus", "BELUM")
+                stat_m = row.get("Status_MPP", "BELUM")
+                stat_c = row.get("Status_Cetak", "BELUM")
                 
-                # Mengganti ikon agar terasa lebih hijau dan jelas
-                ikon = "✅ [LUNAS]" if lunas else "📦 [BELUM LUNAS]"
+                lunas = (stat_k == "SUDAH") and (stat_m == "SUDAH") and (stat_c == "SUDAH")
+                ikon = "✅ [SELESAI]" if lunas else "📦 [BELUM SELESAI]"
                 
-                # expanded=not lunas membuat kotak ini OTOMATIS MENUTUP saat sudah lunas
                 with st.expander(f"{ikon} {row['Tanggal']} - {row['Nama_Petugas']}", expanded=not lunas):
-                    
-                    # Jika sudah lunas, beri blok hijau cantik di dalamnya
                     if lunas:
-                        st.success("✨ Karcis ini telah dikonfirmasi. Silakan cetak PDF jika diperlukan.")
+                        st.success("✨ Seluruh proses setoran dan pencetakan telah selesai.")
                         
                     ck, cm = st.columns(2)
                     with ck:
                         st.write(f"**KHUSUS**\nR2: {row['Khusus_Roda_R2']} | R4: {row['Khusus_Roda_R4']}")
-                        if row["Status_Khusus"] == "BELUM":
+                        if stat_k == "BELUM":
                             if st.button("TERIMA KHUSUS", key=f"k{i}", use_container_width=True):
                                 df_p.loc[i, "Status_Khusus"] = "SUDAH"
                                 if safe_update("DATA_PARKIR", df_p): st.rerun()
-                        else: st.success("✅ Telah Diterima")
+                        else: st.success("✅ Khusus Diterima")
+                    
                     with cm:
                         st.write(f"**MPP**\nR2: {row['MPP_Roda_R2']} | R4: {row['MPP_Roda_R4']}")
-                        if row["Status_MPP"] == "BELUM":
+                        if stat_m == "BELUM":
                             if st.button("TERIMA MPP", key=f"m{i}", type="primary", use_container_width=True):
                                 df_p.loc[i, "Status_MPP"] = "SUDAH"
                                 if safe_update("DATA_PARKIR", df_p): st.rerun()
                         else: 
                             st.download_button("🖨️ CETAK PDF MPP", data=cetak_tanda_terima_parkir(row), file_name=f"MPP_{row['Tanggal']}.pdf", key=f"p{i}", use_container_width=True)
+                            
+                            if stat_c != "SUDAH":
+                                if st.button("✅ SUDAH CETAK", key=f"c{i}", use_container_width=True):
+                                    df_p.loc[i, "Status_Cetak"] = "SUDAH"
+                                    if safe_update("DATA_PARKIR", df_p): st.rerun()
+                            else:
+                                st.success("✅ Telah Dicetak")
+                                
     st.divider(); st.dataframe(df_p.sort_values(by="Tanggal", ascending=False).head(15), hide_index=True)
 
 # ==========================================
