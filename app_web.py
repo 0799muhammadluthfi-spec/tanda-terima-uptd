@@ -710,7 +710,7 @@ def halaman_pengambilan_sk():
 # ==========================================
 def halaman_parkir(menu):
     c_head, c_btn = st.columns([0.88, 0.12])
-    c_head.header(f"🚗 {menu}")
+    c_head.header(f"🅿️ {menu}")
     with c_btn: tombol_refresh_pojok("ref_parkir")
 
     df_p = load_data("DATA_PARKIR")
@@ -752,10 +752,10 @@ def halaman_parkir(menu):
         with st.form("form_rekap_harian", clear_on_submit=True):
             c1, c2 = st.columns(2)
             with c1: 
-                tr2 = st.number_input("TOTAL TERJUAL R2", min_value=0)
+                tr2 = st.number_input("TOTAL KARCIS R2", min_value=0)
                 mr2 = st.number_input("MPP RODA R2", min_value=0)
             with c2: 
-                tr4 = st.number_input("TOTAL TERJUAL R4", min_value=0)
+                tr4 = st.number_input("TOTAL KARCIS R4", min_value=0)
                 mr4 = st.number_input("MPP RODA R4", min_value=0)
             
             cb1, cb2 = st.columns(2)
@@ -824,8 +824,8 @@ def halaman_parkir(menu):
         st.info(f"Mengisi stok baru untuk petugas: **{nama_p}**")
         with st.form("form_stok_baru", clear_on_submit=True):
             c1, c2 = st.columns(2)
-            with c1: pk2 = st.number_input("PENGAMBILAN BARU R2", min_value=0)
-            with c2: pk4 = st.number_input("PENGAMBILAN BARU R4", min_value=0)
+            with c1: pk2 = st.number_input("PENGAMBILAN KARCIS R2", min_value=0)
+            with c2: pk4 = st.number_input("PENGAMBILAN KARCIS R4", min_value=0)
             
             cb1, cb2 = st.columns(2)
             with cb1: 
