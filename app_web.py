@@ -142,7 +142,7 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
     c.rect(X_POS, Y_BASE, LEBAR_BOX, TINGGI_BOX)
     c.rect(X_POS + 0.15 * cm, Y_BASE + 0.15 * cm, LEBAR_BOX - 0.3 * cm, TINGGI_BOX - 0.3 * cm)
 
-    y_tab = Y_BASE + 9.85 * cm 
+    y_tab = Y_BASE + 10.35 * cm 
     TINGGI_B = 1.05 * cm
     
     tgl_terima_pdf = format_tgl_hari_indo(data.get("Tanggal_Pengantaran", "-"))
