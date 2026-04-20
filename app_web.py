@@ -184,14 +184,24 @@ st.markdown("""
     }
 
     /* ============================================
-       SIDEBAR NAVIGATION - UKURAN SERAGAM
-       Tidak ada perubahan ukuran saat aktif/tidak
+       SIDEBAR NAVIGATION
        ============================================ */
 
-    /* Hapus semua margin/gap antar tombol */
     [data-testid="stSidebar"] .stButton {
         margin-bottom: 0px !important;
         margin-top: 0px !important;
+        animation: sidebarFadeIn 0.3s ease-out;
+    }
+
+    @keyframes sidebarFadeIn {
+        from {
+            opacity: 0;
+            transform: translateX(-8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
     }
 
     /* BASE: Semua tombol sidebar UKURAN IDENTIK */
@@ -225,7 +235,7 @@ st.markdown("""
         border-color: rgba(255,255,255,0.1) !important;
     }
 
-    /* AKTIF - hanya beda warna, ukuran SAMA */
+    /* AKTIF */
     [data-testid="stSidebar"] .stButton > button[kind="primary"] {
         background: rgba(96,165,250,0.12) !important;
         border: 1px solid rgba(96,165,250,0.2) !important;
@@ -237,24 +247,22 @@ st.markdown("""
         color: #93bbfc !important;
     }
 
-    /* Font dalam tombol sidebar */
+    /* Font dalam tombol */
     [data-testid="stSidebar"] .stButton > button p,
     [data-testid="stSidebar"] .stButton > button span {
         font-family: 'Inter', sans-serif !important;
         font-size: 0.72rem !important;
         font-weight: 600 !important;
-        transition: color 0.15s ease !important;
         white-space: nowrap !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
+        transition: color 0.15s ease !important;
     }
 
-    /* ============================================
-       SUB-MENU ANIMATION
-       ============================================ */
+    /* SUB-MENU ANIMATION */
     .submenu-container {
         overflow: hidden;
-        animation: slideDown 0.2s ease-out forwards;
+        animation: slideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         transform-origin: top;
     }
 
@@ -262,12 +270,12 @@ st.markdown("""
         from {
             max-height: 0;
             opacity: 0;
-            transform: translateY(-6px);
+            transform: translateY(-10px) scaleY(0.95);
         }
         to {
             max-height: 300px;
             opacity: 1;
-            transform: translateY(0);
+            transform: translateY(0) scaleY(1);
         }
     }
 
@@ -488,10 +496,27 @@ st.markdown("""
         border-top: 1px solid #e5e7eb !important;
     }
 
+    /* ANIMASI HALAMAN */
     .main .block-container {
-        animation: fadeIn 0.3s ease-out;
+        animation: pageTransition 0.4s ease-out;
         max-width: 80%;
         margin: 0 auto;
+    }
+
+    @keyframes pageTransition {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+            filter: blur(2px);
+        }
+        50% {
+            filter: blur(0px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+            filter: blur(0px);
+        }
     }
 
     @media (max-width: 768px) {
@@ -500,10 +525,6 @@ st.markdown("""
             padding-left: 1rem;
             padding-right: 1rem;
         }
-    }
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(4px); }
-        to { opacity: 1; transform: translateY(0); }
     }
 
     ::-webkit-scrollbar { width: 6px; }
@@ -1029,9 +1050,7 @@ def main():
         </div>
         """, unsafe_allow_html=True)
 
-        # ==========================================
         # SK TOKO
-        # ==========================================
         is_sk = st.session_state["modul_aktif"] == "SK TOKO"
 
         if st.button(
@@ -1063,9 +1082,7 @@ def main():
                         st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
-        # ==========================================
         # PARKIR
-        # ==========================================
         is_parkir = st.session_state["modul_aktif"] == "PARKIR"
 
         if st.button(
@@ -1112,9 +1129,7 @@ def main():
         </div>
         """, unsafe_allow_html=True)
 
-    # ==========================================
     # RENDER HALAMAN
-    # ==========================================
     modul = st.session_state["modul_aktif"]
     menu = st.session_state["menu_aktif"]
 
