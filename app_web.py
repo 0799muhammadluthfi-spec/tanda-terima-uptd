@@ -297,11 +297,16 @@ def halaman_pengambilan():
                                    file_name=f"AMBIL_{no_cari}.pdf")
         else: st.error("❌ Tidak Ditemukan!")
 
-# Letakkan ini di bagian paling bawah fungsi halaman_pengambilan
+# 4. TAMPILKAN TABEL (Hanya yang belum diambil)
     st.divider()
-    st.subheader("📊 DAFTAR BERKAS TERDAFTAR")
-    if not df_sk.empty:
-        st.dataframe(df_sk, use_container_width=True, hide_index=True)
+    st.subheader(f"📊 DAFTAR BERKAS BELUM DIAMBIL ({len(df_belum_diambil)} Berkas)")
+    
+    # Menampilkan tabel yang sudah difilter tadi
+    st.dataframe(
+        df_belum_diambil.sort_values(by="No", ascending=True), 
+        use_container_width=True, 
+        hide_index=True
+    )
 
 # ==========================================
 # 6. MODUL PARKIR & MAIN
