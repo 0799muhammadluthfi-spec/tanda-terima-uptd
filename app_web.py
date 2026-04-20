@@ -14,7 +14,7 @@ import urllib.request
 # ==========================================
 st.set_page_config(
     page_title="UPTD PASAR KANDANGAN",
-    page_icon="🏪",
+    page_icon="logo_hss.png",
     layout="wide"
 )
 conn = st.connection("gsheets", type=GSheetsConnection)
