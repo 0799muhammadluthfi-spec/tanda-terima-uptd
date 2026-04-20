@@ -99,7 +99,7 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
         y_strike = yy + 0.11 * cm 
         if item in berkas_list:
             # Coret TIDAK ADA (Panjang sudah diperpendek)
-            c.line(x_status + 1.4 * cm, y_strike, x_status + 3.4 * cm, y_strike)
+            c.line(x_status + 1.4 * cm, y_strike, x_status + 3.5 * cm, y_strike)
         else:
             # Coret ADA
             c.line(x_status - 0.1 * cm, y_strike, x_status + 0.8 * cm, y_strike)
@@ -146,7 +146,7 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
     for label, val in DETAIL_ROWS:
         c.setLineWidth(1.5) 
         c.rect(X_POS + 0.15 * cm, y_tab - TINGGI_B, 6 * cm, TINGGI_B)
-        c.rect(X_POS + 6.15 * cm, y_tab - TINGGI_B, 13.55 * cm, TINGGI_B)
+        c.rect(X_POS + 6.15 * cm, y_tab - TINGGI_B, 13.7 * cm, TINGGI_B)
         
         c.setFont("Helvetica-Bold", 9)
         c.drawString(X_POS + 0.5 * cm, y_tab - 0.7 * cm, label)
