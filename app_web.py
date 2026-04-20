@@ -275,29 +275,51 @@ def halaman_pengantaran():
 # 5. MODUL PENGAMBILAN
 # ==========================================
 def halaman_pengambilan():
-    st.header("🏁 PENGAMBILAN BERKAS")
-    df_sk = load_data("DATA_SK")
-    no_cari = st.text_input("🔍 CARI NOMOR URUT:").strip()
-    if no_cari:
-        hasil = df_sk[df_sk["No"].str.strip() == no_cari]
-        if not hasil.empty:
-            data = hasil.iloc[0]
-            st.success(f"Ditemukan: {data['Nama_Toko']}")
-            tgl_ambil = st.text_input("📅 TANGGAL PENGAMBILAN:", value=datetime.now().strftime("%d-%m-%Y"))
-            if st.button("✅ KONFIRMASI PENGAMBILAN"):
-                df_sk.loc[df_sk["No"].str.strip() == no_cari, "Tanggal_Pengambilan"] = tgl_ambil
-                if safe_update("DATA_SK", df_sk):
-                    st.session_state['print_tgl'] = tgl_ambil
-                    st.session_state['print_no'] = no_cari
-                    st.rerun()
-            
-            if st.session_state.get('print_no') == no_cari:
-                st.download_button("🖨️ PRINT TANGGAL AMBIL", 
-                                   data=cetak_overprint(st.session_state['print_tgl']),
-                                   file_name=f"AMBIL_{no_cari}.pdf")
-        else: st.error("❌ Tidak Ditemukan!")
+    st.header("PENGAMBILAN BERKAS")
+    
+    # 1. Load data mentah dari spreadsheet
+    df_mentah = load_data("DATA_SK")
+    
+    if df_mentah.empty:
+        st.warning("Data tidak ditemukan.")
+        return
 
-# 4. TAMPILKAN TABEL (Hanya yang belum diambil)
+    # 2. FILTER UTAMA: Hanya munculkan yang Tanggal Pengambilannya masih "-"
+    # Ini akan membuat baris yang sudah diisi tanggal otomatis hilang dari daftar
+    df_belum_diambil = df_mentah[df_mentah["Tanggal_Pengambilan"] == "-"]
+
+    # 3. Kolom Pencarian
+    no_cari = st.text_input("🔍 CARI NOMOR URUT:").strip()
+    
+    if no_cari:
+        # Cari di data mentah (agar jika mencari yang sudah diambil, sistem tetap tahu)
+        hasil = df_mentah[df_mentah["No"].str.strip() == no_cari]
+        
+        if not hasil.empty:
+            data_row = hasil.iloc[0]
+            sudah_ambil = data_row["Tanggal_Pengambilan"] not in ["-", "nan", "NAN", ""]
+
+            if sudah_ambil:
+                st.success(f"✅ Berkas Toko **{data_row['Nama_Toko']}** sudah diambil pada: {format_tgl_hari_indo(data_row['Tanggal_Pengambilan'])}")
+                st.download_button("🖨️ PRINT ULANG TANGGAL AMBIL", 
+                                   data=cetak_overprint(data_row['Tanggal_Pengambilan']),
+                                   file_name=f"AMBIL_{no_cari}.pdf")
+            else:
+                st.warning(f"🏪 Toko: {data_row['Nama_Toko']} (BELUM DIAMBIL)")
+                tgl_ambil = st.text_input("📅 TANGGAL PENGAMBILAN:", value=datetime.now().strftime("%d-%m-%Y"))
+                
+                if st.button("✅ KONFIRMASI PENGAMBILAN"):
+                    # Update data di database
+                    df_mentah.loc[df_mentah["No"].str.strip() == no_cari, "Tanggal_Pengambilan"] = tgl_ambil
+                    if safe_update("DATA_SK", df_mentah):
+                        st.session_state['print_tgl'] = tgl_ambil
+                        st.session_state['print_no'] = no_cari
+                        st.success("Konfirmasi berhasil! Data akan hilang dari daftar 'Belum Diambil'.")
+                        st.rerun()
+        else:
+            st.error("❌ Nomor Urut tidak terdaftar.")
+
+    # 4. TAMPILKAN TABEL (Hanya yang belum diambil)
     st.divider()
     st.subheader(f"📊 DAFTAR BERKAS BELUM DIAMBIL ({len(df_belum_diambil)} Berkas)")
     
