@@ -486,8 +486,7 @@ if menu_aktif == "INPUT REKAP":
                         st.success("✅ BERHASIL DIUPDATE!"); st.rerun()
         else:
             st.warning("⚠️ TANGGAL TIDAK DITEMUKAN DI JADWAL SPREADSHEET.")
-
-    elif menu_aktif == "KONFIRMASI":
+        elif menu_aktif == "KONFIRMASI":
         st.subheader("✅ Verifikasi Penerimaan Karcis")
         for col in ["Status_Khusus", "Status_MPP"]:
             if col not in df_parkir.columns: df_parkir[col] = "BELUM"
