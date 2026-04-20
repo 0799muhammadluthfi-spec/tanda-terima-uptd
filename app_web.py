@@ -25,13 +25,10 @@ def load_data(worksheet: str) -> pd.DataFrame:
         df = conn.read(worksheet=worksheet, ttl=0)
         df = df.astype(str).replace(r'\.0$', '', regex=True).replace("nan", "-").replace("None", "-")
         
-        # --- BIKIN KOLOM STATUS CETAK OTOMATIS ---
         if worksheet == "DATA_PARKIR" and not df.empty:
             if "Status_Cetak" not in df.columns:
                 df["Status_Cetak"] = "BELUM"
                 conn.update(worksheet=worksheet, data=df)
-        # -----------------------------------------
-        
         return df
     except Exception as e:
         st.error(f"Gagal membaca data: {e}")
@@ -204,7 +201,7 @@ def halaman_pengambilan_sk():
     st.divider(); st.subheader(f"📊 BELUM DIAMBIL ({len(df_b)})"); st.dataframe(df_b.sort_values(by="No", ascending=True), use_container_width=True, hide_index=True)
 
 # ==========================================
-# 5. MODUL PARKIR
+# 5. MODUL PARKIR (SUDAH FIX LOGIKA SISA KARCIS)
 # ==========================================
 def halaman_parkir(menu):
     st.header(f"🚗 {menu}"); df_p = load_data("DATA_PARKIR")
@@ -222,17 +219,32 @@ def halaman_parkir(menu):
         st.warning("⚠️ Tanggal belum ada di jadwal Sheet. Silakan isi jadwal dulu.")
         return
 
-    idx = baris.index[0]; nama_p = baris.iloc[0]["Nama_Petugas"]
-    sisa_r2 = pd.to_numeric(df_p.iloc[idx - 1].get("Sisa_Stok_R2", 0), errors='coerce') if idx > 0 else 0
-    sisa_r4 = pd.to_numeric(df_p.iloc[idx - 1].get("Sisa_Stok_R4", 0), errors='coerce') if idx > 0 else 0
+    idx = baris.index[0]
+    nama_p = baris.iloc[0]["Nama_Petugas"]
+    
+    # --- LOGIKA SISA KARCIS PER-PETUGAS (ANTI BOCOR) ---
+    # 1. Cari semua baris dengan Nama Petugas yang sama, SEBELUM index baris yang sedang diedit ini
+    df_petugas_sama = df_p[(df_p["Nama_Petugas"] == nama_p) & (df_p.index < idx)]
+    
+    if not df_petugas_sama.empty:
+        # Jika ketemu, ambil index TERAKHIR dari daftar itu
+        idx_terakhir_petugas = df_petugas_sama.index[-1]
+        sisa_r2 = pd.to_numeric(df_petugas_sama.loc[idx_terakhir_petugas].get("Sisa_Stok_R2", 0), errors='coerce')
+        sisa_r4 = pd.to_numeric(df_petugas_sama.loc[idx_terakhir_petugas].get("Sisa_Stok_R4", 0), errors='coerce')
+    else:
+        # Jika belum pernah bertugas sebelumnya, sisa = 0
+        sisa_r2 = 0
+        sisa_r4 = 0
+
     sisa_r2 = 0 if pd.isna(sisa_r2) else sisa_r2
     sisa_r4 = 0 if pd.isna(sisa_r4) else sisa_r4
+    # ----------------------------------------------------
 
     if menu == "INPUT REKAP":
         st.success(f"👤 PETUGAS: **{nama_p}** | 📅 **{format_tgl_hari_indo(tgl_input_user)}**")
         col_s1, col_s2 = st.columns(2)
-        col_s1.metric("📊 Sisa Karcis R2", int(sisa_r2))
-        col_s2.metric("📊 Sisa Karcis R4", int(sisa_r4))
+        col_s1.metric(f"📊 Sisa Karcis R2 ({nama_p})", int(sisa_r2))
+        col_s2.metric(f"📊 Sisa Karcis R4 ({nama_p})", int(sisa_r4))
 
         with st.form("form_rekap_harian", clear_on_submit=True):
             c1, c2 = st.columns(2)
@@ -258,9 +270,18 @@ def halaman_parkir(menu):
                 sn2 = (pk2_lama + sisa_r2) - tr2
                 sn4 = (pk4_lama + sisa_r4) - tr4
                 
-                df_p.loc[idx, ["Total_Karcis_R2", "MPP_Roda_R2", "Sisa_Stok_R2", "Khusus_Roda_R2"]] = [str(tr2), str(mr2), str(sn2), str(tr2-mr2)]
-                df_p.loc[idx, ["Total_Karcis_R4", "MPP_Roda_R4", "Sisa_Stok_R4", "Khusus_Roda_R4"]] = [str(tr4), str(mr4), str(sn4), str(tr4-mr4)]
-                df_p.loc[idx, ["Status_Khusus", "Status_MPP", "Status_Cetak"]] = ["BELUM", "BELUM", "BELUM"]
+                # Gunakan teks "0" daripada spasi/kosong agar tidak hilang di menu konfirmasi
+                tr2_str = str(tr2) if tr2 > 0 else "0"
+                tr4_str = str(tr4) if tr4 > 0 else "0"
+                
+                # Simpan update
+                df_p.loc[idx, ["Total_Karcis_R2", "MPP_Roda_R2", "Sisa_Stok_R2", "Khusus_Roda_R2"]] = [tr2_str, str(mr2), str(sn2), str(tr2-mr2)]
+                df_p.loc[idx, ["Total_Karcis_R4", "MPP_Roda_R4", "Sisa_Stok_R4", "Khusus_Roda_R4"]] = [tr4_str, str(mr4), str(sn4), str(tr4-mr4)]
+                
+                # Status tidak berubah kalau sudah lunas sebelumnya
+                if str(df_p.loc[idx, "Status_Cetak"]).strip() != "SUDAH":
+                    df_p.loc[idx, ["Status_Khusus", "Status_MPP", "Status_Cetak"]] = ["BELUM", "BELUM", "BELUM"]
+                
                 if 'Tgl_Temp' in df_p.columns: df_p = df_p.drop(columns=['Tgl_Temp'])
                 if safe_update("DATA_PARKIR", df_p): st.success("✅ Berhasil Diupdate!"); st.rerun()
 
@@ -277,41 +298,33 @@ def halaman_parkir(menu):
                 if safe_update("DATA_PARKIR", df_p): st.success("✅ Stok Berhasil Ditambahkan!"); st.rerun()
 
     elif menu == "KONFIRMASI":
+        # Perbaikan filter: Cari yang bukan "-" dan bukan "nan"
         df_pen = df_p[(df_p["Total_Karcis_R2"] != "-") & (df_p["Total_Karcis_R2"] != "nan")].copy()
+        
         if df_pen.empty: 
             st.info("TIDAK ADA DATA KONFIRMASI.")
         else:
             df_pen = df_pen.sort_index(ascending=False).head(10)
             
             for i, row in df_pen.iterrows():
-                # AMBIL STATUS TERBARU LANGSUNG DARI MEMORI TERAKHIR
                 stat_k = str(row.get("Status_Khusus", "BELUM")).strip()
                 stat_m = str(row.get("Status_MPP", "BELUM")).strip()
                 stat_c = str(row.get("Status_Cetak", "BELUM")).strip()
                 
-                # Syarat Lunas / Selesai: Ketiganya harus "SUDAH"
                 lunas = (stat_k == "SUDAH") and (stat_m == "SUDAH") and (stat_c == "SUDAH")
-                
-                # IKON DAN JUDUL OTOMATIS BERUBAH
                 ikon = "✅ [SELESAI]" if lunas else "📦 [BELUM SELESAI]"
                 
-                # JIKA LUNAS, KOTAK OTOMATIS TERTUTUP (expanded=False)
                 with st.expander(f"{ikon} {row['Tanggal']} - {row['Nama_Petugas']}", expanded=not lunas):
-                    
                     if lunas:
-                        # BLOK HIJAU CANTIK KETIKA DIBUKA
                         st.success("✨ PROSES SELESAI: Setoran dan pencetakan telah tuntas.")
-                    
-                    # ----------------- TAMPILAN DALAM KOTAK -----------------
+                        
                     ck, cm = st.columns(2)
-                    
                     with ck:
                         st.write(f"**KHUSUS**\nR2: {row['Khusus_Roda_R2']} | R4: {row['Khusus_Roda_R4']}")
                         if stat_k != "SUDAH":
                             if st.button("TERIMA KHUSUS", key=f"k{i}", use_container_width=True):
                                 df_p.loc[i, "Status_Khusus"] = "SUDAH"
-                                safe_update("DATA_PARKIR", df_p)
-                                st.rerun() # Refresh instan agar judul ikut berubah
+                                safe_update("DATA_PARKIR", df_p); st.rerun()
                         else: 
                             st.success("✅ Khusus Diterima")
                     
@@ -320,17 +333,13 @@ def halaman_parkir(menu):
                         if stat_m != "SUDAH":
                             if st.button("TERIMA MPP", key=f"m{i}", type="primary", use_container_width=True):
                                 df_p.loc[i, "Status_MPP"] = "SUDAH"
-                                safe_update("DATA_PARKIR", df_p)
-                                st.rerun() # Refresh instan agar judul ikut berubah
+                                safe_update("DATA_PARKIR", df_p); st.rerun()
                         else: 
-                            # JIKA MPP SUDAH, MUNCULKAN TOMBOL PRINT DAN "SUDAH CETAK"
                             st.download_button("🖨️ CETAK PDF MPP", data=cetak_tanda_terima_parkir(row), file_name=f"MPP_{row['Tanggal']}.pdf", key=f"p{i}", use_container_width=True)
-                            
                             if stat_c != "SUDAH":
                                 if st.button("✅ SUDAH CETAK", key=f"c{i}", use_container_width=True):
                                     df_p.loc[i, "Status_Cetak"] = "SUDAH"
-                                    safe_update("DATA_PARKIR", df_p)
-                                    st.rerun() # Refresh instan agar judul ikut berubah dan kotak menutup
+                                    safe_update("DATA_PARKIR", df_p); st.rerun()
                             else:
                                 st.success("✅ Telah Dicetak")
                                 
