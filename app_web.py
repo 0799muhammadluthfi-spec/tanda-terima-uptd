@@ -18,300 +18,379 @@ st.set_page_config(
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 # ==========================================
-# CUSTOM CSS - MODERN ELEGANT AESTHETIC
+# CUSTOM CSS - FONT & WARNA YANG BENAR
 # ==========================================
 st.markdown("""
 <style>
-    /* ===== FONT IMPORT - INTER (MODERN & CLEAN) ===== */
+    /* ===== FONT IMPORT ===== */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-    /* ===== GLOBAL FONT OVERRIDE ===== */
-    html, body, [class*="css"], .stApp,
-    .stMarkdown, .stText, p, span, label, li, td, th,
-    div, input, textarea, select, button,
-    [data-testid="stMarkdownContainer"],
-    [data-testid="stWidgetLabel"],
-    .stSelectbox, .stMultiSelect, .stTextInput,
-    .stNumberInput, .stRadio, .stCheckbox {
+    /* ===== GLOBAL FONT - MAIN CONTENT ONLY ===== */
+    .stApp > div[data-testid="stMainBlockContainer"] *,
+    .main * {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
-        letter-spacing: -0.01em;
     }
 
     /* ===== BACKGROUND ===== */
     .stApp {
-        background: linear-gradient(135deg, #f8fafc 0%, #f0f4f8 50%, #e8eef5 100%);
+        background: linear-gradient(160deg, #f8fafc 0%, #f1f5f9 100%);
     }
 
-    /* ===== SIDEBAR STYLING ===== */
+    /* ==============================================
+       SIDEBAR - WARNA FONT PUTIH EKSPLISIT
+       ============================================== */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0f172a 0%, #1e293b 40%, #0f172a 100%);
-        border-right: 1px solid rgba(255,255,255,0.06);
+        background: linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+        border-right: 1px solid rgba(255,255,255,0.05);
     }
-    [data-testid="stSidebar"] * {
+
+    /* Semua teks di sidebar HARUS putih/terang */
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] div,
+    [data-testid="stSidebar"] .stSelectbox label,
+    [data-testid="stSidebar"] .stRadio label,
+    [data-testid="stSidebar"] [data-testid="stWidgetLabel"],
+    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"],
+    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
         color: #e2e8f0 !important;
         font-family: 'Inter', sans-serif !important;
     }
-    [data-testid="stSidebar"] h1,
-    [data-testid="stSidebar"] h2,
-    [data-testid="stSidebar"] h3 {
-        font-weight: 700 !important;
-        font-size: 1.1rem !important;
-        letter-spacing: -0.02em !important;
-        color: #f1f5f9 !important;
-    }
-    [data-testid="stSidebar"] .stRadio label {
-        font-size: 0.82rem !important;
-        font-weight: 500 !important;
-        padding: 6px 0 !important;
-        transition: all 0.2s ease;
-    }
-    [data-testid="stSidebar"] .stRadio label:hover {
-        color: #60a5fa !important;
-    }
+
+    /* Sidebar selectbox - label */
     [data-testid="stSidebar"] .stSelectbox label {
-        font-size: 0.78rem !important;
-        font-weight: 600 !important;
-        text-transform: uppercase;
-        letter-spacing: 0.05em !important;
+        font-size: 0.72rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.06em !important;
         color: #94a3b8 !important;
     }
-    [data-testid="stSidebar"] .stDivider {
+
+    /* Sidebar radio - label judul */
+    [data-testid="stSidebar"] .stRadio > label {
+        font-size: 0.72rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.06em !important;
+        color: #94a3b8 !important;
+    }
+
+    /* Sidebar radio - opsi item */
+    [data-testid="stSidebar"] .stRadio [role="radiogroup"] label {
+        font-size: 0.85rem !important;
+        font-weight: 500 !important;
+        color: #cbd5e1 !important;
+        letter-spacing: 0 !important;
+        text-transform: none !important;
+    }
+    [data-testid="stSidebar"] .stRadio [role="radiogroup"] label:hover {
+        color: #60a5fa !important;
+    }
+
+    /* Sidebar selectbox - value text inside dropdown */
+    [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] span,
+    [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] div {
+        color: #f1f5f9 !important;
+        font-size: 0.85rem !important;
+        font-weight: 600 !important;
+    }
+
+    /* Sidebar divider */
+    [data-testid="stSidebar"] hr {
         border-color: rgba(255,255,255,0.08) !important;
     }
 
-    /* ===== HEADINGS ===== */
-    h1 {
+    /* Sidebar button */
+    [data-testid="stSidebar"] .stButton > button {
+        color: #e2e8f0 !important;
+        border-color: rgba(255,255,255,0.15) !important;
+        background: rgba(255,255,255,0.05) !important;
+        font-size: 0.8rem !important;
+        font-weight: 600 !important;
+    }
+    [data-testid="stSidebar"] .stButton > button:hover {
+        background: rgba(255,255,255,0.1) !important;
+        color: #ffffff !important;
+    }
+
+    /* ==============================================
+       MAIN CONTENT - HEADINGS
+       ============================================== */
+    /* h1 - Judul halaman utama */
+    .main h1,
+    [data-testid="stMainBlockContainer"] h1 {
         font-family: 'Inter', sans-serif !important;
+        font-size: 1.55rem !important;
         font-weight: 800 !important;
-        font-size: 1.65rem !important;
         color: #0f172a !important;
         letter-spacing: -0.03em !important;
-        line-height: 1.2 !important;
-        margin-bottom: 0.4rem !important;
-    }
-    h2 {
-        font-family: 'Inter', sans-serif !important;
-        font-weight: 700 !important;
-        font-size: 1.25rem !important;
-        color: #1e293b !important;
-        letter-spacing: -0.025em !important;
-        line-height: 1.3 !important;
-    }
-    h3 {
-        font-family: 'Inter', sans-serif !important;
-        font-weight: 600 !important;
-        font-size: 1.05rem !important;
-        color: #334155 !important;
-        letter-spacing: -0.02em !important;
+        line-height: 1.25 !important;
+        margin-bottom: 0.3rem !important;
     }
 
-    /* ===== BODY TEXT & PARAGRAPHS ===== */
-    p, .stMarkdown p {
+    /* h2 - Sub judul / section */
+    .main h2,
+    [data-testid="stMainBlockContainer"] h2 {
+        font-family: 'Inter', sans-serif !important;
+        font-size: 1.15rem !important;
+        font-weight: 700 !important;
+        color: #1e293b !important;
+        letter-spacing: -0.02em !important;
+        line-height: 1.3 !important;
+        margin-top: 0.8rem !important;
+    }
+
+    /* h3 - Sub-sub judul */
+    .main h3,
+    [data-testid="stMainBlockContainer"] h3 {
+        font-family: 'Inter', sans-serif !important;
+        font-size: 0.98rem !important;
+        font-weight: 600 !important;
+        color: #334155 !important;
+        letter-spacing: -0.01em !important;
+    }
+
+    /* ==============================================
+       MAIN CONTENT - BODY TEXT
+       ============================================== */
+    .main p,
+    .main span,
+    .main li,
+    [data-testid="stMainBlockContainer"] p,
+    [data-testid="stMarkdownContainer"] p {
         font-size: 0.88rem !important;
         font-weight: 400 !important;
-        line-height: 1.65 !important;
-        color: #475569 !important;
+        line-height: 1.6 !important;
+        color: #374151 !important;
     }
 
-    /* ===== METRIC CARDS ===== */
-    [data-testid="stMetric"] {
-        background: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 16px 20px !important;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
-        transition: all 0.25s ease;
-    }
-    [data-testid="stMetric"]:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.07);
-        transform: translateY(-1px);
-    }
-    [data-testid="stMetricLabel"] {
-        font-size: 0.72rem !important;
-        font-weight: 600 !important;
-        text-transform: uppercase;
-        letter-spacing: 0.04em !important;
-        color: #64748b !important;
-    }
-    [data-testid="stMetricValue"] {
-        font-family: 'JetBrains Mono', monospace !important;
-        font-size: 1.6rem !important;
+    /* Bold text inside markdown */
+    .main strong,
+    [data-testid="stMarkdownContainer"] strong {
         font-weight: 700 !important;
-        color: #0f172a !important;
+        color: #1e293b !important;
     }
 
-    /* ===== INPUT FIELDS ===== */
-    .stTextInput > div > div > input,
-    .stNumberInput > div > div > input {
+    /* ==============================================
+       FORM LABELS & INPUTS
+       ============================================== */
+    /* Label di atas input (MAIN area saja) */
+    .main .stTextInput label,
+    .main .stNumberInput label,
+    .main .stSelectbox label,
+    .main .stCheckbox label,
+    .main [data-testid="stWidgetLabel"] {
         font-family: 'Inter', sans-serif !important;
-        font-size: 0.88rem !important;
-        font-weight: 500 !important;
-        border: 1.5px solid #e2e8f0 !important;
-        border-radius: 10px !important;
-        padding: 10px 14px !important;
-        background: #ffffff !important;
-        color: #1e293b !important;
-        transition: all 0.2s ease;
-    }
-    .stTextInput > div > div > input:focus,
-    .stNumberInput > div > div > input:focus {
-        border-color: #3b82f6 !important;
-        box-shadow: 0 0 0 3px rgba(59,130,246,0.12) !important;
-    }
-    .stTextInput label, .stNumberInput label,
-    .stSelectbox label, .stCheckbox label {
         font-size: 0.78rem !important;
         font-weight: 600 !important;
         color: #374151 !important;
         letter-spacing: 0.01em !important;
-        margin-bottom: 4px !important;
     }
 
-    /* ===== BUTTONS ===== */
-    .stButton > button {
-        font-family: 'Inter', sans-serif !important;
-        font-size: 0.82rem !important;
-        font-weight: 600 !important;
-        border-radius: 10px !important;
-        padding: 8px 20px !important;
-        letter-spacing: 0.01em !important;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        border: 1.5px solid #e2e8f0 !important;
-    }
-    .stButton > button:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
-    }
-    .stButton > button[kind="primary"],
-    .stButton > button[data-testid="baseButton-primary"] {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
-        border: none !important;
-        color: white !important;
-        box-shadow: 0 2px 8px rgba(37,99,235,0.25) !important;
-    }
-    .stButton > button[kind="primary"]:hover,
-    .stButton > button[data-testid="baseButton-primary"]:hover {
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
-        box-shadow: 0 6px 16px rgba(37,99,235,0.35) !important;
-    }
-    .stDownloadButton > button {
-        font-family: 'Inter', sans-serif !important;
-        font-size: 0.82rem !important;
-        font-weight: 600 !important;
-        border-radius: 10px !important;
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-        color: white !important;
-        border: none !important;
-        box-shadow: 0 2px 8px rgba(5,150,105,0.2) !important;
-    }
-    .stDownloadButton > button:hover {
-        box-shadow: 0 6px 16px rgba(5,150,105,0.3) !important;
-        transform: translateY(-1px);
+    /* Checkbox label text */
+    .main .stCheckbox label span {
+        font-size: 0.84rem !important;
+        font-weight: 500 !important;
+        color: #374151 !important;
     }
 
-    /* ===== FORM CONTAINER ===== */
-    [data-testid="stForm"] {
-        background: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 14px;
-        padding: 24px !important;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-    }
-
-    /* ===== EXPANDER ===== */
-    .streamlit-expanderHeader {
+    /* Input field text */
+    .main .stTextInput input,
+    .main .stNumberInput input {
         font-family: 'Inter', sans-serif !important;
         font-size: 0.88rem !important;
-        font-weight: 600 !important;
+        font-weight: 500 !important;
         color: #1e293b !important;
-        background: white !important;
-        border: 1px solid #e2e8f0 !important;
-        border-radius: 12px !important;
-        padding: 12px 16px !important;
+        background: #ffffff !important;
+        border: 1.5px solid #d1d5db !important;
+        border-radius: 8px !important;
+        padding: 10px 14px !important;
     }
-    [data-testid="stExpander"] {
-        border: 1px solid #e2e8f0 !important;
-        border-radius: 12px !important;
-        background: white !important;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-        margin-bottom: 8px !important;
+    .main .stTextInput input:focus,
+    .main .stNumberInput input:focus {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.1) !important;
     }
 
-    /* ===== DATAFRAME ===== */
-    [data-testid="stDataFrame"] {
-        border-radius: 12px;
-        overflow: hidden;
-        border: 1px solid #e2e8f0;
+    /* Input placeholder */
+    .main .stTextInput input::placeholder,
+    .main .stNumberInput input::placeholder {
+        color: #9ca3af !important;
+        font-weight: 400 !important;
+    }
+
+    /* ==============================================
+       METRIC CARDS
+       ============================================== */
+    [data-testid="stMetric"] {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 14px 18px !important;
         box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    [data-testid="stMetric"]:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    [data-testid="stMetricLabel"] {
+        font-family: 'Inter', sans-serif !important;
+        font-size: 0.7rem !important;
+        font-weight: 600 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.03em !important;
+        color: #6b7280 !important;
+    }
+    [data-testid="stMetricValue"] {
+        font-family: 'JetBrains Mono', monospace !important;
+        font-size: 1.5rem !important;
+        font-weight: 700 !important;
+        color: #111827 !important;
+    }
+
+    /* ==============================================
+       BUTTONS - MAIN AREA
+       ============================================== */
+    .main .stButton > button {
+        font-family: 'Inter', sans-serif !important;
+        font-size: 0.82rem !important;
+        font-weight: 600 !important;
+        border-radius: 8px !important;
+        padding: 8px 20px !important;
+        color: #374151 !important;
+        border: 1.5px solid #d1d5db !important;
+        background: #ffffff !important;
+        transition: all 0.15s ease;
+    }
+    .main .stButton > button:hover {
+        background: #f9fafb !important;
+        border-color: #9ca3af !important;
+        color: #111827 !important;
+    }
+
+    /* Primary button */
+    .main .stButton > button[data-testid="baseButton-primary"],
+    .main .stButton > button[kind="primary"] {
+        background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+        border: none !important;
+        color: #ffffff !important;
+        box-shadow: 0 2px 6px rgba(37,99,235,0.2);
+    }
+    .main .stButton > button[data-testid="baseButton-primary"]:hover,
+    .main .stButton > button[kind="primary"]:hover {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+    }
+
+    /* Download button */
+    .main .stDownloadButton > button {
+        font-family: 'Inter', sans-serif !important;
+        font-size: 0.82rem !important;
+        font-weight: 600 !important;
+        border-radius: 8px !important;
+        background: linear-gradient(135deg, #10b981, #059669) !important;
+        color: #ffffff !important;
+        border: none !important;
+    }
+    .main .stDownloadButton > button:hover {
+        background: linear-gradient(135deg, #059669, #047857) !important;
+        color: #ffffff !important;
+    }
+
+    /* ==============================================
+       FORM CONTAINER
+       ============================================== */
+    [data-testid="stForm"] {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 20px !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+
+    /* ==============================================
+       EXPANDER
+       ============================================== */
+    [data-testid="stExpander"] {
+        border: 1px solid #e5e7eb !important;
+        border-radius: 10px !important;
+        background: #ffffff !important;
+        margin-bottom: 6px !important;
+    }
+    .streamlit-expanderHeader {
+        font-family: 'Inter', sans-serif !important;
+        font-size: 0.86rem !important;
+        font-weight: 600 !important;
+        color: #1e293b !important;
+    }
+
+    /* ==============================================
+       DATAFRAME / TABLE
+       ============================================== */
+    [data-testid="stDataFrame"] {
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid #e5e7eb;
     }
     [data-testid="stDataFrame"] th {
         font-family: 'Inter', sans-serif !important;
-        font-size: 0.72rem !important;
+        font-size: 0.7rem !important;
         font-weight: 700 !important;
         text-transform: uppercase !important;
         letter-spacing: 0.04em !important;
-        color: #475569 !important;
-        background: #f8fafc !important;
+        color: #4b5563 !important;
+        background: #f9fafb !important;
     }
     [data-testid="stDataFrame"] td {
         font-family: 'JetBrains Mono', monospace !important;
         font-size: 0.78rem !important;
-        font-weight: 400 !important;
-        color: #334155 !important;
-    }
-
-    /* ===== ALERTS ===== */
-    .stAlert, [data-testid="stAlert"] {
-        font-size: 0.85rem !important;
-        font-weight: 500 !important;
-        border-radius: 10px !important;
-        border-left-width: 4px !important;
-    }
-
-    /* ===== DIVIDER ===== */
-    hr {
-        border: none !important;
-        border-top: 1px solid #e2e8f0 !important;
-        margin: 1.2rem 0 !important;
-    }
-
-    /* ===== CHECKBOX STYLING ===== */
-    .stCheckbox {
-        font-size: 0.84rem !important;
-    }
-    .stCheckbox label span {
-        font-weight: 500 !important;
         color: #374151 !important;
     }
 
-    /* ===== TABS (if used) ===== */
-    .stTabs [data-baseweb="tab"] {
-        font-family: 'Inter', sans-serif !important;
+    /* ==============================================
+       ALERTS (info, success, warning, error)
+       ============================================== */
+    .main [data-testid="stAlert"] p,
+    .main .stAlert p {
         font-size: 0.84rem !important;
-        font-weight: 600 !important;
+        font-weight: 500 !important;
+        color: inherit !important;
     }
 
-    /* ===== SCROLLBAR ===== */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 3px;
+    /* ==============================================
+       DIVIDER
+       ============================================== */
+    .main hr {
+        border: none !important;
+        border-top: 1px solid #e5e7eb !important;
+        margin: 1rem 0 !important;
     }
-    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-    /* ===== SMOOTH TRANSITIONS ===== */
+    /* ==============================================
+       SMOOTH ANIMATION
+       ============================================== */
     .main .block-container {
-        animation: fadeIn 0.35s ease-out;
+        animation: fadeIn 0.3s ease-out;
         max-width: 1100px;
     }
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(6px); }
+        from { opacity: 0; transform: translateY(4px); }
         to { opacity: 1; transform: translateY(0); }
     }
 
-    /* ===== HIDE STREAMLIT BRANDING ===== */
+    /* ==============================================
+       SCROLLBAR
+       ============================================== */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    /* ==============================================
+       HIDE DEFAULT STREAMLIT ELEMENTS
+       ============================================== */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header [data-testid="stStatusWidget"] {display: none;}
@@ -732,27 +811,50 @@ def halaman_parkir(menu):
 # ==========================================
 # 6. MAIN RUNNER
 # ==========================================
+
+# URL Logo HSS dari Wikipedia (sumber resmi, stabil)
+LOGO_HSS_URL = "https://upload.wikimedia.org/wikipedia/commons/3/3e/Lambang_Kabupaten_Hulu_Sungai_Selatan.png"
+
 def main():
     with st.sidebar:
-        # ===== LOGO KABUPATEN HSS =====
+        # ===== LOGO KABUPATEN HSS - PASTI MUNCUL =====
+        # Metode 1: Coba file lokal dulu
+        logo_lokal = "logo_hss.png"
+        if os.path.exists(logo_lokal):
+            st.image(logo_lokal, width=85, use_container_width=False)
+        else:
+            # Metode 2: Dari URL Wikipedia dengan fallback HTML
+            try:
+                st.image(LOGO_HSS_URL, width=85, use_container_width=False)
+            except Exception:
+                # Metode 3: HTML img tag sebagai fallback terakhir
+                st.markdown(f"""
+                <div style="text-align:center; padding:10px 0;">
+                    <img src="{LOGO_HSS_URL}" width="80" 
+                         onerror="this.style.display='none'"
+                         style="filter:drop-shadow(0 2px 6px rgba(0,0,0,0.3));">
+                </div>
+                """, unsafe_allow_html=True)
+
+        # ===== HEADER SIDEBAR =====
         st.markdown("""
-        <div style="text-align:center; padding: 16px 0 8px 0;">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Lambang_Kabupaten_Hulu_Sungai_Selatan.png/220px-Lambang_Kabupaten_Hulu_Sungai_Selatan.png" 
-                 width="80" style="filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3)); margin-bottom: 8px;">
-            <p style="font-size: 0.65rem; font-weight: 600; color: #94a3b8 !important; 
-                      letter-spacing: 0.08em; text-transform: uppercase; margin: 0; line-height: 1.4;">
-                Kabupaten<br>Hulu Sungai Selatan
+        <div style="text-align:center; padding:2px 0 10px 0;">
+            <p style="font-family:'Inter',sans-serif; font-size:0.62rem; font-weight:600; 
+                      color:#64748b !important; letter-spacing:0.08em; 
+                      text-transform:uppercase; margin:0; line-height:1.5;">
+                KABUPATEN HULU SUNGAI SELATAN
             </p>
         </div>
         """, unsafe_allow_html=True)
-        
+
         st.markdown("""
-        <div style="text-align:center; padding: 4px 0 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 12px;">
-            <h2 style="font-size: 1.05rem !important; font-weight: 800 !important; 
-                       color: #f1f5f9 !important; letter-spacing: -0.02em; margin: 0;
-                       line-height: 1.3;">
-                🏪 UPTD PASAR<br>KANDANGAN
-            </h2>
+        <div style="text-align:center; padding:0 0 8px 0; 
+                    border-bottom:1px solid rgba(255,255,255,0.08); margin-bottom:10px;">
+            <p style="font-family:'Inter',sans-serif; font-size:1.05rem; font-weight:800; 
+                      color:#f1f5f9 !important; letter-spacing:-0.02em; 
+                      margin:0; line-height:1.3;">
+                🏪 UPTD PASAR KANDANGAN
+            </p>
         </div>
         """, unsafe_allow_html=True)
         
@@ -764,12 +866,16 @@ def main():
         else: 
             menu = st.radio("MENU PARKIR:", ["INPUT REKAP", "INPUT STOK", "KONFIRMASI"], key="pilih_menu_parkir")
         
-        # ===== FOOTER SIDEBAR =====
+        # ===== FOOTER SIDEBAR - NAMA M. LUTHFI RENALDI =====
         st.markdown("""
-        <div style="position: fixed; bottom: 12px; left: 12px; right: 12px; text-align: center;">
-            <p style="font-size: 0.6rem; color: #475569 !important; margin: 0; 
-                      letter-spacing: 0.03em; line-height: 1.5;">
-                © 2025 UPTD Pengelolaan Pasar<br>Kab. Hulu Sungai Selatan
+        <div style="text-align:center; padding:20px 0 8px 0; 
+                    border-top:1px solid rgba(255,255,255,0.06); margin-top:30px;">
+            <p style="font-family:'Inter',sans-serif; font-size:0.58rem; font-weight:500; 
+                      color:#64748b !important; margin:0; letter-spacing:0.02em; line-height:1.6;">
+                Developed by<br>
+                <span style="font-weight:700; color:#94a3b8 !important; font-size:0.64rem;">
+                    M. Luthfi Renaldi
+                </span>
             </p>
         </div>
         """, unsafe_allow_html=True)
