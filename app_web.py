@@ -747,17 +747,17 @@ def format_tgl_hari_indo(tgl_str):
 
 def normalisasi_no(val):
     try:
-        txt = str(val).strip().replace("\u00a0", "")
-        if txt in ["", "-", "nan", "None", "null", "NaN", "<NA>"]:
-            return ""
+        txt = str(val)
+        txt = txt.replace("\u00a0", "")  # hapus non-breaking space
+        txt = txt.replace("'", "")       # hapus tanda '
+        txt = txt.strip()
 
-        if txt.endswith(".0"):
-            txt = txt[:-2]
+        # Kalau angka float seperti 1.0 → jadi 1
+        try:
+            return str(int(float(txt)))
+        except:
+            return txt
 
-        if txt.isdigit():
-            txt = str(int(txt))
-
-        return txt
     except:
         return ""
 
@@ -895,7 +895,6 @@ def halaman_pengambilan_sk():
 
     df_b = df_m[(df_m["Tanggal_Pengambilan"] == "-") & (df_m["No"] != "-")]
     no_cari = st.text_input("🔍 CARI NOMOR URUT:").strip()
-
     if no_cari:
         no_cari_norm = normalisasi_no(no_cari)
         mask_no = df_m["No"].apply(normalisasi_no) == no_cari_norm
