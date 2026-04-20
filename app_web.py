@@ -8,7 +8,7 @@ from streamlit_gsheets import GSheetsConnection
 
 # ==========================================
 # 1. FUNGSI KHUSUS CETAK PARKIR (PORTRAIT)
-# ========================================== 
+# ==========================================
 def cetak_tanda_terima_parkir(data):
     buffer = BytesIO()
     # UKURAN F4 PORTRAIT (21.5cm x 33cm)
@@ -100,6 +100,7 @@ def cetak_tanda_terima_parkir(data):
     c.save()
     buffer.seek(0)
     return buffer
+
 # ==========================================
 # 1. KONFIGURASI
 # ==========================================
@@ -365,7 +366,7 @@ def halaman_pengantaran():
             mime="application/pdf"
         )
 
-# Letakkan ini di bagian paling bawah fungsi halaman_pengantaran
+    # Letakkan ini di bagian paling bawah fungsi halaman_pengantaran
     st.divider()
     st.subheader("📊 DATA TABEL GOOGLE SHEETS")
     if not df_sk.empty:
@@ -454,7 +455,7 @@ def halaman_parkir(menu_aktif):
         if not baris_cocok.empty:
             idx = baris_cocok.index[0]
             nama_ptgs = baris_cocok.iloc[0]["Nama_Petugas"]
-            st.success(f"👤 PETUGAS: **{nama_ptgs}** | 📅 **{tgl_input}**")
+            st.success(f"👤 PETUGAS: **{nama_ptgs}** | 📅 **{format_tgl_hari_indo(tgl_input)}**")
             
             # AMBIL SISA KEMARIN dari baris sebelumnya (idx - 1)
             sisa_r2_lama = df_parkir.iloc[idx - 1]["Sisa_Stok_R2"] if idx > 0 else 0
@@ -533,12 +534,12 @@ def halaman_parkir(menu_aktif):
                                 use_container_width=True
                             )
 
-    # Tabel Riwayat (Posisinya sejajar dengan IF menu_aktif paling atas)
+    # Tabel Riwayat 
     st.divider()
     st.subheader("📊 LOG REKAP PARKIR")
     if not df_parkir.empty:
         st.dataframe(df_parkir.sort_values(by="No", ascending=False), use_container_width=True, hide_index=True)
-        
+
 # ==========================================
 # 7. MAIN APP
 # ==========================================
@@ -553,8 +554,10 @@ def main():
             menu = st.radio("MENU PARKIR:", ["INPUT REKAP", "KONFIRMASI"])
     
     if modul == "SK TOKO":
-        if menu == "PENGANTARAN": halaman_pengantaran()
-        else: halaman_pengambilan()
+        if menu == "PENGANTARAN": 
+            halaman_pengantaran()
+        else: 
+            halaman_pengambilan()
     else:
         halaman_parkir(menu)
 
