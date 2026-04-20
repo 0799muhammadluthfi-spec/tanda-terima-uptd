@@ -11,34 +11,42 @@ from streamlit_gsheets import GSheetsConnection
 # ========================================== 
 def cetak_tanda_terima_parkir(data):
     buffer = BytesIO()
-    # Tetap gunakan ukuran custom, tapi tanpa perintah landscape
-    custom_size = (13.6 * cm, 7 * cm)
-    c = canvas.Canvas(buffer, pagesize=custom_size)
+    # Gunakan ukuran F4 standar agar terbaca PORTRAIT oleh printer
+    # Lebar: 21.5cm, Tinggi: 33cm
+    c = canvas.Canvas(buffer, pagesize=(21.5 * cm, 33 * cm))
     
-    # Garis Bingkai Luar (Tanda Potong)
+    # KITA SETTING KOORDINAT UNTUK UKURAN 13.6cm x 7cm
+    # Kita gambar di area paling atas kertas
+    lebar_tanda_terima = 13.6 * cm
+    tinggi_tanda_terima = 7.0 * cm
+    y_top = 33 * cm - 1.0 * cm # Mulai dari 1cm dari atas kertas
+    y_bottom = y_top - tinggi_tanda_terima
+    
+    # 1. Garis Bingkai (Tanda Potong)
     c.setDash(1, 2)
     c.setLineWidth(0.5)
-    c.rect(0.2*cm, 0.2*cm, 13.2*cm, 6.6*cm)
+    c.rect(1 * cm, y_bottom, lebar_tanda_terima, tinggi_tanda_terima)
     c.setDash()
     
-    # Header - Rata Tengah
-    c.setFont("Helvetica-Bold", 10)
-    c.drawCentredString(6.8 * cm, 6.0 * cm, "UPTD PENGELOLAAN PASAR KANDANGAN")
-    c.setFont("Helvetica-Bold", 8)
-    c.drawCentredString(6.8 * cm, 5.5 * cm, "TANDA TERIMA SETORAN PARKIR (MPP)")
+    # 2. Header (Posisi disesuaikan agar di tengah kotak 13.6cm)
+    center_x = 1 * cm + (lebar_tanda_terima / 2)
     
-    # Garis Pembatas Header
-    c.setLineWidth(1)
-    c.line(1*cm, 5.3*cm, 12.6*cm, 5.3*cm)
+    c.setFont("Helvetica-Bold", 11)
+    c.drawCentredString(center_x, y_top - 0.8 * cm, "UPTD PENGELOLAAN PASAR KANDANGAN")
     
-    # Isi Data
-    c.setFont("Helvetica", 9)
-    y_awal = 4.3 * cm
-    x_label = 1.5 * cm
-    x_titik = 4.5 * cm
-    x_value = 4.8 * cm
+    c.setFont("Helvetica-Bold", 9)
+    c.drawCentredString(center_x, y_top - 1.3 * cm, "TANDA TERIMA SETORAN PARKIR (MPP)")
     
-    # Daftar data yang akan ditampilkan
+    c.setLineWidth(1.2)
+    c.line(2 * cm, y_top - 1.6 * cm, 13.5 * cm, y_top - 1.6 * cm)
+    
+    # 3. Isi Data
+    c.setFont("Helvetica", 10)
+    x_label = 2.0 * cm
+    x_titik = 5.5 * cm
+    x_value = 5.8 * cm
+    y_data = y_top - 2.5 * cm
+    
     items = [
         ("TANGGAL", data['Tanggal']),
         ("NAMA PETUGAS", data['Nama_Petugas']),
@@ -48,18 +56,18 @@ def cetak_tanda_terima_parkir(data):
     ]
     
     for label, value in items:
-        c.setFont("Helvetica", 9)
-        c.drawString(x_label, y_awal, label)
-        c.drawString(x_titik, y_awal, ":")
-        c.setFont("Helvetica-Bold", 9)
-        c.drawString(x_value, y_awal, str(value))
-        y_awal -= 0.6 * cm # Jarak antar baris
+        c.setFont("Helvetica", 10)
+        c.drawString(x_label, y_data, label)
+        c.drawString(x_titik, y_data, ":")
+        c.setFont("Helvetica-Bold", 10)
+        c.drawString(x_value, y_data, str(value))
+        y_data -= 0.7 * cm
         
-    # Footer Kecil
+    # 4. Footer (ID dan Waktu)
     c.setFont("Helvetica-Oblique", 7)
     tgl_cetak = datetime.now().strftime("%d/%m/%Y %H:%M")
-    c.drawString(1.5 * cm, 0.5 * cm, f"ID: PRK-{data['No']}")
-    c.drawRightString(12.1 * cm, 0.5 * cm, f"Dicetak pada: {tgl_cetak} WITA")
+    c.drawString(2.0 * cm, y_bottom + 0.4 * cm, f"ID: PRK-{data['No']}")
+    c.drawRightString(14.0 * cm, y_bottom + 0.4 * cm, f"Dicetak: {tgl_cetak} WITA")
     
     c.showPage()
     c.save()
