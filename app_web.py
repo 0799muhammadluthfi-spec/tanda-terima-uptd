@@ -100,4 +100,73 @@ def halaman_parkir(menu_aktif):
             
             # AMBIL SISA KEMARIN (idx - 1)
             sisa_r2_lama = df_parkir.iloc[idx - 1]["Sisa_Stok_R2"] if idx > 0 else 0
-            sisa_
+            sisa_r4_lama = df_parkir.iloc[idx - 1]["Sisa_Stok_R4"] if idx > 0 else 0
+            st.info(f"📊 SISA KEMARIN: R2={sisa_r2_lama} | R4={sisa_r4_lama}")
+
+            with st.form("form_parkir", clear_on_submit=True):
+                c1, c2 = st.columns(2)
+                with c1:
+                    pk_r2 = st.number_input("PENGAMBILAN BARU R2", min_value=0)
+                    tot_r2 = st.number_input("TERJUAL R2 (REKAP)", min_value=0)
+                    mpp_r2 = st.number_input("MPP RODA R2", min_value=0)
+                with c2:
+                    pk_r4 = st.number_input("PENGAMBILAN BARU R4", min_value=0)
+                    tot_r4 = st.number_input("TERJUAL R4 (REKAP)", min_value=0)
+                    mpp_r4 = st.number_input("MPP RODA R4", min_value=0)
+
+                if st.form_submit_button("💾 UPDATE DATA", type="primary"):
+                    # RUMUS: (Baru + Sisa Lama) - Terjual
+                    sisa_n_r2 = (pk_r2 + sisa_r2_lama) - tot_r2
+                    sisa_n_r4 = (pk_r4 + sisa_r4_lama) - tot_r4
+                    
+                    df_parkir.loc[idx, ["Pengambilan_Karcis_R2", "Total_Karcis_R2", "MPP_Roda_R2", "Sisa_Stok_R2", "Khusus_Roda_R2"]] = [pk_r2, tot_r2, mpp_r2, sisa_n_r2, tot_r2-mpp_r2]
+                    df_parkir.loc[idx, ["Pengambilan_Karcis_R4", "Total_Karcis_R4", "MPP_Roda_R4", "Sisa_Stok_R4", "Khusus_Roda_R4"]] = [pk_r4, tot_r4, mpp_r4, sisa_n_r4, tot_r4-mpp_r4]
+                    df_parkir.loc[idx, ["Status_Khusus", "Status_MPP"]] = ["BELUM", "BELUM"]
+                    
+                    if safe_update("DATA_PARKIR", df_parkir):
+                        st.success("✅ BERHASIL DIUPDATE!"); st.rerun()
+        else:
+            st.warning("⚠️ TANGGAL TIDAK DITEMUKAN DI JADWAL SPREADSHEET.")
+
+    elif menu_aktif == "KONFIRMASI":
+        # Filter data yang belum lunas konfirmasinya
+        df_pend = df_parkir[(df_parkir["Status_Khusus"] == "BELUM") | (df_parkir["Status_MPP"] == "BELUM")].copy()
+        # Buang baris yang datanya masih kosong (belum diisi rekap)
+        df_pend = df_pend[df_pend["Total_Karcis_R2"].notnull()]
+
+        if df_pend.empty: 
+            st.info("TIDAK ADA DATA YANG MENUNGGU KONFIRMASI.")
+        else:
+            for i, row in df_pend.iterrows():
+                # Gunakan index i sebagai key agar tidak duplicate
+                with st.expander(f"📦 {row['Tanggal']} - {row['Nama_Petugas']}"):
+                    ck, cm = st.columns(2)
+                    with ck:
+                        st.write(f"**KHUSUS**\nR2: {row['Khusus_Roda_R2']}\nR4: {row['Khusus_Roda_R4']}")
+                        if st.button(f"TERIMA KHUSUS", key=f"k_{i}", use_container_width=True):
+                            df_parkir.loc[i, "Status_Khusus"] = "SUDAH"
+                            if safe_update("DATA_PARKIR", df_parkir): st.rerun()
+                    
+                    with cm:
+                        st.write(f"**MPP**\nR2: {row['MPP_Roda_R2']}\nR4: {row['MPP_Roda_R4']}")
+                        if row["Status_MPP"] == "BELUM":
+                            if st.button(f"TERIMA MPP", key=f"m_{i}", type="primary", use_container_width=True):
+                                df_parkir.loc[i, "Status_MPP"] = "SUDAH"
+                                if safe_update("DATA_PARKIR", df_parkir): st.rerun()
+                        else:
+                            st.download_button("🖨️ CETAK MPP", data=cetak_tanda_terima_parkir(row), file_name=f"MPP_{row['Tanggal']}.pdf", key=f"p_{i}", use_container_width=True)
+
+    st.divider()
+    st.subheader("📊 LOG REKAP TERAKHIR")
+    st.dataframe(df_parkir.sort_values(by="Tanggal", ascending=False).head(10), hide_index=True)
+
+# ==========================================
+# 3. MAIN RUNNER
+# ==========================================
+def main():
+    st.sidebar.title("🅿️ PARKIR UPTD")
+    menu = st.sidebar.radio("MENU UTAMA", ["INPUT REKAP", "KONFIRMASI"])
+    halaman_parkir(menu)
+
+if __name__ == "__main__":
+    main()
