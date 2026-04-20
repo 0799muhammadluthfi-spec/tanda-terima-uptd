@@ -196,7 +196,7 @@ def halaman_pengambilan_sk():
     st.divider(); st.subheader(f"📊 BELUM DIAMBIL ({len(df_b)})"); st.dataframe(df_b.sort_values(by="No", ascending=True), use_container_width=True, hide_index=True)
 
 # ==========================================
-# 5. MODUL PARKIR (TERBARU)
+# 5. MODUL PARKIR
 # ==========================================
 def halaman_parkir(menu):
     st.header(f"🚗 {menu}"); df_p = load_data("DATA_PARKIR")
@@ -236,7 +236,6 @@ def halaman_parkir(menu):
                 tr4 = st.number_input("TOTAL TERJUAL R4", min_value=0)
                 mr4 = st.number_input("MPP RODA R4", min_value=0)
             
-            # Tombol Reset di dalam form dilayani oleh tombol sidebar atau st.rerun
             cb1, cb2 = st.columns(2)
             with cb1: subm = st.form_submit_button("💾 SIMPAN REKAP", type="primary", use_container_width=True)
             with cb2: reset = st.form_submit_button("🔄 RESET FORM", use_container_width=True)
@@ -244,8 +243,6 @@ def halaman_parkir(menu):
             if reset: st.rerun()
 
             if subm:
-                # Sisa karcis = (Ambil Baru + Sisa Kemarin) - Terjual
-                # Karena Ambil Baru sudah dipisah, kita ambil dari baris yang sedang diedit
                 pk2_lama = pd.to_numeric(df_p.loc[idx, "Pengambilan_Karcis_R2"], errors='coerce')
                 pk4_lama = pd.to_numeric(df_p.loc[idx, "Pengambilan_Karcis_R4"], errors='coerce')
                 pk2_lama = 0 if pd.isna(pk2_lama) else pk2_lama
@@ -273,15 +270,24 @@ def halaman_parkir(menu):
                 if safe_update("DATA_PARKIR", df_p): st.success("✅ Stok Berhasil Ditambahkan!"); st.rerun()
 
     elif menu == "KONFIRMASI":
-        # Menampilkan data 7 hari terakhir agar tidak langsung hilang setelah konfirmasi
         df_pen = df_p[(df_p["Total_Karcis_R2"] != "-") & (df_p["Total_Karcis_R2"] != "nan")].copy()
         if df_pen.empty: st.info("TIDAK ADA DATA KONFIRMASI.")
         else:
             df_pen = df_pen.sort_index(ascending=False).head(10)
             for i, row in df_pen.iterrows():
+                # Mengecek apakah sudah dikonfirmasi keduanya
                 lunas = (row["Status_Khusus"] == "SUDAH") and (row["Status_MPP"] == "SUDAH")
-                ikon = "✅" if lunas else "📦"
+                
+                # Mengganti ikon agar terasa lebih hijau dan jelas
+                ikon = "✅ [LUNAS]" if lunas else "📦 [BELUM LUNAS]"
+                
+                # expanded=not lunas membuat kotak ini OTOMATIS MENUTUP saat sudah lunas
                 with st.expander(f"{ikon} {row['Tanggal']} - {row['Nama_Petugas']}", expanded=not lunas):
+                    
+                    # Jika sudah lunas, beri blok hijau cantik di dalamnya
+                    if lunas:
+                        st.success("✨ Karcis ini telah dikonfirmasi. Silakan cetak PDF jika diperlukan.")
+                        
                     ck, cm = st.columns(2)
                     with ck:
                         st.write(f"**KHUSUS**\nR2: {row['Khusus_Roda_R2']} | R4: {row['Khusus_Roda_R4']}")
