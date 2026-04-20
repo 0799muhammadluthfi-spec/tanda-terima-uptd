@@ -249,4 +249,192 @@ def halaman_pengantaran():
                 for err in errors: st.error(f"❌ {err}")
             else:
                 new_row = {
-                    "No": no_urut.strip(), "Tanggal_Pengantaran":
+                    "No": no_urut.strip(), "Tanggal_Pengantaran": tgl_terima,
+                    "Tanggal_Pengambilan": "-", "Nama_Toko": nama_toko, "No_Toko": no_toko,
+                    "Nama_Pemilik_Asli": nama_pemilik, "Nama_Pengantar_Berkas": nama_pengantar,
+                    "Penerima_Berkas": nama_penerima,
+                }
+
+                df_baru = pd.concat([df_sk, pd.DataFrame([new_row])], ignore_index=True)
+
+                if safe_update("DATA_SK", df_baru):
+                    st.session_state["last_data"] = new_row
+                    st.session_state["last_berkas"] = sel_berkas
+                    st.success(f"✅ Data No. {no_urut} berhasil disimpan!")
+                    st.balloons()
+
+    if "last_data" in st.session_state and st.session_state["last_data"]:
+        st.divider()
+        st.subheader("📄 Download Tanda Terima")
+        last = st.session_state["last_data"]
+        st.info(f"**No:** {last['No']} | **Toko:** {last['Nama_Toko']} | **Pemilik:** {last['Nama_Pemilik_Asli']}")
+
+        pdf_buffer = buat_pdf_full(last, st.session_state.get("last_berkas", []))
+        st.download_button(
+            label="📥 DOWNLOAD PDF TANDA TERIMA", data=pdf_buffer,
+            file_name=f"TANDA_TERIMA_{last['No']}_{last['Nama_Toko']}.pdf",
+            mime="application/pdf", type="primary",
+        )
+
+        if st.button("🔄 Input Baru", type="secondary"):
+            del st.session_state["last_data"]
+            del st.session_state["last_berkas"]
+            st.rerun()
+
+    st.divider()
+    st.subheader("📊 Data Terbaru (10 Record Terakhir)")
+    if not df_sk.empty:
+        st.dataframe(df_sk.tail(10).reset_index(drop=True), use_container_width=True, hide_index=True)
+    else:
+        st.info("Belum ada data.")
+
+# ==========================================
+# 5. MODUL SK TOKO - PENGAMBILAN
+# ==========================================
+def halaman_pengambilan():
+    st.header("🏁 PENGAMBILAN BERKAS")
+
+    df_sk = load_data("DATA_SK")
+    if df_sk.empty:
+        st.warning("Tidak ada data tersedia.")
+        return
+
+    col_filter, col_search = st.columns([1, 2])
+    with col_filter:
+        tampilkan = st.selectbox("Tampilkan:", ["Semua", "Belum Diambil", "Sudah Diambil"])
+    with col_search:
+        no_cari = st.text_input("🔍 CARI NOMOR URUT:", placeholder="Masukkan nomor urut...").strip()
+
+    df_tampil = df_sk.copy()
+    if tampilkan == "Belum Diambil":
+        df_tampil = df_tampil[df_tampil["Tanggal_Pengambilan"] == "-"]
+    elif tampilkan == "Sudah Diambil":
+        df_tampil = df_tampil[df_tampil["Tanggal_Pengambilan"] != "-"]
+
+    if no_cari:
+        hasil = df_sk[df_sk["No"].str.strip() == no_cari]
+        if not hasil.empty:
+            data_row = hasil.iloc[0]
+            sudah_ambil = data_row["Tanggal_Pengambilan"] not in ["-", "nan", "NAN", ""]
+
+            st.divider()
+            col_info1, col_info2, col_info3 = st.columns(3)
+            col_info1.metric("🏪 Nama Toko", data_row["Nama_Toko"])
+            col_info2.metric("👤 Pemilik", data_row["Nama_Pemilik_Asli"])
+            col_info3.metric("📅 Tgl Terima", data_row["Tanggal_Pengantaran"])
+
+            if sudah_ambil:
+                st.success(f"✅ Berkas ini sudah diambil pada: **{data_row['Tanggal_Pengambilan']}**")
+                st.download_button(
+                    label="🖨️ PRINT ULANG TANGGAL AMBIL",
+                    data=cetak_overprint(data_row['Tanggal_Pengambilan']),
+                    file_name=f"OVERPRINT_{no_cari}.pdf",
+                    mime="application/pdf"
+                )
+            else:
+                st.warning("⏳ Berkas BELUM diambil.")
+                tgl_ambil = st.text_input("📅 TANGGAL PENGAMBILAN:", value=datetime.now().strftime("%d-%m-%Y"))
+
+                if st.button("✅ KONFIRMASI PENGAMBILAN", type="primary"):
+                    mask = df_sk["No"].str.strip() == no_cari
+                    df_sk.loc[mask, "Tanggal_Pengambilan"] = tgl_ambil
+                    
+                    if safe_update("DATA_SK", df_sk):
+                        st.session_state['ready_to_print_overprint'] = tgl_ambil
+                        st.session_state['print_no'] = no_cari
+                        st.success(f"✅ Berkas No. {no_cari} berhasil diupdate!")
+
+            if st.session_state.get('print_no') == no_cari:
+                st.write("---")
+                st.download_button(
+                    label="🖨️ PRINT TANGGAL AMBIL DI KERTAS SEKARANG",
+                    data=cetak_overprint(st.session_state['ready_to_print_overprint']),
+                    file_name=f"OVERPRINT_{no_cari}.pdf",
+                    mime="application/pdf",
+                    type="primary"
+                )
+        else:
+            st.error(f"❌ Nomor urut **{no_cari}** tidak ditemukan!")
+
+    st.divider()
+    st.subheader(f"📊 Data ({tampilkan}): {len(df_tampil)} record")
+
+    if not df_tampil.empty:
+        def highlight_row(row):
+            if row["Tanggal_Pengambilan"] in ["-", "", "nan"]:
+                return ["background-color: #fff3cd"] * len(row)
+            return ["background-color: #d4edda"] * len(row)
+
+        st.dataframe(
+            df_tampil.reset_index(drop=True).style.apply(highlight_row, axis=1),
+            use_container_width=True, hide_index=True
+        )
+    else:
+        st.info(f"Tidak ada data untuk kategori: {tampilkan}")
+
+# ==========================================
+# 6. MODUL PARKIR
+# ==========================================
+def halaman_parkir():
+    st.header("🚗 MANAJEMEN PARKIR")
+    tab1, tab2 = st.tabs(["📝 Input Parkir", "📊 Data Parkir"])
+
+    with tab1:
+        df_parkir = load_data("DATA_PARKIR")
+        next_no = get_next_no(df_parkir)
+
+        with st.form("form_parkir"):
+            col1, col2 = st.columns(2)
+            with col1:
+                no_urut = st.text_input("NO. URUT", value=str(next_no))
+                tgl = st.text_input("TANGGAL", value=datetime.now().strftime("%d-%m-%Y"))
+                nama = st.text_input("NAMA").strip().upper()
+            with col2:
+                no_kendaraan = st.text_input("NO. KENDARAAN").strip().upper()
+                jenis = st.selectbox("JENIS KENDARAAN", ["MOTOR", "MOBIL", "TRUK", "LAINNYA"])
+                tarif = st.number_input("TARIF (Rp)", min_value=0, step=500, value=2000)
+
+            if st.form_submit_button("💾 SIMPAN", type="primary"):
+                new_row = {"No": no_urut, "Tanggal": tgl, "Nama": nama, "No_Kendaraan": no_kendaraan, "Jenis": jenis, "Tarif": tarif}
+                df_baru = pd.concat([df_parkir, pd.DataFrame([new_row])], ignore_index=True)
+                if safe_update("DATA_PARKIR", df_baru):
+                    st.success("✅ Data parkir berhasil disimpan!")
+
+    with tab2:
+        df_parkir = load_data("DATA_PARKIR")
+        if not df_parkir.empty:
+            try:
+                total_tarif = pd.to_numeric(df_parkir["Tarif"], errors="coerce").sum()
+                col1, col2 = st.columns(2)
+                col1.metric("🚗 Total Kendaraan", len(df_parkir))
+                col2.metric("💰 Total Tarif", f"Rp {total_tarif:,.0f}")
+            except Exception: pass
+            st.dataframe(df_parkir.reset_index(drop=True), use_container_width=True, hide_index=True)
+        else:
+            st.info("Belum ada data parkir.")
+
+# ==========================================
+# 7. MAIN APP
+# ==========================================
+def main():
+    with st.sidebar:
+        st.image("https://via.placeholder.com/200x80?text=UPTD+PASAR", use_column_width=True)
+        st.title("🗂️ DASHBOARD UPTD")
+        st.caption("PASAR KANDANGAN")
+        st.divider()
+        modul = st.selectbox("📁 PILIH MODUL:", ["SK TOKO", "PARKIR"])
+        if modul == "SK TOKO":
+            menu = st.radio("📋 MENU SK TOKO:", ["PENGANTARAN", "PENGAMBILAN"])
+        else:
+            menu = None
+        st.divider()
+        st.caption(f"🕐 {datetime.now().strftime('%d/%m/%Y %H:%M')}")
+
+    if modul == "SK TOKO":
+        if menu == "PENGANTARAN": halaman_pengantaran()
+        elif menu == "PENGAMBILAN": halaman_pengambilan()
+    elif modul == "PARKIR":
+        halaman_parkir()
+
+if __name__ == "__main__":
+    main()
