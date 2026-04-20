@@ -6,6 +6,8 @@ from reportlab.lib.units import cm
 from io import BytesIO
 from streamlit_gsheets import GSheetsConnection
 import os
+import base64
+import urllib.request
 
 # ==========================================
 # 1. KONFIGURASI HALAMAN
@@ -18,7 +20,41 @@ st.set_page_config(
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 # ==========================================
-# CUSTOM CSS - FONT & WARNA YANG BENAR
+# FUNGSI LOGO HSS - PASTI MUNCUL
+# ==========================================
+def get_logo_base64():
+    """Ambil logo HSS dan convert ke base64 agar pasti muncul via HTML img tag"""
+    
+    # Coba file lokal dulu
+    for nama_file in ["logo_hss.png", "logo.png", "Logo_HSS.png"]:
+        if os.path.exists(nama_file):
+            with open(nama_file, "rb") as f:
+                return base64.b64encode(f.read()).decode()
+    
+    # Kalau tidak ada file lokal, download dari URL dan cache
+    urls = [
+        "https://upload.wikimedia.org/wikipedia/commons/3/3e/Lambang_Kabupaten_Hulu_Sungai_Selatan.png",
+        "https://raw.githubusercontent.com/pfrfrfr/logo-pemda/main/hulu_sungai_selatan.png",
+    ]
+    
+    for url in urls:
+        try:
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            with urllib.request.urlopen(req, timeout=5) as response:
+                img_data = response.read()
+                if len(img_data) > 100:  # Pastikan bukan error page
+                    return base64.b64encode(img_data).decode()
+        except Exception:
+            continue
+    
+    return None
+
+# Cache logo agar tidak download berulang
+if "logo_b64" not in st.session_state:
+    st.session_state["logo_b64"] = get_logo_base64()
+
+# ==========================================
+# CUSTOM CSS
 # ==========================================
 st.markdown("""
 <style>
@@ -26,180 +62,216 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-    /* ===== GLOBAL FONT - MAIN CONTENT ONLY ===== */
-    .stApp > div[data-testid="stMainBlockContainer"] *,
-    .main * {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
-    }
-
-    /* ===== BACKGROUND ===== */
+    /* ===== BACKGROUND UTAMA ===== */
     .stApp {
         background: linear-gradient(160deg, #f8fafc 0%, #f1f5f9 100%);
     }
 
-    /* ==============================================
-       SIDEBAR - WARNA FONT PUTIH EKSPLISIT
-       ============================================== */
+    /* ===== HAPUS TOOLTIP DOUBLE / KEYBOARD SHORTCUT POPUP ===== */
+    [data-testid="stSidebar"] [title],
+    [data-testid="stSidebar"] [data-tooltip],
+    [data-testid="stSidebar"] .stTooltipIcon,
+    [data-testid="stSidebar"] button[kind="header"],
+    [data-testid="stSidebar"] [data-testid="collapsedControl"],
+    .stAppDeployButton,
+    [data-testid="stToolbar"],
+    [data-testid="stDecoration"],
+    [data-testid="stStatusWidget"],
+    div[data-testid="stToolbar"],
+    div[data-testid="stDecoration"],
+    button[title="View fullscreen"],
+    .viewerBadge_container__r5tak,
+    .styles_viewerBadge__CvC9N {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        height: 0 !important;
+        width: 0 !important;
+        overflow: hidden !important;
+    }
+    
+    /* Hapus keyboard shortcut overlay yang muncul di hover */
+    iframe[title="streamlit_shortcuts"],
+    div[data-testid="stMainMenu"],
+    #MainMenu,
+    header[data-testid="stHeader"] button,
+    header button {
+        display: none !important;
+        visibility: hidden !important;
+    }
+
+    /* Hapus header bar streamlit sepenuhnya */
+    header[data-testid="stHeader"] {
+        height: 0 !important;
+        min-height: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+    }
+
+    /* ============================================
+       SIDEBAR STYLING
+       ============================================ */
     [data-testid="stSidebar"] {
         background: linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
         border-right: 1px solid rgba(255,255,255,0.05);
     }
 
-    /* Semua teks di sidebar HARUS putih/terang */
-    [data-testid="stSidebar"] label,
-    [data-testid="stSidebar"] span,
-    [data-testid="stSidebar"] p,
-    [data-testid="stSidebar"] div,
-    [data-testid="stSidebar"] .stSelectbox label,
-    [data-testid="stSidebar"] .stRadio label,
-    [data-testid="stSidebar"] [data-testid="stWidgetLabel"],
-    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"],
-    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
-        color: #e2e8f0 !important;
+    /* --- SEMUA TEKS SIDEBAR: WARNA TERANG --- */
+    [data-testid="stSidebar"] *:not(input):not(textarea) {
         font-family: 'Inter', sans-serif !important;
     }
 
-    /* Sidebar selectbox - label */
-    [data-testid="stSidebar"] .stSelectbox label {
-        font-size: 0.72rem !important;
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] [data-testid="stWidgetLabel"] label,
+    [data-testid="stSidebar"] [data-testid="stWidgetLabel"] p,
+    [data-testid="stSidebar"] [data-testid="stWidgetLabel"] span,
+    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
+    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] span {
+        color: #e2e8f0 !important;
+    }
+
+    /* --- SELECTBOX LABEL ("PILIH MODUL:") --- */
+    [data-testid="stSidebar"] .stSelectbox > label,
+    [data-testid="stSidebar"] .stSelectbox [data-testid="stWidgetLabel"],
+    [data-testid="stSidebar"] .stSelectbox [data-testid="stWidgetLabel"] p,
+    [data-testid="stSidebar"] .stSelectbox [data-testid="stWidgetLabel"] label {
+        font-size: 0.75rem !important;
         font-weight: 700 !important;
         text-transform: uppercase !important;
         letter-spacing: 0.06em !important;
-        color: #94a3b8 !important;
-    }
-
-    /* Sidebar radio - label judul */
-    [data-testid="stSidebar"] .stRadio > label {
-        font-size: 0.72rem !important;
-        font-weight: 700 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.06em !important;
-        color: #94a3b8 !important;
-    }
-
-    /* Sidebar radio - opsi item */
-    [data-testid="stSidebar"] .stRadio [role="radiogroup"] label {
-        font-size: 0.85rem !important;
-        font-weight: 500 !important;
         color: #cbd5e1 !important;
-        letter-spacing: 0 !important;
-        text-transform: none !important;
-    }
-    [data-testid="stSidebar"] .stRadio [role="radiogroup"] label:hover {
-        color: #60a5fa !important;
     }
 
-    /* Sidebar selectbox - value text inside dropdown */
+    /* --- SELECTBOX VALUE (teks yang dipilih di dalam kotak) --- */
+    [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"],
     [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] span,
-    [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] div {
-        color: #f1f5f9 !important;
-        font-size: 0.85rem !important;
+    [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] div,
+    [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] [data-testid="stMarkdownContainer"],
+    [data-testid="stSidebar"] .stSelectbox [role="combobox"],
+    [data-testid="stSidebar"] .stSelectbox [role="combobox"] span,
+    [data-testid="stSidebar"] .stSelectbox [role="option"],
+    [data-testid="stSidebar"] [data-baseweb="select"] .css-1dimb5e-singleValue,
+    [data-testid="stSidebar"] [data-baseweb="select"] > div > div {
+        color: #f8fafc !important;
+        font-size: 0.88rem !important;
         font-weight: 600 !important;
     }
 
-    /* Sidebar divider */
+    /* --- SELECTBOX BOX BORDER --- */
+    [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div {
+        background: rgba(255,255,255,0.06) !important;
+        border: 1px solid rgba(255,255,255,0.15) !important;
+        border-radius: 8px !important;
+    }
+
+    /* --- RADIO LABEL ("MENU SK:" / "MENU PARKIR:") --- */
+    [data-testid="stSidebar"] .stRadio > label,
+    [data-testid="stSidebar"] .stRadio > [data-testid="stWidgetLabel"],
+    [data-testid="stSidebar"] .stRadio > [data-testid="stWidgetLabel"] p {
+        font-size: 0.72rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.06em !important;
+        color: #94a3b8 !important;
+    }
+
+    /* --- RADIO OPTIONS (item yang bisa diklik) --- */
+    [data-testid="stSidebar"] .stRadio [role="radiogroup"] label,
+    [data-testid="stSidebar"] .stRadio [role="radiogroup"] label span,
+    [data-testid="stSidebar"] .stRadio [role="radiogroup"] label p,
+    [data-testid="stSidebar"] .stRadio [role="radiogroup"] label div {
+        font-size: 0.86rem !important;
+        font-weight: 500 !important;
+        color: #e2e8f0 !important;
+        letter-spacing: 0 !important;
+        text-transform: none !important;
+    }
+    [data-testid="stSidebar"] .stRadio [role="radiogroup"] label:hover,
+    [data-testid="stSidebar"] .stRadio [role="radiogroup"] label:hover span {
+        color: #60a5fa !important;
+    }
+
+    /* --- SIDEBAR DIVIDER --- */
     [data-testid="stSidebar"] hr {
         border-color: rgba(255,255,255,0.08) !important;
     }
 
-    /* Sidebar button */
+    /* --- SIDEBAR BUTTON --- */
     [data-testid="stSidebar"] .stButton > button {
         color: #e2e8f0 !important;
-        border-color: rgba(255,255,255,0.15) !important;
+        border: 1px solid rgba(255,255,255,0.15) !important;
         background: rgba(255,255,255,0.05) !important;
-        font-size: 0.8rem !important;
+        font-size: 0.82rem !important;
         font-weight: 600 !important;
+        border-radius: 8px !important;
     }
     [data-testid="stSidebar"] .stButton > button:hover {
-        background: rgba(255,255,255,0.1) !important;
+        background: rgba(255,255,255,0.12) !important;
         color: #ffffff !important;
     }
 
-    /* ==============================================
-       MAIN CONTENT - HEADINGS
-       ============================================== */
-    /* h1 - Judul halaman utama */
-    .main h1,
-    [data-testid="stMainBlockContainer"] h1 {
-        font-family: 'Inter', sans-serif !important;
+    /* ============================================
+       MAIN CONTENT - FONT GLOBAL
+       ============================================ */
+    .main *,
+    [data-testid="stMainBlockContainer"] * {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    }
+
+    /* --- HEADINGS --- */
+    .main h1, [data-testid="stMainBlockContainer"] h1 {
         font-size: 1.55rem !important;
         font-weight: 800 !important;
         color: #0f172a !important;
         letter-spacing: -0.03em !important;
         line-height: 1.25 !important;
-        margin-bottom: 0.3rem !important;
     }
-
-    /* h2 - Sub judul / section */
-    .main h2,
-    [data-testid="stMainBlockContainer"] h2 {
-        font-family: 'Inter', sans-serif !important;
+    .main h2, [data-testid="stMainBlockContainer"] h2 {
         font-size: 1.15rem !important;
         font-weight: 700 !important;
         color: #1e293b !important;
         letter-spacing: -0.02em !important;
-        line-height: 1.3 !important;
-        margin-top: 0.8rem !important;
     }
-
-    /* h3 - Sub-sub judul */
-    .main h3,
-    [data-testid="stMainBlockContainer"] h3 {
-        font-family: 'Inter', sans-serif !important;
+    .main h3, [data-testid="stMainBlockContainer"] h3 {
         font-size: 0.98rem !important;
         font-weight: 600 !important;
         color: #334155 !important;
-        letter-spacing: -0.01em !important;
     }
 
-    /* ==============================================
-       MAIN CONTENT - BODY TEXT
-       ============================================== */
-    .main p,
-    .main span,
-    .main li,
-    [data-testid="stMainBlockContainer"] p,
-    [data-testid="stMarkdownContainer"] p {
+    /* --- BODY TEXT --- */
+    .main p, .main span, .main li,
+    [data-testid="stMainBlockContainer"] p {
         font-size: 0.88rem !important;
         font-weight: 400 !important;
         line-height: 1.6 !important;
         color: #374151 !important;
     }
-
-    /* Bold text inside markdown */
-    .main strong,
-    [data-testid="stMarkdownContainer"] strong {
+    .main strong, [data-testid="stMarkdownContainer"] strong {
         font-weight: 700 !important;
         color: #1e293b !important;
     }
 
-    /* ==============================================
-       FORM LABELS & INPUTS
-       ============================================== */
-    /* Label di atas input (MAIN area saja) */
+    /* --- FORM LABELS (MAIN AREA) --- */
     .main .stTextInput label,
     .main .stNumberInput label,
     .main .stSelectbox label,
     .main .stCheckbox label,
     .main [data-testid="stWidgetLabel"] {
-        font-family: 'Inter', sans-serif !important;
         font-size: 0.78rem !important;
         font-weight: 600 !important;
         color: #374151 !important;
-        letter-spacing: 0.01em !important;
     }
-
-    /* Checkbox label text */
     .main .stCheckbox label span {
         font-size: 0.84rem !important;
         font-weight: 500 !important;
         color: #374151 !important;
     }
 
-    /* Input field text */
+    /* --- INPUT FIELDS --- */
     .main .stTextInput input,
     .main .stNumberInput input {
-        font-family: 'Inter', sans-serif !important;
         font-size: 0.88rem !important;
         font-weight: 500 !important;
         color: #1e293b !important;
@@ -213,17 +285,12 @@ st.markdown("""
         border-color: #3b82f6 !important;
         box-shadow: 0 0 0 3px rgba(59,130,246,0.1) !important;
     }
-
-    /* Input placeholder */
     .main .stTextInput input::placeholder,
     .main .stNumberInput input::placeholder {
         color: #9ca3af !important;
-        font-weight: 400 !important;
     }
 
-    /* ==============================================
-       METRIC CARDS
-       ============================================== */
+    /* --- METRIC CARDS --- */
     [data-testid="stMetric"] {
         background: #ffffff;
         border: 1px solid #e5e7eb;
@@ -231,11 +298,7 @@ st.markdown("""
         padding: 14px 18px !important;
         box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
-    [data-testid="stMetric"]:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-    }
     [data-testid="stMetricLabel"] {
-        font-family: 'Inter', sans-serif !important;
         font-size: 0.7rem !important;
         font-weight: 600 !important;
         text-transform: uppercase !important;
@@ -249,44 +312,31 @@ st.markdown("""
         color: #111827 !important;
     }
 
-    /* ==============================================
-       BUTTONS - MAIN AREA
-       ============================================== */
+    /* --- BUTTONS MAIN --- */
     .main .stButton > button {
-        font-family: 'Inter', sans-serif !important;
         font-size: 0.82rem !important;
         font-weight: 600 !important;
         border-radius: 8px !important;
-        padding: 8px 20px !important;
         color: #374151 !important;
         border: 1.5px solid #d1d5db !important;
         background: #ffffff !important;
-        transition: all 0.15s ease;
     }
     .main .stButton > button:hover {
         background: #f9fafb !important;
-        border-color: #9ca3af !important;
         color: #111827 !important;
     }
-
-    /* Primary button */
     .main .stButton > button[data-testid="baseButton-primary"],
     .main .stButton > button[kind="primary"] {
         background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
         border: none !important;
         color: #ffffff !important;
-        box-shadow: 0 2px 6px rgba(37,99,235,0.2);
     }
     .main .stButton > button[data-testid="baseButton-primary"]:hover,
     .main .stButton > button[kind="primary"]:hover {
         background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
         color: #ffffff !important;
-        box-shadow: 0 4px 12px rgba(37,99,235,0.3);
     }
-
-    /* Download button */
     .main .stDownloadButton > button {
-        font-family: 'Inter', sans-serif !important;
         font-size: 0.82rem !important;
         font-weight: 600 !important;
         border-radius: 8px !important;
@@ -294,25 +344,16 @@ st.markdown("""
         color: #ffffff !important;
         border: none !important;
     }
-    .main .stDownloadButton > button:hover {
-        background: linear-gradient(135deg, #059669, #047857) !important;
-        color: #ffffff !important;
-    }
 
-    /* ==============================================
-       FORM CONTAINER
-       ============================================== */
+    /* --- FORM CONTAINER --- */
     [data-testid="stForm"] {
         background: #ffffff;
         border: 1px solid #e5e7eb;
         border-radius: 12px;
         padding: 20px !important;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
     }
 
-    /* ==============================================
-       EXPANDER
-       ============================================== */
+    /* --- EXPANDER --- */
     [data-testid="stExpander"] {
         border: 1px solid #e5e7eb !important;
         border-radius: 10px !important;
@@ -320,18 +361,14 @@ st.markdown("""
         margin-bottom: 6px !important;
     }
     .streamlit-expanderHeader {
-        font-family: 'Inter', sans-serif !important;
         font-size: 0.86rem !important;
         font-weight: 600 !important;
         color: #1e293b !important;
     }
 
-    /* ==============================================
-       DATAFRAME / TABLE
-       ============================================== */
+    /* --- DATAFRAME --- */
     [data-testid="stDataFrame"] {
         border-radius: 10px;
-        overflow: hidden;
         border: 1px solid #e5e7eb;
     }
     [data-testid="stDataFrame"] th {
@@ -339,7 +376,6 @@ st.markdown("""
         font-size: 0.7rem !important;
         font-weight: 700 !important;
         text-transform: uppercase !important;
-        letter-spacing: 0.04em !important;
         color: #4b5563 !important;
         background: #f9fafb !important;
     }
@@ -349,28 +385,19 @@ st.markdown("""
         color: #374151 !important;
     }
 
-    /* ==============================================
-       ALERTS (info, success, warning, error)
-       ============================================== */
-    .main [data-testid="stAlert"] p,
-    .main .stAlert p {
+    /* --- ALERTS --- */
+    .main [data-testid="stAlert"] p {
         font-size: 0.84rem !important;
         font-weight: 500 !important;
-        color: inherit !important;
     }
 
-    /* ==============================================
-       DIVIDER
-       ============================================== */
+    /* --- DIVIDER --- */
     .main hr {
         border: none !important;
         border-top: 1px solid #e5e7eb !important;
-        margin: 1rem 0 !important;
     }
 
-    /* ==============================================
-       SMOOTH ANIMATION
-       ============================================== */
+    /* --- ANIMATION --- */
     .main .block-container {
         animation: fadeIn 0.3s ease-out;
         max-width: 1100px;
@@ -380,20 +407,14 @@ st.markdown("""
         to { opacity: 1; transform: translateY(0); }
     }
 
-    /* ==============================================
-       SCROLLBAR
-       ============================================== */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
+    /* --- SCROLLBAR --- */
+    ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-    /* ==============================================
-       HIDE DEFAULT STREAMLIT ELEMENTS
-       ============================================== */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header [data-testid="stStatusWidget"] {display: none;}
+    /* --- HIDE STREAMLIT DEFAULT --- */
+    #MainMenu { display: none !important; }
+    footer { display: none !important; }
+    header { display: none !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -409,13 +430,10 @@ def tombol_refresh_pojok(key_btn):
 def load_data(worksheet: str) -> pd.DataFrame:
     try:
         df = conn.read(worksheet=worksheet, ttl=0)
-        
-        # BERSILAT LIDAH DENGAN DATA GOOGLE SHEETS AGAR SUPER BERSIH
         df = df.astype(str).replace(r'\.0$', '', regex=True)
         for col in df.columns:
-            df[col] = df[col].str.strip() # Babat habis spasi tersembunyi
-        df = df.replace(["nan", "None", "", "null", "NaN", "<NA>"], "-") # Seragamkan semua data siluman jadi "-"
-
+            df[col] = df[col].str.strip()
+        df = df.replace(["nan", "None", "", "null", "NaN", "<NA>"], "-")
         if worksheet == "DATA_PARKIR" and not df.empty:
             if "Status_Cetak" not in df.columns:
                 df["Status_Cetak"] = "BELUM"
@@ -458,7 +476,6 @@ def format_tgl_hari_indo(tgl_str):
 # ==========================================
 # 3. FUNGSI PDF (SK TOKO & PARKIR)
 # ==========================================
-
 def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
     buffer = BytesIO()
     UKURAN_KERTAS = (21.5 * cm, 33 * cm)
@@ -673,7 +690,6 @@ def halaman_parkir(menu):
                 tr2_str = str(tr2) if tr2 > 0 else "0"
                 tr4_str = str(tr4) if tr4 > 0 else "0"
 
-                # --- CEK APAKAH DATA SUDAH PERNAH DIISI ---
                 karcis_r2_sekarang = str(df_p.loc[idx, "Total_Karcis_R2"]).strip()
                 sudah_diisi = karcis_r2_sekarang not in ["-", "nan", ""]
 
@@ -683,12 +699,10 @@ def halaman_parkir(menu):
                 }
 
                 if sudah_diisi:
-                    # Tahan proses dan munculkan peringatan
                     st.session_state["pending_parkir"] = data_baru
                     st.session_state["pending_idx"] = idx
                     st.session_state["show_confirm_parkir"] = True
                 else:
-                    # Proses langsung simpan
                     df_p.loc[idx, ["Total_Karcis_R2", "MPP_Roda_R2", "Sisa_Stok_R2", "Khusus_Roda_R2"]] = [data_baru["tr2_str"], data_baru["mr2_str"], data_baru["sn2_str"], data_baru["kh2_str"]]
                     df_p.loc[idx, ["Total_Karcis_R4", "MPP_Roda_R4", "Sisa_Stok_R4", "Khusus_Roda_R4"]] = [data_baru["tr4_str"], data_baru["mr4_str"], data_baru["sn4_str"], data_baru["kh4_str"]]
                     df_p.loc[idx, ["Status_Khusus", "Status_MPP", "Status_Cetak"]] = ["BELUM", "BELUM", "BELUM"]
@@ -696,7 +710,6 @@ def halaman_parkir(menu):
                     if 'Tgl_Temp' in df_p.columns: df_p = df_p.drop(columns=['Tgl_Temp'])
                     if safe_update("DATA_PARKIR", df_p): st.success("✅ Berhasil Diupdate!"); st.rerun()
 
-        # --- BLOK PERINGATAN TIMPA DATA (Muncul di bawah form) ---
         if st.session_state.get("show_confirm_parkir"):
             st.warning(f"⚠️ Data setoran untuk tanggal **{tgl_input_user}** sudah pernah diisi! Yakin ingin menimpanya?")
             col_c1, col_c2 = st.columns(2)
@@ -707,7 +720,6 @@ def halaman_parkir(menu):
                 df_p.loc[p_idx, ["Total_Karcis_R2", "MPP_Roda_R2", "Sisa_Stok_R2", "Khusus_Roda_R2"]] = [d["tr2_str"], d["mr2_str"], d["sn2_str"], d["kh2_str"]]
                 df_p.loc[p_idx, ["Total_Karcis_R4", "MPP_Roda_R4", "Sisa_Stok_R4", "Khusus_Roda_R4"]] = [d["tr4_str"], d["mr4_str"], d["sn4_str"], d["kh4_str"]]
                 
-                # Reset status konfirmasi jika ditimpa
                 if str(df_p.loc[p_idx, "Status_Cetak"]).strip() != "SUDAH":
                     df_p.loc[p_idx, ["Status_Khusus", "Status_MPP", "Status_Cetak"]] = ["BELUM", "BELUM", "BELUM"]
                 
@@ -729,7 +741,6 @@ def halaman_parkir(menu):
             with c1: pk2 = st.number_input("PENGAMBILAN BARU R2", min_value=0)
             with c2: pk4 = st.number_input("PENGAMBILAN BARU R4", min_value=0)
             
-            # --- PENAMBAHAN TOMBOL RESET DI SINI ---
             cb1, cb2 = st.columns(2)
             with cb1: 
                 subm_stok = st.form_submit_button("➕ TAMBAH STOK", type="primary", use_container_width=True)
@@ -745,7 +756,6 @@ def halaman_parkir(menu):
                 if safe_update("DATA_PARKIR", df_p): st.success("✅ Stok Berhasil Ditambahkan!"); st.rerun()
 
     elif menu == "KONFIRMASI":
-        # FILTER ANTI HANTU: Hanya tampilkan jika Total Karcis terdeteksi sebagai ANGKA
         kondisi_angka_r2 = df_p["Total_Karcis_R2"].str.isnumeric()
         kondisi_angka_r4 = df_p["Total_Karcis_R4"].str.isnumeric()
         df_pen = df_p[kondisi_angka_r2 | kondisi_angka_r4].copy()
@@ -811,49 +821,43 @@ def halaman_parkir(menu):
 # ==========================================
 # 6. MAIN RUNNER
 # ==========================================
-
-# URL Logo HSS dari Wikipedia (sumber resmi, stabil)
-LOGO_HSS_URL = "https://upload.wikimedia.org/wikipedia/commons/3/3e/Lambang_Kabupaten_Hulu_Sungai_Selatan.png"
-
 def main():
     with st.sidebar:
-        # ===== LOGO KABUPATEN HSS - PASTI MUNCUL =====
-        # Metode 1: Coba file lokal dulu
-        logo_lokal = "logo_hss.png"
-        if os.path.exists(logo_lokal):
-            st.image(logo_lokal, width=85, use_container_width=False)
+        # ===== LOGO HSS - 3 METODE FALLBACK =====
+        logo_b64 = st.session_state.get("logo_b64")
+        
+        if logo_b64:
+            # Base64 embedded - PASTI muncul, tidak butuh akses internet lagi
+            st.markdown(f"""
+            <div style="text-align:center; padding:18px 0 6px 0;">
+                <img src="data:image/png;base64,{logo_b64}" 
+                     width="78" height="auto"
+                     style="display:inline-block; filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4));">
+            </div>
+            """, unsafe_allow_html=True)
         else:
-            # Metode 2: Dari URL Wikipedia dengan fallback HTML
-            try:
-                st.image(LOGO_HSS_URL, width=85, use_container_width=False)
-            except Exception:
-                # Metode 3: HTML img tag sebagai fallback terakhir
-                st.markdown(f"""
-                <div style="text-align:center; padding:10px 0;">
-                    <img src="{LOGO_HSS_URL}" width="80" 
-                         onerror="this.style.display='none'"
-                         style="filter:drop-shadow(0 2px 6px rgba(0,0,0,0.3));">
-                </div>
-                """, unsafe_allow_html=True)
+            # Fallback: Emoji sebagai pengganti logo
+            st.markdown("""
+            <div style="text-align:center; padding:18px 0 6px 0;">
+                <div style="font-size:3rem; line-height:1;">🏛️</div>
+            </div>
+            """, unsafe_allow_html=True)
 
-        # ===== HEADER SIDEBAR =====
+        # ===== HEADER TEXT =====
         st.markdown("""
-        <div style="text-align:center; padding:2px 0 10px 0;">
-            <p style="font-family:'Inter',sans-serif; font-size:0.62rem; font-weight:600; 
-                      color:#64748b !important; letter-spacing:0.08em; 
-                      text-transform:uppercase; margin:0; line-height:1.5;">
+        <div style="text-align:center; padding:4px 0 6px 0;">
+            <p style="font-family:'Inter',sans-serif; font-size:0.58rem; font-weight:600; 
+                      color:#94a3b8 !important; letter-spacing:0.1em; 
+                      text-transform:uppercase; margin:0; line-height:1.6;">
                 KABUPATEN HULU SUNGAI SELATAN
             </p>
         </div>
-        """, unsafe_allow_html=True)
-
-        st.markdown("""
-        <div style="text-align:center; padding:0 0 8px 0; 
-                    border-bottom:1px solid rgba(255,255,255,0.08); margin-bottom:10px;">
-            <p style="font-family:'Inter',sans-serif; font-size:1.05rem; font-weight:800; 
+        <div style="text-align:center; padding:0 0 14px 0; 
+                    border-bottom:1px solid rgba(255,255,255,0.08); margin-bottom:14px;">
+            <p style="font-family:'Inter',sans-serif; font-size:1rem; font-weight:800; 
                       color:#f1f5f9 !important; letter-spacing:-0.02em; 
-                      margin:0; line-height:1.3;">
-                🏪 UPTD PASAR KANDANGAN
+                      margin:0; line-height:1.35;">
+                🏪 UPTD PASAR<br>KANDANGAN
             </p>
         </div>
         """, unsafe_allow_html=True)
@@ -866,16 +870,17 @@ def main():
         else: 
             menu = st.radio("MENU PARKIR:", ["INPUT REKAP", "INPUT STOK", "KONFIRMASI"], key="pilih_menu_parkir")
         
-        # ===== FOOTER SIDEBAR - NAMA M. LUTHFI RENALDI =====
+        # ===== FOOTER - M. LUTHFI RENALDI =====
         st.markdown("""
-        <div style="text-align:center; padding:20px 0 8px 0; 
-                    border-top:1px solid rgba(255,255,255,0.06); margin-top:30px;">
-            <p style="font-family:'Inter',sans-serif; font-size:0.58rem; font-weight:500; 
-                      color:#64748b !important; margin:0; letter-spacing:0.02em; line-height:1.6;">
-                Developed by<br>
-                <span style="font-weight:700; color:#94a3b8 !important; font-size:0.64rem;">
-                    M. Luthfi Renaldi
-                </span>
+        <div style="text-align:center; padding:24px 0 8px 0; 
+                    border-top:1px solid rgba(255,255,255,0.06); margin-top:40px;">
+            <p style="font-family:'Inter',sans-serif; font-size:0.56rem; font-weight:400; 
+                      color:#64748b !important; margin:0; line-height:1.7; letter-spacing:0.02em;">
+                Developed by
+            </p>
+            <p style="font-family:'Inter',sans-serif; font-size:0.68rem; font-weight:700; 
+                      color:#94a3b8 !important; margin:2px 0 0 0; letter-spacing:0.01em;">
+                M. Luthfi Renaldi
             </p>
         </div>
         """, unsafe_allow_html=True)
