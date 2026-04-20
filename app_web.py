@@ -530,91 +530,113 @@ st.markdown("""
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
-        /* ============================================
+    /* ============================================
        ANIMASI KONTEN HALAMAN - STAGGERED ENTRY
        ============================================ */
 
     /* Header halaman */
     .main [data-testid="stHorizontalBlock"]:first-child {
-        animation: contentSlideIn 0.4s ease-out forwards;
+        animation: contentSlideIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
     }
 
-    /* Metric cards */
+    /* Metric cards - muncul satu per satu */
     .main [data-testid="stMetric"] {
-        animation: contentFadeScale 0.5s ease-out forwards;
-        animation-delay: 0.1s;
+        animation: contentFadeScale 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         opacity: 0;
     }
 
-    /* Form */
-    .main [data-testid="stForm"] {
-        animation: contentSlideIn 0.5s ease-out forwards;
+    .main [data-testid="stHorizontalBlock"]:nth-child(2) [data-testid="stMetric"] {
         animation-delay: 0.15s;
-        opacity: 0;
     }
 
-    /* Alert / info / warning / success */
-    .main [data-testid="stAlert"] {
-        animation: contentSlideIn 0.4s ease-out forwards;
-        animation-delay: 0.1s;
-        opacity: 0;
-    }
-
-    /* Expander */
-    .main [data-testid="stExpander"] {
-        animation: contentSlideIn 0.5s ease-out forwards;
+    .main [data-testid="stColumn"]:nth-child(1) [data-testid="stMetric"] {
         animation-delay: 0.2s;
+    }
+
+    .main [data-testid="stColumn"]:nth-child(2) [data-testid="stMetric"] {
+        animation-delay: 0.35s;
+    }
+
+    .main [data-testid="stColumn"]:nth-child(3) [data-testid="stMetric"] {
+        animation-delay: 0.5s;
+    }
+
+    /* Subheader */
+    .main h2 {
+        animation: contentSlideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation-delay: 0.3s;
         opacity: 0;
     }
 
-    /* Dataframe / tabel */
-    .main [data-testid="stDataFrame"] {
-        animation: contentSlideIn 0.5s ease-out forwards;
-        animation-delay: 0.25s;
+    .main h3 {
+        animation: contentSlideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation-delay: 0.35s;
         opacity: 0;
     }
 
     /* Checkbox group */
     .main .stCheckbox {
-        animation: contentFadeIn 0.4s ease-out forwards;
-        animation-delay: 0.1s;
+        animation: contentFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation-delay: 0.4s;
         opacity: 0;
     }
 
     /* Divider */
     .main hr {
-        animation: dividerExpand 0.5s ease-out forwards;
-        animation-delay: 0.15s;
+        animation: dividerExpand 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation-delay: 0.5s;
         opacity: 0;
         transform-origin: left;
     }
 
-    /* Subheader */
-    .main h2, .main h3 {
-        animation: contentSlideIn 0.4s ease-out forwards;
-        animation-delay: 0.1s;
+    /* Alert / info / warning / success */
+    .main [data-testid="stAlert"] {
+        animation: contentSlideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation-delay: 0.3s;
         opacity: 0;
     }
 
-    /* Download button */
-    .main .stDownloadButton {
-        animation: contentFadeScale 0.4s ease-out forwards;
-        animation-delay: 0.15s;
+    /* Form */
+    .main [data-testid="stForm"] {
+        animation: contentSlideIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation-delay: 0.5s;
         opacity: 0;
     }
 
     /* Text input & number input */
     .main .stTextInput,
     .main .stNumberInput {
-        animation: contentFadeIn 0.4s ease-out forwards;
-        animation-delay: 0.1s;
+        animation: contentFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation-delay: 0.55s;
         opacity: 0;
     }
 
     /* Tombol di main content */
     .main .stButton {
-        animation: contentFadeScale 0.35s ease-out forwards;
-        animation-delay: 0.1s;
+        animation: contentFadeScale 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation-delay: 0.6s;
+        opacity: 0;
+    }
+
+    /* Download button */
+    .main .stDownloadButton {
+        animation: contentFadeScale 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation-delay: 0.55s;
+        opacity: 0;
+    }
+
+    /* Expander */
+    .main [data-testid="stExpander"] {
+        animation: contentSlideIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation-delay: 0.65s;
+        opacity: 0;
+    }
+
+    /* Dataframe / tabel */
+    .main [data-testid="stDataFrame"] {
+        animation: contentSlideIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation-delay: 0.7s;
         opacity: 0;
     }
 
@@ -623,8 +645,8 @@ st.markdown("""
     @keyframes contentSlideIn {
         from {
             opacity: 0;
-            transform: translateY(16px);
-            filter: blur(2px);
+            transform: translateY(30px);
+            filter: blur(4px);
         }
         to {
             opacity: 1;
@@ -636,7 +658,7 @@ st.markdown("""
     @keyframes contentFadeIn {
         from {
             opacity: 0;
-            transform: translateY(8px);
+            transform: translateY(20px);
         }
         to {
             opacity: 1;
@@ -647,7 +669,7 @@ st.markdown("""
     @keyframes contentFadeScale {
         from {
             opacity: 0;
-            transform: scale(0.95) translateY(10px);
+            transform: scale(0.9) translateY(20px);
         }
         to {
             opacity: 1;
