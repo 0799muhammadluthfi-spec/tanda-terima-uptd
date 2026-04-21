@@ -149,16 +149,29 @@ def render_log_rekap(df_p, dt_user):
             st.info("Belum ada data.")
             return
 
-        df_isi = df_p[
-            (df_p["Total_Karcis_R2"].astype(str).str.strip().apply(lambda x: x not in ["-","nan",""])) |
-            (df_p["Total_Karcis_R4"].astype(str).str.strip().apply(lambda x: x not in ["-","nan",""]))
+        hari_ini = datetime.now().date()
+
+        df_isi = df_p.copy()
+        df_isi["Tgl_Sort"] = pd.to_datetime(
+            df_isi["Tanggal"], dayfirst=True, errors="coerce"
+        ).dt.date
+
+        # Filter hanya sampai hari ini
+        df_isi = df_isi[
+            (df_isi["Tgl_Sort"].notna()) &
+            (df_isi["Tgl_Sort"] <= hari_ini)
+        ]
+
+        # Filter yang sudah diisi
+        df_sudah = df_isi[
+            (df_isi["Total_Karcis_R2"].astype(str).str.strip().apply(lambda x: x not in ["-","nan",""])) |
+            (df_isi["Total_Karcis_R4"].astype(str).str.strip().apply(lambda x: x not in ["-","nan",""]))
         ].copy()
 
-        if not df_isi.empty:
-            df_isi["Tgl_Sort"] = pd.to_datetime(df_isi["Tanggal"], dayfirst=True, errors="coerce").dt.date
-            last = df_isi[df_isi["Tgl_Sort"] == dt_user] if dt_user else pd.DataFrame()
+        if not df_sudah.empty:
+            last = df_sudah[df_sudah["Tgl_Sort"] == dt_user] if dt_user else pd.DataFrame()
             if last.empty:
-                last = df_isi.sort_values(by="Tgl_Sort", ascending=False).head(1)
+                last = df_sudah.sort_values(by="Tgl_Sort", ascending=False).head(1)
             else:
                 last = last.head(1)
             kolom = ["Tanggal","Nama_Petugas","Total_Karcis_R2","Total_Karcis_R4","MPP_Roda_R2","MPP_Roda_R4"]
@@ -170,9 +183,25 @@ def render_log_rekap(df_p, dt_user):
 
         st.divider()
         st.subheader("📅 Tanggal Belum Diinput (Awal Bulan s/d Hari Ini)")
-        df_kosong = daftar_tanggal_kosong_bulan_ini(df_p)
+
+        # Filter tanggal kosong: hanya sampai hari ini & belum diisi
+        df_kosong = df_isi[
+            (df_isi["Total_Karcis_R2"].astype(str).str.strip().apply(lambda x: x in ["-","nan","","None","null"])) &
+            (df_isi["Total_Karcis_R4"].astype(str).str.strip().apply(lambda x: x in ["-","nan","","None","null"]))
+        ].copy()
+
+        awal_bulan = hari_ini.replace(day=1)
+        df_kosong = df_kosong[
+            (df_kosong["Tgl_Sort"] >= awal_bulan) &
+            (df_kosong["Tgl_Sort"] <= hari_ini)
+        ]
+
         if not df_kosong.empty:
-            st.dataframe(df_kosong, hide_index=True, use_container_width=True)
+            st.dataframe(
+                df_kosong.sort_values("Tgl_Sort")[["Tanggal","Nama_Petugas"]],
+                hide_index=True,
+                use_container_width=True
+            )
         else:
             st.success("✅ Tidak ada tanggal kosong bulan ini.")
 
@@ -182,23 +211,33 @@ def render_log_stok(df_p, dt_user):
             st.info("Belum ada data.")
             return
 
-        # Ambil semua nama petugas unik (termasuk yang belum ada stok)
+        hari_ini = datetime.now().date()
+
+        # Ambil semua nama petugas unik
         semua_petugas = df_p["Nama_Petugas"].unique()
 
-        # Filter baris yang SUDAH punya data stok
+        # Siapkan data dengan tanggal
         df_stok = df_p.copy()
+        df_stok["Tgl_Sort"] = pd.to_datetime(
+            df_stok["Tanggal"], dayfirst=True, errors="coerce"
+        ).dt.date
+
+        # Filter: hanya tanggal hari ini atau sebelumnya
+        df_stok = df_stok[
+            (df_stok["Tgl_Sort"].notna()) &
+            (df_stok["Tgl_Sort"] <= hari_ini)
+        ]
+
+        # Filter: hanya yang punya data sisa stok (bukan "-", "nan", kosong)
         df_stok["_r2"] = df_stok["Sisa_Stok_R2"].astype(str).str.strip()
         df_stok["_r4"] = df_stok["Sisa_Stok_R4"].astype(str).str.strip()
 
         df_ada_stok = df_stok[
-            (df_stok["_r2"].apply(lambda x: x not in ["-", "nan", "", "None", "null", "0"])) |
-            (df_stok["_r4"].apply(lambda x: x not in ["-", "nan", "", "None", "null", "0"]))
+            (df_stok["_r2"].apply(lambda x: x not in ["-", "nan", "", "None", "null"])) |
+            (df_stok["_r4"].apply(lambda x: x not in ["-", "nan", "", "None", "null"]))
         ].copy()
 
         if not df_ada_stok.empty:
-            df_ada_stok["Tgl_Sort"] = pd.to_datetime(
-                df_ada_stok["Tanggal"], dayfirst=True, errors="coerce"
-            )
             df_ada_stok = df_ada_stok.sort_values("Tgl_Sort", ascending=False)
 
         ada_data = False
@@ -236,7 +275,6 @@ def render_log_stok(df_p, dt_user):
                 c1.metric("🏍️ Sisa Karcis R2", sisa_r2)
                 c2.metric("🚗 Sisa Karcis R4", sisa_r4)
             else:
-                # Petugas ada tapi belum pernah ada data stok
                 st.markdown(f"### 👤 {petugas}")
                 st.caption("Belum ada data stok")
 
@@ -256,14 +294,27 @@ def render_log_konfirmasi(df_p):
             st.info("Belum ada data.")
             return
 
-        df_isi = df_p[
-            (df_p["Status_Khusus"].astype(str).str.strip().apply(lambda x: x not in ["-","nan",""])) |
-            (df_p["Status_MPP"].astype(str).str.strip().apply(lambda x: x not in ["-","nan",""])) |
-            (df_p["Status_Cetak"].astype(str).str.strip().apply(lambda x: x not in ["-","nan",""]))
+        hari_ini = datetime.now().date()
+
+        df_isi = df_p.copy()
+        df_isi["Tgl_Sort"] = pd.to_datetime(
+            df_isi["Tanggal"], dayfirst=True, errors="coerce"
+        ).dt.date
+
+        # Filter hanya sampai hari ini
+        df_isi = df_isi[
+            (df_isi["Tgl_Sort"].notna()) &
+            (df_isi["Tgl_Sort"] <= hari_ini)
+        ]
+
+        # Filter yang sudah ada status
+        df_isi = df_isi[
+            (df_isi["Status_Khusus"].astype(str).str.strip().apply(lambda x: x not in ["-","nan",""])) |
+            (df_isi["Status_MPP"].astype(str).str.strip().apply(lambda x: x not in ["-","nan",""])) |
+            (df_isi["Status_Cetak"].astype(str).str.strip().apply(lambda x: x not in ["-","nan",""]))
         ].copy()
 
         if not df_isi.empty:
-            df_isi["Tgl_Sort"] = pd.to_datetime(df_isi["Tanggal"], dayfirst=True, errors="coerce")
             last = df_isi.sort_values(by="Tgl_Sort", ascending=False).head(1)
             kolom = ["Tanggal","Nama_Petugas","Status_Khusus","Status_MPP","Status_Cetak"]
             kolom_ada = [k for k in kolom if k in last.columns]
