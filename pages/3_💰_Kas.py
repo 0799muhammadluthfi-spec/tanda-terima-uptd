@@ -328,26 +328,13 @@ with tab1:
     # ── HASIL PERHITUNGAN ──
     sisa_uang_kas_seluruh = sisa_kas_input + sisa_atm + sisa_penyedia
 
-    st.divider()
-    st.subheader("🧮 HASIL PERHITUNGAN")
-    r1, r2, r3 = st.columns(3)
-    if jenis_transaksi == "MASUK":
-        r1.metric("BERSIH MASUK", rupiah(bersih))
-    else:
-        r1.metric("NOMINAL KELUAR", rupiah(nominal))
-    r2.metric("SISA KAS DI TANGAN", rupiah(sisa_kas_input))
-    r3.metric("SISA KAS SELURUH", rupiah(sisa_uang_kas_seluruh))
-
     # ── SELISIH ──
-    # Selisih = Kas Seluruh (hitungan) vs Kas Seluruh sebelumnya + perubahan
-    kas_seluruh_auto = new_kas + new_atm + new_penyedia
-    selisih_kurang = kas_seluruh_auto - sisa_uang_kas_seluruh
+    selisih_kurang = sisa_uang_kas_seluruh - sisa_kas_input
 
-    if abs(selisih_kurang) > 0.5:
-        if selisih_kurang > 0:
-            st.warning(f"⚠️ SELISIH / KURANG: **{rupiah(selisih_kurang)}**")
-        else:
-            st.info(f"ℹ️ SELISIH / LEBIH: **{rupiah(abs(selisih_kurang))}**")
+    if selisih_kurang > 0.5:
+        st.warning(f"⚠️ SELISIH / KURANG: **{rupiah(selisih_kurang)}** (uang di tangan kurang dari seharusnya)")
+    elif selisih_kurang < -0.5:
+        st.success(f"✅ SELISIH / LEBIH: **{rupiah(abs(selisih_kurang))}** (uang di tangan lebih dari seharusnya)")
     else:
         st.success("✅ SELISIH: **Rp 0** (Pas)")
 
