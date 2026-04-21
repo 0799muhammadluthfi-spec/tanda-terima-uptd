@@ -145,27 +145,29 @@ def ambil_info_tanggal_parkir(df_p, tgl_input_user):
 
 def render_log_rekap(df_p, dt_user):
     with st.expander("📊 LOG INPUT & STATUS BULAN INI", expanded=False):
-        if "Total_Karcis_R2" not in df_p.columns:
+        if "Total_Karcis_R2" not in df_p.columns or "Tanggal" not in df_p.columns:
             st.info("Belum ada data.")
             return
 
         hari_ini = today_wita()
+        awal_bulan = hari_ini.replace(day=1)
 
         df_isi = df_p.copy()
-        df_isi["Tgl_Sort"] = pd.to_datetime(
-            df_isi["Tanggal"], dayfirst=True, errors="coerce"
-        ).dt.date
+        df_isi["Tgl_Bersih"] = df_isi["Tanggal"].astype(str).str.strip().str.replace("/", "-", regex=False)
+        df_isi["Tgl_Sort"] = pd.to_datetime(df_isi["Tgl_Bersih"], dayfirst=True, errors="coerce").dt.date
 
-        # Filter hanya sampai hari ini
+        # Hanya data sampai hari ini
         df_isi = df_isi[
             (df_isi["Tgl_Sort"].notna()) &
             (df_isi["Tgl_Sort"] <= hari_ini)
-        ]
+        ].copy()
 
-        # Filter yang sudah diisi
-        df_kosong = df_isi[
-            (df_isi["Total_Karcis_R2"].astype(str).str.strip().apply(lambda x: x in ["-","nan","","None","null","0"])) &
-            (df_isi["Total_Karcis_R4"].astype(str).str.strip().apply(lambda x: x in ["-","nan","","None","null","0"]))
+        # Data yang SUDAH diisi
+        df_sudah = df_isi[
+            ~(
+                df_isi["Total_Karcis_R2"].astype(str).str.strip().isin(["-", "nan", "", "None", "null", "0"]) &
+                df_isi["Total_Karcis_R4"].astype(str).str.strip().isin(["-", "nan", "", "None", "null", "0"])
+            )
         ].copy()
 
         if not df_sudah.empty:
@@ -174,8 +176,17 @@ def render_log_rekap(df_p, dt_user):
                 last = df_sudah.sort_values(by="Tgl_Sort", ascending=False).head(1)
             else:
                 last = last.head(1)
-            kolom = ["Tanggal","Nama_Petugas","Total_Karcis_R2","Total_Karcis_R4","MPP_Roda_R2","MPP_Roda_R4"]
+
+            kolom = [
+                "Tanggal",
+                "Nama_Petugas",
+                "Total_Karcis_R2",
+                "Total_Karcis_R4",
+                "MPP_Roda_R2",
+                "MPP_Roda_R4"
+            ]
             kolom_ada = [k for k in kolom if k in last.columns]
+
             st.subheader("📋 Input Terakhir")
             st.dataframe(last[kolom_ada], hide_index=True, use_container_width=True)
         else:
@@ -184,21 +195,18 @@ def render_log_rekap(df_p, dt_user):
         st.divider()
         st.subheader("📅 Tanggal Belum Diinput (Awal Bulan s/d Hari Ini)")
 
-        # Filter tanggal kosong: hanya sampai hari ini & belum diisi
         df_kosong = df_isi[
-            (df_isi["Total_Karcis_R2"].astype(str).str.strip().apply(lambda x: x in ["-","nan","","None","null"])) &
-            (df_isi["Total_Karcis_R4"].astype(str).str.strip().apply(lambda x: x in ["-","nan","","None","null"]))
+            (df_isi["Tgl_Sort"] >= awal_bulan) &
+            (df_isi["Tgl_Sort"] <= hari_ini) &
+            (
+                df_isi["Total_Karcis_R2"].astype(str).str.strip().isin(["-", "nan", "", "None", "null", "0"]) &
+                df_isi["Total_Karcis_R4"].astype(str).str.strip().isin(["-", "nan", "", "None", "null", "0"])
+            )
         ].copy()
-
-        awal_bulan = hari_ini.replace(day=1)
-        df_kosong = df_kosong[
-            (df_kosong["Tgl_Sort"] >= awal_bulan) &
-            (df_kosong["Tgl_Sort"] <= hari_ini)
-        ]
 
         if not df_kosong.empty:
             st.dataframe(
-                df_kosong.sort_values("Tgl_Sort")[["Tanggal","Nama_Petugas"]],
+                df_kosong.sort_values("Tgl_Sort")[["Tanggal", "Nama_Petugas"]],
                 hide_index=True,
                 use_container_width=True
             )
