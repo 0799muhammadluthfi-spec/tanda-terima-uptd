@@ -149,7 +149,7 @@ def render_log_rekap(df_p, dt_user):
             st.info("Belum ada data.")
             return
 
-        hari_ini = datetime.now().date()
+        hari_ini = today_wita()
 
         df_isi = df_p.copy()
         df_isi["Tgl_Sort"] = pd.to_datetime(
