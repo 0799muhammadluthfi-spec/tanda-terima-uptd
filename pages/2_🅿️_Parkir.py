@@ -289,13 +289,10 @@ with tab1:
         cs2.metric(f"📊 Sisa R4 ({nama_p})", int(sisa_r4))
 
         with st.form("form_rekap_harian", clear_on_submit=True):
-            c1, c2 = st.columns(2)
-            with c1:
-                tr2 = st.number_input("TOTAL KARCIS R2", min_value=0)
-                mr2 = st.number_input("MPP RODA R2", min_value=0)
-            with c2:
-                tr4 = st.number_input("TOTAL KARCIS R4", min_value=0)
-                mr4 = st.number_input("MPP RODA R4", min_value=0)
+            tr2 = st.number_input("TOTAL KARCIS R2", min_value=0)
+            tr4 = st.number_input("TOTAL KARCIS R4", min_value=0)
+            mr2 = st.number_input("MPP RODA R2", min_value=0)
+            mr4 = st.number_input("MPP RODA R4", min_value=0)
 
             b1, b2 = st.columns(2)
             with b1:
