@@ -36,26 +36,7 @@ inject_css()
 # KONEKSI
 # ==========================================
 conn_sk = st.connection("gsheets_sk", type=GSheetsConnection)
-def reset_form_sk():
-    keys = [
-        "sk_no_urut",
-        "sk_tgl_terima",
-        "sk_nama_toko",
-        "sk_no_toko",
-        "sk_nama_pemilik",
-        "sk_nama_pengantar",
-        "sk_nama_penerima",
-        "cb_SK ASLI MENEMPATI",
-        "cb_PAS FOTO 3X4 (2 LBR)",
-        "cb_FC KTP PEMILIK",
-        "cb_FC KARTU SEWA",
-        "cb_SURAT KUASA",
-        "cb_SURAT KEHILANGAN"
-    ]
-    for k in keys:
-        if k in st.session_state:
-            del st.session_state[k]
-    st.rerun()
+
 # ==========================================
 # SIDEBAR
 # ==========================================
@@ -63,23 +44,16 @@ with st.sidebar:
     logo_b64 = st.session_state.get("logo_b64")
     if logo_b64:
         st.markdown(
-            f"""
-            <div style="text-align:center; padding:18px 0 6px 0;">
-                <img src="data:image/png;base64,{logo_b64}"
-                     width="78" height="auto"
-                     style="display:inline-block;
-                            filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4));">
-            </div>
-            """,
+            f'<div style="text-align:center; padding:18px 0 6px 0;">'
+            f'<img src="data:image/png;base64,{logo_b64}" width="78" height="auto" '
+            f'style="display:inline-block; filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4));">'
+            f'</div>',
             unsafe_allow_html=True
         )
     else:
         st.markdown(
-            """
-            <div style="text-align:center; padding:18px 0 6px 0;">
-                <div style="font-size:3rem;">🏛️</div>
-            </div>
-            """,
+            '<div style="text-align:center; padding:18px 0 6px 0;">'
+            '<div style="font-size:3rem;">🏛️</div></div>',
             unsafe_allow_html=True
         )
 
@@ -88,20 +62,14 @@ with st.sidebar:
         <div style="text-align:center; padding:4px 0 14px 0;
                     border-bottom:1px solid rgba(255,255,255,0.08);
                     margin-bottom:14px;">
-            <p style="font-family:'Inter',sans-serif;
-                      font-size:1.05rem; font-weight:800;
-                      color:#f1f5f9 !important;
-                      letter-spacing:-0.02em;
+            <p style="font-family:'Inter',sans-serif; font-size:1.05rem; font-weight:800;
+                      color:#f1f5f9 !important; letter-spacing:-0.02em;
                       margin:0 0 4px 0; line-height:1.3;">
-                UPTD PASAR KANDANGAN
-            </p>
-            <p style="font-family:'Inter',sans-serif;
-                      font-size:0.78rem; font-weight:600;
-                      color:#94a3b8 !important;
-                      letter-spacing:0.04em;
+                UPTD PASAR KANDANGAN</p>
+            <p style="font-family:'Inter',sans-serif; font-size:0.78rem; font-weight:600;
+                      color:#94a3b8 !important; letter-spacing:0.04em;
                       margin:0; line-height:1.4;">
-                KABUPATEN HULU SUNGAI SELATAN
-            </p>
+                KABUPATEN HULU SUNGAI SELATAN</p>
         </div>
         """,
         unsafe_allow_html=True
@@ -110,54 +78,25 @@ with st.sidebar:
     st.page_link("app_web.py", label="🏠  Beranda", use_container_width=True)
 
     st.markdown(
-        """
-        <div style="padding: 8px 4px 4px 4px;">
-            <p style="font-family:'Inter',sans-serif;
-                      font-size:0.7rem; font-weight:600;
-                      color:#64748b !important;
-                      text-transform:uppercase;
-                      letter-spacing:0.06em;
-                      margin:0 0 6px 0;">
-                MODUL
-            </p>
-        </div>
-        """,
+        '<div style="padding: 8px 4px 4px 4px;">'
+        '<p style="font-family:\'Inter\',sans-serif; font-size:0.7rem; font-weight:600;'
+        'color:#64748b !important; text-transform:uppercase; letter-spacing:0.06em;'
+        'margin:0 0 6px 0;">MODUL</p></div>',
         unsafe_allow_html=True
     )
 
-    st.page_link(
-        "pages/1_📋_SK_Toko.py",
-        label="📋  SK Toko",
-        use_container_width=True
-    )
-    st.page_link(
-        "pages/2_🅿️_Parkir.py",
-        label="🅿️  Parkir",
-        use_container_width=True
-    )
-    st.page_link(
-        "pages/3_💰_Kas.py",
-        label="💰  Kas UPTD",
-        use_container_width=True
-    )
+    st.page_link("pages/1_📋_SK_Toko.py", label="📋  SK Toko", use_container_width=True)
+    st.page_link("pages/2_🅿️_Parkir.py", label="🅿️  Parkir", use_container_width=True)
+    st.page_link("pages/3_💰_Kas.py", label="💰  Kas UPTD", use_container_width=True)
 
     st.markdown(
         """
         <div style="text-align:center; padding:24px 0 8px 0;
-                    border-top:1px solid rgba(255,255,255,0.06);
-                    margin-top:40px;">
-            <p style="font-family:'Inter',sans-serif;
-                      font-size:0.56rem; font-weight:400;
-                      color:#64748b !important;
-                      margin:0; line-height:1.7;">
-                Developed by
-            </p>
-            <p style="font-family:'Inter',sans-serif;
-                      font-size:0.68rem; font-weight:700;
-                      color:#94a3b8 !important;
-                      margin:2px 0 0 0;">
-                M. Luthfi Renaldi
-            </p>
+                    border-top:1px solid rgba(255,255,255,0.06); margin-top:40px;">
+            <p style="font-family:'Inter',sans-serif; font-size:0.56rem;
+                      color:#64748b !important; margin:0; line-height:1.7;">Developed by</p>
+            <p style="font-family:'Inter',sans-serif; font-size:0.68rem; font-weight:700;
+                      color:#94a3b8 !important; margin:2px 0 0 0;">M. Luthfi Renaldi</p>
         </div>
         """,
         unsafe_allow_html=True
@@ -182,26 +121,16 @@ with tab1:
     # Statistik
     col_stat1, col_stat2, col_stat3 = st.columns(3)
     total = len(df_sk[df_sk["No"] != "-"]) if not df_sk.empty else 0
-    sudah_ambil = (
-        len(df_sk[df_sk["Tanggal_Pengambilan"] != "-"])
-        if not df_sk.empty else 0
-    )
+    sudah_ambil = len(df_sk[df_sk["Tanggal_Pengambilan"] != "-"]) if not df_sk.empty else 0
     col_stat1.metric("📦 Total Berkas", total)
     col_stat2.metric("✅ Sudah Diambil", sudah_ambil)
     col_stat3.metric("⏳ Belum Diambil", total - sudah_ambil)
 
     # Pilih berkas
     SEMUA_BERKAS = [
-        "SK ASLI MENEMPATI",
-        "PAS FOTO 3X4 (2 LBR)",
-        "FC KTP PEMILIK",
-        "FC KARTU SEWA",
-        "SURAT KUASA",
-        "SURAT KEHILANGAN"
+        "SK ASLI MENEMPATI", "PAS FOTO 3X4 (2 LBR)", "FC KTP PEMILIK",
+        "FC KARTU SEWA", "SURAT KUASA", "SURAT KEHILANGAN"
     ]
-
-    if "sel_berkas" not in st.session_state:
-        st.session_state["sel_berkas"] = []
 
     st.subheader("☑️ Pilih Berkas yang Dibawa:")
     cols_berkas = st.columns(3)
@@ -219,71 +148,52 @@ with tab1:
         next_no = get_next_no(df_sk)
         col1, col2 = st.columns(2)
         with col1:
-            no_urut = st.text_input(
-    "NOMOR URUT *",
-    value=str(next_no),
-    key="sk_no_urut"
-)
-tgl_terima = st.text_input(
-    "TANGGAL TERIMA *",
-    value=datetime.now().strftime("%d-%m-%Y"),
-    key="sk_tgl_terima"
-)
-nama_toko = st.text_input("NAMA TOKO *", key="sk_nama_toko").strip().upper()
-no_toko   = st.text_input("NOMOR TOKO *", key="sk_no_toko").strip().upper()
+            no_urut = st.text_input("NOMOR URUT *", value=str(next_no))
+            tgl_terima = st.text_input("TANGGAL TERIMA *", value=datetime.now().strftime("%d-%m-%Y"))
+            nama_toko = st.text_input("NAMA TOKO *").strip().upper()
+            no_toko = st.text_input("NOMOR TOKO *").strip().upper()
         with col2:
-nama_pemilik   = st.text_input("NAMA PEMILIK SK *", key="sk_nama_pemilik").strip().upper()
-nama_pengantar = st.text_input("NAMA PENGANTAR *", key="sk_nama_pengantar").strip().upper()
-nama_penerima  = st.text_input("NAMA PENERIMA *", key="sk_nama_penerima").strip().upper()
+            nama_pemilik = st.text_input("NAMA PEMILIK SK *").strip().upper()
+            nama_pengantar = st.text_input("NAMA PENGANTAR *").strip().upper()
+            nama_penerima = st.text_input("NAMA PENERIMA *").strip().upper()
 
-       b1, b2 = st.columns(2)
-with b1:
-    submit_sk = st.form_submit_button(
-        "💾 SIMPAN DATA",
-        type="primary",
-        use_container_width=True
-    )
-with b2:
-    reset_sk = st.form_submit_button(
-        "🔄 RESET FORM",
-        use_container_width=True
-    )
+        b1, b2 = st.columns(2)
+        with b1:
+            submit_sk = st.form_submit_button("💾 SIMPAN DATA", type="primary", use_container_width=True)
+        with b2:
+            reset_sk = st.form_submit_button("🔄 RESET FORM", use_container_width=True)
 
-if reset_sk:
-    reset_form_sk()
+        if reset_sk:
+            st.rerun()
 
-if submit_sk:
-    if not no_urut.strip() or not nama_toko or not nama_pemilik:
-        st.error("❌ Data Wajib Diisi!")
-    else:
-        is_exist = (
-            not df_sk.empty and
-            normalisasi_no(no_urut) in
-            df_sk["No"].apply(normalisasi_no).values
-        )
-        new_row = {
-            "No": no_urut.strip(),
-            "Tanggal_Pengantaran": tgl_terima,
-            "Tanggal_Pengambilan": "-",
-            "Nama_Toko": nama_toko,
-            "No_Toko": no_toko,
-            "Nama_Pemilik_Asli": nama_pemilik,
-            "Nama_Pengantar_Berkas": nama_pengantar,
-            "Penerima_Berkas": nama_penerima
-        }
-        if is_exist:
-            st.session_state["pending_sk"] = new_row
-            st.session_state["show_confirm_sk"] = True
-        else:
-            df_baru = pd.concat(
-                [df_sk, pd.DataFrame([new_row])],
-                ignore_index=True
-            )
-            if safe_update(conn_sk, WS_SK, df_baru):
-                st.session_state["last_sk"] = new_row
-                st.session_state["last_berkas"] = sel_berkas
-                st.success("✅ Berhasil!")
-                st.rerun()
+        if submit_sk:
+            if not no_urut.strip() or not nama_toko or not nama_pemilik:
+                st.error("❌ Data Wajib Diisi!")
+            else:
+                is_exist = (
+                    not df_sk.empty and
+                    normalisasi_no(no_urut) in df_sk["No"].apply(normalisasi_no).values
+                )
+                new_row = {
+                    "No": no_urut.strip(),
+                    "Tanggal_Pengantaran": tgl_terima,
+                    "Tanggal_Pengambilan": "-",
+                    "Nama_Toko": nama_toko,
+                    "No_Toko": no_toko,
+                    "Nama_Pemilik_Asli": nama_pemilik,
+                    "Nama_Pengantar_Berkas": nama_pengantar,
+                    "Penerima_Berkas": nama_penerima
+                }
+                if is_exist:
+                    st.session_state["pending_sk"] = new_row
+                    st.session_state["show_confirm_sk"] = True
+                else:
+                    df_baru = pd.concat([df_sk, pd.DataFrame([new_row])], ignore_index=True)
+                    if safe_update(conn_sk, WS_SK, df_baru):
+                        st.session_state["last_sk"] = new_row
+                        st.session_state["last_berkas"] = sel_berkas
+                        st.success("✅ Berhasil!")
+                        st.rerun()
 
     # Konfirmasi timpa
     if st.session_state.get("show_confirm_sk"):
@@ -292,10 +202,7 @@ if submit_sk:
         if col_c1.button("✅ YA, TIMPA DATA", type="primary", key="timpa_sk"):
             d = st.session_state["pending_sk"]
             df_sk = df_sk[df_sk["No"] != d["No"]]
-            df_final = pd.concat(
-                [df_sk, pd.DataFrame([d])],
-                ignore_index=True
-            )
+            df_final = pd.concat([df_sk, pd.DataFrame([d])], ignore_index=True)
             if safe_update(conn_sk, WS_SK, df_final):
                 st.session_state["last_sk"] = d
                 st.session_state["last_berkas"] = sel_berkas
@@ -343,10 +250,7 @@ with tab2:
     if df_m.empty:
         st.warning("⚠️ Data kosong atau worksheet tidak ditemukan.")
     else:
-        df_b = df_m[
-            (df_m["Tanggal_Pengambilan"] == "-") &
-            (df_m["No"] != "-")
-        ]
+        df_b = df_m[(df_m["Tanggal_Pengambilan"] == "-") & (df_m["No"] != "-")]
 
         no_cari = st.text_input(
             "🔍 CARI NOMOR URUT:",
