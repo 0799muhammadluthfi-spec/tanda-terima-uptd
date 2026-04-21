@@ -36,7 +36,26 @@ inject_css()
 # KONEKSI
 # ==========================================
 conn_sk = st.connection("gsheets_sk", type=GSheetsConnection)
-
+def reset_form_sk():
+    keys = [
+        "sk_no_urut",
+        "sk_tgl_terima",
+        "sk_nama_toko",
+        "sk_no_toko",
+        "sk_nama_pemilik",
+        "sk_nama_pengantar",
+        "sk_nama_penerima",
+        "cb_SK ASLI MENEMPATI",
+        "cb_PAS FOTO 3X4 (2 LBR)",
+        "cb_FC KTP PEMILIK",
+        "cb_FC KARTU SEWA",
+        "cb_SURAT KUASA",
+        "cb_SURAT KEHILANGAN"
+    ]
+    for k in keys:
+        if k in st.session_state:
+            del st.session_state[k]
+    st.rerun()
 # ==========================================
 # SIDEBAR
 # ==========================================
@@ -201,52 +220,70 @@ with tab1:
         col1, col2 = st.columns(2)
         with col1:
             no_urut = st.text_input(
-                "NOMOR URUT *",
-                value=str(next_no)
-            )
-            tgl_terima = st.text_input(
-                "TANGGAL TERIMA *",
-                value=datetime.now().strftime("%d-%m-%Y")
-            )
-            nama_toko = st.text_input("NAMA TOKO *").strip().upper()
-            no_toko   = st.text_input("NOMOR TOKO *").strip().upper()
+    "NOMOR URUT *",
+    value=str(next_no),
+    key="sk_no_urut"
+)
+tgl_terima = st.text_input(
+    "TANGGAL TERIMA *",
+    value=datetime.now().strftime("%d-%m-%Y"),
+    key="sk_tgl_terima"
+)
+nama_toko = st.text_input("NAMA TOKO *", key="sk_nama_toko").strip().upper()
+no_toko   = st.text_input("NOMOR TOKO *", key="sk_no_toko").strip().upper()
         with col2:
-            nama_pemilik   = st.text_input("NAMA PEMILIK SK *").strip().upper()
-            nama_pengantar = st.text_input("NAMA PENGANTAR *").strip().upper()
-            nama_penerima  = st.text_input("NAMA PENERIMA *").strip().upper()
+nama_pemilik   = st.text_input("NAMA PEMILIK SK *", key="sk_nama_pemilik").strip().upper()
+nama_pengantar = st.text_input("NAMA PENGANTAR *", key="sk_nama_pengantar").strip().upper()
+nama_penerima  = st.text_input("NAMA PENERIMA *", key="sk_nama_penerima").strip().upper()
 
-        if st.form_submit_button("💾 SIMPAN DATA", type="primary"):
-            if not no_urut.strip() or not nama_toko or not nama_pemilik:
-                st.error("❌ Data Wajib Diisi!")
-            else:
-                is_exist = (
-                    not df_sk.empty and
-                    normalisasi_no(no_urut) in
-                    df_sk["No"].apply(normalisasi_no).values
-                )
-                new_row = {
-                    "No": no_urut.strip(),
-                    "Tanggal_Pengantaran": tgl_terima,
-                    "Tanggal_Pengambilan": "-",
-                    "Nama_Toko": nama_toko,
-                    "No_Toko": no_toko,
-                    "Nama_Pemilik_Asli": nama_pemilik,
-                    "Nama_Pengantar_Berkas": nama_pengantar,
-                    "Penerima_Berkas": nama_penerima
-                }
-                if is_exist:
-                    st.session_state["pending_sk"] = new_row
-                    st.session_state["show_confirm_sk"] = True
-                else:
-                    df_baru = pd.concat(
-                        [df_sk, pd.DataFrame([new_row])],
-                        ignore_index=True
-                    )
-                    if safe_update(conn_sk, WS_SK, df_baru):
-                        st.session_state["last_sk"] = new_row
-                        st.session_state["last_berkas"] = sel_berkas
-                        st.success("✅ Berhasil!")
-                        st.rerun()
+       b1, b2 = st.columns(2)
+with b1:
+    submit_sk = st.form_submit_button(
+        "💾 SIMPAN DATA",
+        type="primary",
+        use_container_width=True
+    )
+with b2:
+    reset_sk = st.form_submit_button(
+        "🔄 RESET FORM",
+        use_container_width=True
+    )
+
+if reset_sk:
+    reset_form_sk()
+
+if submit_sk:
+    if not no_urut.strip() or not nama_toko or not nama_pemilik:
+        st.error("❌ Data Wajib Diisi!")
+    else:
+        is_exist = (
+            not df_sk.empty and
+            normalisasi_no(no_urut) in
+            df_sk["No"].apply(normalisasi_no).values
+        )
+        new_row = {
+            "No": no_urut.strip(),
+            "Tanggal_Pengantaran": tgl_terima,
+            "Tanggal_Pengambilan": "-",
+            "Nama_Toko": nama_toko,
+            "No_Toko": no_toko,
+            "Nama_Pemilik_Asli": nama_pemilik,
+            "Nama_Pengantar_Berkas": nama_pengantar,
+            "Penerima_Berkas": nama_penerima
+        }
+        if is_exist:
+            st.session_state["pending_sk"] = new_row
+            st.session_state["show_confirm_sk"] = True
+        else:
+            df_baru = pd.concat(
+                [df_sk, pd.DataFrame([new_row])],
+                ignore_index=True
+            )
+            if safe_update(conn_sk, WS_SK, df_baru):
+                st.session_state["last_sk"] = new_row
+                st.session_state["last_berkas"] = sel_berkas
+                st.success("✅ Berhasil!")
+                st.rerun()
 
     # Konfirmasi timpa
     if st.session_state.get("show_confirm_sk"):
