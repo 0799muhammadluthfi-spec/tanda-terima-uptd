@@ -177,38 +177,47 @@ def render_log_rekap(df_p, dt_user):
             st.success("✅ Tidak ada tanggal kosong bulan ini.")
 
 def render_log_stok(df_p, dt_user):
-    with st.expander("📊 LOG INPUT & STATUS BULAN INI", expanded=False):
-        if "Pengambilan_Karcis_R2" not in df_p.columns:
+    with st.expander("📊 SISA STOK KARCIS PER PETUGAS", expanded=False):
+        if "Sisa_Stok_R2" not in df_p.columns or "Nama_Petugas" not in df_p.columns:
             st.info("Belum ada data.")
             return
 
-        df_isi = df_p[
-            (df_p["Pengambilan_Karcis_R2"].astype(str).str.strip().apply(lambda x: x not in ["-","nan",""])) |
-            (df_p["Pengambilan_Karcis_R4"].astype(str).str.strip().apply(lambda x: x not in ["-","nan",""]))
+        # Filter baris yang punya data sisa stok
+        df_stok = df_p[
+            (df_p["Sisa_Stok_R2"].astype(str).str.strip().apply(lambda x: x not in ["-","nan",""])) |
+            (df_p["Sisa_Stok_R4"].astype(str).str.strip().apply(lambda x: x not in ["-","nan",""]))
         ].copy()
 
-        if not df_isi.empty:
-            df_isi["Tgl_Sort"] = pd.to_datetime(df_isi["Tanggal"], dayfirst=True, errors="coerce").dt.date
-            last = df_isi[df_isi["Tgl_Sort"] == dt_user] if dt_user else pd.DataFrame()
-            if last.empty:
-                last = df_isi.sort_values(by="Tgl_Sort", ascending=False).head(1)
-            else:
-                last = last.head(1)
-            kolom = ["Tanggal","Nama_Petugas","Pengambilan_Karcis_R2","Pengambilan_Karcis_R4"]
-            kolom_ada = [k for k in kolom if k in last.columns]
-            st.subheader("📋 Input Terakhir")
-            st.dataframe(last[kolom_ada], hide_index=True, use_container_width=True)
-        else:
-            st.info("Belum ada data yang diinput.")
+        if df_stok.empty:
+            st.info("Belum ada data stok.")
+            return
 
-        st.divider()
-        st.subheader("📅 Tanggal Belum Diinput (Awal Bulan s/d Hari Ini)")
-        df_kosong = daftar_tanggal_kosong_bulan_ini(df_p)
-        if not df_kosong.empty:
-            st.dataframe(df_kosong, hide_index=True, use_container_width=True)
-        else:
-            st.success("✅ Tidak ada tanggal kosong bulan ini.")
+        # Ambil data terakhir per petugas
+        df_stok["Tgl_Sort"] = pd.to_datetime(df_stok["Tanggal"], dayfirst=True, errors="coerce")
+        df_stok = df_stok.sort_values("Tgl_Sort", ascending=False)
 
+        # Ambil baris terakhir per petugas
+        petugas_list = df_stok["Nama_Petugas"].unique()
+
+        for petugas in petugas_list:
+            if petugas in ["-", "nan", "", "None"]:
+                continue
+
+            data_petugas = df_stok[df_stok["Nama_Petugas"] == petugas].iloc[0]
+
+            sisa_r2 = data_petugas.get("Sisa_Stok_R2", "-")
+            sisa_r4 = data_petugas.get("Sisa_Stok_R4", "-")
+            tgl_terakhir = data_petugas.get("Tanggal", "-")
+
+            st.markdown(f"### 👤 {petugas}")
+            st.caption(f"Data terakhir: {tgl_terakhir}")
+
+            c1, c2 = st.columns(2)
+            c1.metric("🏍️ Sisa Karcis R2", sisa_r2)
+            c2.metric("🚗 Sisa Karcis R4", sisa_r4)
+
+            st.divider()
+            
 def render_log_konfirmasi(df_p):
     with st.expander("📊 LOG INPUT & STATUS BULAN INI", expanded=False):
         if "Status_Khusus" not in df_p.columns:
