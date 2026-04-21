@@ -1,6 +1,6 @@
-streamlit>=1.28.0
-pandas>=1.5.0
-reportlab>=3.6.0
-st-gsheets-connection
-gspread>=5.10.0
-google-auth>=2.17.0
+[theme]
+base = "light"
+primaryColor = "#3b82f6"
+backgroundColor = "#f8fafc"
+secondaryBackgroundColor = "#f1f5f9"
+textColor = "#0f172a"
