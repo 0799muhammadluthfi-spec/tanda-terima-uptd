@@ -163,9 +163,9 @@ def render_log_rekap(df_p, dt_user):
         ]
 
         # Filter yang sudah diisi
-        df_sudah = df_isi[
-            (df_isi["Total_Karcis_R2"].astype(str).str.strip().apply(lambda x: x not in ["-","nan",""])) |
-            (df_isi["Total_Karcis_R4"].astype(str).str.strip().apply(lambda x: x not in ["-","nan",""]))
+        df_kosong = df_isi[
+            (df_isi["Total_Karcis_R2"].astype(str).str.strip().apply(lambda x: x in ["-","nan","","None","null","0"])) &
+            (df_isi["Total_Karcis_R4"].astype(str).str.strip().apply(lambda x: x in ["-","nan","","None","null","0"]))
         ].copy()
 
         if not df_sudah.empty:
