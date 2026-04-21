@@ -17,7 +17,13 @@ st.set_page_config(
     page_icon="logo_hss.png",
     layout="wide"
 )
-conn = st.connection("gsheets", type=GSheetsConnection)
+
+# ==========================================
+# KONEKSI - 3 FILE TERPISAH
+# ==========================================
+conn_sk = st.connection("gsheets_sk", type=GSheetsConnection)
+conn_parkir = st.connection("gsheets_parkir", type=GSheetsConnection)
+conn_kas = st.connection("gsheets_kas", type=GSheetsConnection)
 
 # ==========================================
 # FUNGSI LOGO HSS
@@ -467,16 +473,16 @@ st.markdown("""
         border-top: 1px solid #e5e7eb !important;
     }
 
+    /* ANIMASI HALAMAN UTAMA */
     .main .block-container {
-        animation: pageTransition 0.4s ease-out;
+        animation: pageTransition 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         max-width: 80%;
         margin: 0 auto;
     }
 
     @keyframes pageTransition {
-        from { opacity: 0; transform: translateY(12px); filter: blur(2px); }
-        50% { filter: blur(0px); }
-        to { opacity: 1; transform: translateY(0); filter: blur(0px); }
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 
     @media (max-width: 768px) {
@@ -490,104 +496,54 @@ st.markdown("""
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
-    .main [data-testid="stHorizontalBlock"]:first-child {
-        animation: contentSlideIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        opacity: 0;
+    /* ============================================
+       ANIMASI KONTEN - SMOOTH RENDERING
+       ============================================ */
+
+    .main [data-testid="stHorizontalBlock"],
+    .main [data-testid="stMetric"],
+    .main [data-testid="stForm"],
+    .main [data-testid="stAlert"],
+    .main [data-testid="stExpander"],
+    .main [data-testid="stDataFrame"],
+    .main .stCheckbox,
+    .main .stTextInput,
+    .main .stNumberInput,
+    .main .stButton,
+    .main .stDownloadButton,
+    .main h2,
+    .main h3,
+    .main hr {
+        animation: smoothFadeIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
     }
 
-    .main [data-testid="stMetric"] {
-        animation: contentFadeScale 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        opacity: 0;
-    }
+    .main > div > div > div:nth-child(1) { animation-delay: 0.05s; }
+    .main > div > div > div:nth-child(2) { animation-delay: 0.1s; }
+    .main > div > div > div:nth-child(3) { animation-delay: 0.15s; }
+    .main > div > div > div:nth-child(4) { animation-delay: 0.2s; }
+    .main > div > div > div:nth-child(5) { animation-delay: 0.25s; }
+    .main > div > div > div:nth-child(6) { animation-delay: 0.3s; }
+    .main > div > div > div:nth-child(7) { animation-delay: 0.35s; }
+    .main > div > div > div:nth-child(8) { animation-delay: 0.4s; }
+    .main > div > div > div:nth-child(9) { animation-delay: 0.45s; }
+    .main > div > div > div:nth-child(10) { animation-delay: 0.5s; }
+    .main > div > div > div:nth-child(n+11) { animation-delay: 0.55s; }
 
-    .main [data-testid="stColumn"]:nth-child(1) [data-testid="stMetric"] { animation-delay: 0.2s; }
-    .main [data-testid="stColumn"]:nth-child(2) [data-testid="stMetric"] { animation-delay: 0.35s; }
-    .main [data-testid="stColumn"]:nth-child(3) [data-testid="stMetric"] { animation-delay: 0.5s; }
-
-    .main h2 {
-        animation: contentSlideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        animation-delay: 0.3s;
-        opacity: 0;
-    }
-
-    .main h3 {
-        animation: contentSlideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        animation-delay: 0.35s;
-        opacity: 0;
-    }
-
-    .main .stCheckbox {
-        animation: contentFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        animation-delay: 0.4s;
-        opacity: 0;
-    }
+    .main [data-testid="stColumn"]:nth-child(1) { animation-delay: 0.1s; }
+    .main [data-testid="stColumn"]:nth-child(2) { animation-delay: 0.2s; }
+    .main [data-testid="stColumn"]:nth-child(3) { animation-delay: 0.3s; }
 
     .main hr {
-        animation: dividerExpand 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        animation-delay: 0.5s;
-        opacity: 0;
+        animation: smoothDivider 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
         transform-origin: left;
     }
 
-    .main [data-testid="stAlert"] {
-        animation: contentSlideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        animation-delay: 0.3s;
-        opacity: 0;
-    }
-
-    .main [data-testid="stForm"] {
-        animation: contentSlideIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        animation-delay: 0.5s;
-        opacity: 0;
-    }
-
-    .main .stTextInput,
-    .main .stNumberInput {
-        animation: contentFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        animation-delay: 0.55s;
-        opacity: 0;
-    }
-
-    .main .stButton {
-        animation: contentFadeScale 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        animation-delay: 0.6s;
-        opacity: 0;
-    }
-
-    .main .stDownloadButton {
-        animation: contentFadeScale 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        animation-delay: 0.55s;
-        opacity: 0;
-    }
-
-    .main [data-testid="stExpander"] {
-        animation: contentSlideIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        animation-delay: 0.65s;
-        opacity: 0;
-    }
-
-    .main [data-testid="stDataFrame"] {
-        animation: contentSlideIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        animation-delay: 0.7s;
-        opacity: 0;
-    }
-
-    @keyframes contentSlideIn {
-        from { opacity: 0; transform: translateY(30px); filter: blur(4px); }
-        to { opacity: 1; transform: translateY(0); filter: blur(0); }
-    }
-
-    @keyframes contentFadeIn {
-        from { opacity: 0; transform: translateY(20px); }
+    @keyframes smoothFadeIn {
+        from { opacity: 0; transform: translateY(12px); }
         to { opacity: 1; transform: translateY(0); }
     }
 
-    @keyframes contentFadeScale {
-        from { opacity: 0; transform: scale(0.9) translateY(20px); }
-        to { opacity: 1; transform: scale(1) translateY(0); }
-    }
-
-    @keyframes dividerExpand {
+    @keyframes smoothDivider {
         from { opacity: 0; transform: scaleX(0); }
         to { opacity: 1; transform: scaleX(1); }
     }
@@ -603,9 +559,9 @@ def tombol_refresh_pojok(key_btn):
 # ==========================================
 # 2. FUNGSI HELPER (LOAD, SAVE, FORMAT)
 # ==========================================
-def load_data(worksheet: str) -> pd.DataFrame:
+def load_data(conn_obj, worksheet: str) -> pd.DataFrame:
     try:
-        df = conn.read(worksheet=worksheet, ttl=0)
+        df = conn_obj.read(worksheet=worksheet, ttl=0)
         df = df.astype(str).replace(r'\.0$', '', regex=True)
         for col in df.columns:
             df[col] = df[col].str.strip()
@@ -613,7 +569,7 @@ def load_data(worksheet: str) -> pd.DataFrame:
         if worksheet == "DATA_PARKIR" and not df.empty:
             if "Status_Cetak" not in df.columns:
                 df["Status_Cetak"] = "BELUM"
-                conn.update(worksheet=worksheet, data=df)
+                conn_obj.update(worksheet=worksheet, data=df)
                 st.cache_data.clear()
         return df
     except Exception as e:
@@ -627,9 +583,9 @@ def get_next_no(df: pd.DataFrame, col: str = "No") -> int:
         return int(nums.max()) + 1 if not nums.empty else 1
     except Exception: return 1
 
-def safe_update(worksheet: str, data: pd.DataFrame) -> bool:
+def safe_update(conn_obj, worksheet: str, data: pd.DataFrame) -> bool:
     try:
-        conn.update(worksheet=worksheet, data=data)
+        conn_obj.update(worksheet=worksheet, data=data)
         st.cache_data.clear()
         return True
     except Exception as e:
@@ -666,28 +622,22 @@ def cari_tanggal_belum_input_parkir(df_p: pd.DataFrame):
     try:
         if df_p.empty or "Tanggal" not in df_p.columns:
             return None, pd.DataFrame()
-
         df = df_p.copy()
         df["Tgl_Cek"] = pd.to_datetime(df["Tanggal"], dayfirst=True, errors="coerce").dt.date
         hari_ini = datetime.now().date()
-
         kondisi_belum = (
             df["Total_Karcis_R2"].astype(str).str.strip().isin(["-", "nan", "", "None", "null"]) &
             df["Total_Karcis_R4"].astype(str).str.strip().isin(["-", "nan", "", "None", "null"])
         )
-
         df_belum = df[
             (df["Tgl_Cek"].notna()) &
             (df["Tgl_Cek"] <= hari_ini) &
             kondisi_belum
         ].copy()
-
         if df_belum.empty:
             return None, df_belum
-
         tanggal_awal = df_belum.sort_values("Tgl_Cek").iloc[0]["Tgl_Cek"]
         return tanggal_awal, df_belum
-
     except:
         return None, pd.DataFrame()
 
@@ -769,7 +719,7 @@ def halaman_pengantaran():
     c_head.header("📝 INPUT PENGANTARAN BERKAS")
     with c_btn: tombol_refresh_pojok("ref_pengantaran")
 
-    df_sk = load_data("DATA_SK")
+    df_sk = load_data(conn_sk, "DATA_SK")
     col_stat1, col_stat2, col_stat3 = st.columns(3)
     total = len(df_sk) if not df_sk.empty else 0
     sudah_ambil = len(df_sk[df_sk["Tanggal_Pengambilan"] != "-"]) if not df_sk.empty else 0
@@ -798,12 +748,12 @@ def halaman_pengantaran():
                 if is_exist: st.session_state["pending_sk"] = new_row; st.session_state["show_confirm_sk"] = True
                 else:
                     df_baru = pd.concat([df_sk, pd.DataFrame([new_row])], ignore_index=True)
-                    if safe_update("DATA_SK", df_baru): st.session_state["last_sk"] = new_row; st.session_state["last_berkas"] = sel_berkas; st.success("✅ Berhasil!"); st.rerun()
+                    if safe_update(conn_sk, "DATA_SK", df_baru): st.session_state["last_sk"] = new_row; st.session_state["last_berkas"] = sel_berkas; st.success("✅ Berhasil!"); st.rerun()
     if st.session_state.get("show_confirm_sk"):
         st.warning(f"⚠️ Nomor {no_urut} sudah ada!"); col_c1, col_c2 = st.columns(2)
         if col_c1.button("✅ YA, TIMPA DATA", type="primary"):
             d = st.session_state["pending_sk"]; df_sk = df_sk[df_sk["No"] != d["No"]]; df_final = pd.concat([df_sk, pd.DataFrame([d])], ignore_index=True)
-            if safe_update("DATA_SK", df_final): st.session_state["last_sk"] = d; st.session_state["last_berkas"] = sel_berkas; st.session_state["show_confirm_sk"] = False; st.rerun()
+            if safe_update(conn_sk, "DATA_SK", df_final): st.session_state["last_sk"] = d; st.session_state["last_berkas"] = sel_berkas; st.session_state["show_confirm_sk"] = False; st.rerun()
         if col_c2.button("❌ BATAL"): st.session_state["show_confirm_sk"] = False; st.rerun()
     if "last_sk" in st.session_state:
         st.divider(); l = st.session_state["last_sk"]
@@ -819,7 +769,7 @@ def halaman_pengambilan_sk():
     with c_btn:
         tombol_refresh_pojok("ref_ambil")
 
-    df_m = load_data("DATA_SK")
+    df_m = load_data(conn_sk, "DATA_SK")
     if df_m.empty:
         return
 
@@ -856,7 +806,7 @@ def halaman_pengambilan_sk():
                 )
                 if st.button("✅ KONFIRMASI PENGAMBILAN"):
                     df_m.loc[mask_no, "Tanggal_Pengambilan"] = tgl_a
-                    if safe_update("DATA_SK", df_m):
+                    if safe_update(conn_sk, "DATA_SK", df_m):
                         st.success("Berhasil!")
                         st.rerun()
         else:
@@ -874,10 +824,9 @@ def halaman_parkir(menu):
     c_head.header(f"🅿️ {menu}")
     with c_btn: tombol_refresh_pojok("ref_parkir")
 
-    df_p = load_data("DATA_PARKIR")
+    df_p = load_data(conn_parkir, "DATA_PARKIR")
     hari_ini = datetime.now().date()
 
-    # INFO TANGGAL BELUM INPUT
     if menu in ["INPUT REKAP", "INPUT STOK"]:
         tgl_belum, df_belum = cari_tanggal_belum_input_parkir(df_p)
         if tgl_belum:
@@ -908,7 +857,6 @@ def halaman_parkir(menu):
 
     if not baris.empty:
         idx = baris.index[0]; nama_p = baris.iloc[0]["Nama_Petugas"]
-
         df_petugas_sama = df_p[(df_p["Nama_Petugas"] == nama_p) & (df_p.index < idx)]
         if not df_petugas_sama.empty:
             idx_terakhir_petugas = df_petugas_sama.index[-1]
@@ -916,7 +864,6 @@ def halaman_parkir(menu):
             sisa_r4 = pd.to_numeric(df_petugas_sama.loc[idx_terakhir_petugas].get("Sisa_Stok_R4", 0), errors='coerce')
         else:
             sisa_r2 = 0; sisa_r4 = 0
-
         sisa_r2 = 0 if pd.isna(sisa_r2) else sisa_r2
         sisa_r4 = 0 if pd.isna(sisa_r4) else sisa_r4
 
@@ -969,9 +916,8 @@ def halaman_parkir(menu):
                     df_p.loc[idx, ["Total_Karcis_R2", "MPP_Roda_R2", "Sisa_Stok_R2", "Khusus_Roda_R2"]] = [data_baru["tr2_str"], data_baru["mr2_str"], data_baru["sn2_str"], data_baru["kh2_str"]]
                     df_p.loc[idx, ["Total_Karcis_R4", "MPP_Roda_R4", "Sisa_Stok_R4", "Khusus_Roda_R4"]] = [data_baru["tr4_str"], data_baru["mr4_str"], data_baru["sn4_str"], data_baru["kh4_str"]]
                     df_p.loc[idx, ["Status_Khusus", "Status_MPP", "Status_Cetak"]] = ["BELUM", "BELUM", "BELUM"]
-
                     if 'Tgl_Temp' in df_p.columns: df_p = df_p.drop(columns=['Tgl_Temp'])
-                    if safe_update("DATA_PARKIR", df_p): st.success("✅ Berhasil Diupdate!"); st.rerun()
+                    if safe_update(conn_parkir, "DATA_PARKIR", df_p): st.success("✅ Berhasil Diupdate!"); st.rerun()
 
         if st.session_state.get("show_confirm_parkir"):
             st.warning(f"⚠️ Data setoran untuk tanggal **{tgl_input_user}** sudah pernah diisi! Yakin ingin menimpanya?")
@@ -979,19 +925,15 @@ def halaman_parkir(menu):
             if col_c1.button("✅ YA, TIMPA DATA", type="primary", key="btn_timpa_parkir"):
                 d = st.session_state["pending_parkir"]
                 p_idx = st.session_state["pending_idx"]
-
                 df_p.loc[p_idx, ["Total_Karcis_R2", "MPP_Roda_R2", "Sisa_Stok_R2", "Khusus_Roda_R2"]] = [d["tr2_str"], d["mr2_str"], d["sn2_str"], d["kh2_str"]]
                 df_p.loc[p_idx, ["Total_Karcis_R4", "MPP_Roda_R4", "Sisa_Stok_R4", "Khusus_Roda_R4"]] = [d["tr4_str"], d["mr4_str"], d["sn4_str"], d["kh4_str"]]
-
                 if str(df_p.loc[p_idx, "Status_Cetak"]).strip() != "SUDAH":
                     df_p.loc[p_idx, ["Status_Khusus", "Status_MPP", "Status_Cetak"]] = ["BELUM", "BELUM", "BELUM"]
-
                 if 'Tgl_Temp' in df_p.columns: df_p = df_p.drop(columns=['Tgl_Temp'])
-                if safe_update("DATA_PARKIR", df_p):
+                if safe_update(conn_parkir, "DATA_PARKIR", df_p):
                     st.session_state["show_confirm_parkir"] = False
                     st.success("✅ Berhasil Ditimpa!")
                     st.rerun()
-
             if col_c2.button("❌ BATAL", key="btn_batal_parkir"):
                 st.session_state["show_confirm_parkir"] = False
                 st.rerun()
@@ -1015,7 +957,7 @@ def halaman_parkir(menu):
             if subm_stok:
                 df_p.loc[idx, ["Pengambilan_Karcis_R2", "Pengambilan_Karcis_R4"]] = [str(pk2), str(pk4)]
                 if 'Tgl_Temp' in df_p.columns: df_p = df_p.drop(columns=['Tgl_Temp'])
-                if safe_update("DATA_PARKIR", df_p): st.success("✅ Stok Berhasil Ditambahkan!"); st.rerun()
+                if safe_update(conn_parkir, "DATA_PARKIR", df_p): st.success("✅ Stok Berhasil Ditambahkan!"); st.rerun()
 
     elif menu == "KONFIRMASI":
         kondisi_angka_r2 = df_p["Total_Karcis_R2"].str.isnumeric()
@@ -1026,7 +968,6 @@ def halaman_parkir(menu):
             st.info("TIDAK ADA DATA KONFIRMASI.")
         else:
             df_pen['Tgl_Temp'] = pd.to_datetime(df_pen['Tanggal'], dayfirst=True, errors='coerce').dt.date
-
             df_terfilter = df_pen[
                 (df_pen["Status_Khusus"] != "SUDAH") |
                 (df_pen["Status_MPP"] != "SUDAH") |
@@ -1038,41 +979,37 @@ def halaman_parkir(menu):
                 st.info("TIDAK ADA DATA KONFIRMASI (Semua data lama sudah Lunas).")
             else:
                 df_terfilter = df_terfilter.sort_index(ascending=False).head(10)
-
                 for i, row in df_terfilter.iterrows():
                     stat_k = str(row.get("Status_Khusus", "BELUM")).strip()
                     stat_m = str(row.get("Status_MPP", "BELUM")).strip()
                     stat_c = str(row.get("Status_Cetak", "BELUM")).strip()
-
                     lunas = (stat_k == "SUDAH") and (stat_m == "SUDAH") and (stat_c == "SUDAH")
                     ikon = "✅ [SELESAI]" if lunas else "📦 [BELUM SELESAI]"
 
                     with st.expander(f"{ikon} {row['Tanggal']} - {row['Nama_Petugas']}", expanded=not lunas):
                         if lunas:
                             st.success("✨ PROSES SELESAI: Data ini akan otomatis hilang besok.")
-
                         ck, cm = st.columns(2)
                         with ck:
                             st.write(f"**KHUSUS**\nR2: {row['Khusus_Roda_R2']} | R4: {row['Khusus_Roda_R4']}")
                             if stat_k != "SUDAH":
                                 if st.button("TERIMA KHUSUS", key=f"k{i}", use_container_width=True):
                                     df_p.loc[i, "Status_Khusus"] = "SUDAH"
-                                    safe_update("DATA_PARKIR", df_p); st.rerun()
+                                    safe_update(conn_parkir, "DATA_PARKIR", df_p); st.rerun()
                             else:
                                 st.success("✅ Khusus Diterima")
-
                         with cm:
                             st.write(f"**MPP**\nR2: {row['MPP_Roda_R2']} | R4: {row['MPP_Roda_R4']}")
                             if stat_m != "SUDAH":
                                 if st.button("TERIMA MPP", key=f"m{i}", type="primary", use_container_width=True):
                                     df_p.loc[i, "Status_MPP"] = "SUDAH"
-                                    safe_update("DATA_PARKIR", df_p); st.rerun()
+                                    safe_update(conn_parkir, "DATA_PARKIR", df_p); st.rerun()
                             else:
                                 st.download_button("🖨️ CETAK PDF MPP", data=cetak_tanda_terima_parkir(row), file_name=f"MPP_{row['Tanggal']}.pdf", key=f"p{i}", use_container_width=True)
                                 if stat_c != "SUDAH":
                                     if st.button("✅ SUDAH CETAK", key=f"c{i}", use_container_width=True):
                                         df_p.loc[i, "Status_Cetak"] = "SUDAH"
-                                        safe_update("DATA_PARKIR", df_p); st.rerun()
+                                        safe_update(conn_parkir, "DATA_PARKIR", df_p); st.rerun()
                                 else:
                                     st.success("✅ Telah Dicetak")
 
@@ -1132,29 +1069,18 @@ def halaman_parkir(menu):
 # ==========================================
 def halaman_welcome():
     logo_b64 = st.session_state.get("logo_b64")
-
-    logo_html = ""
-    if logo_b64:
-        logo_html = f'<img src="data:image/png;base64,{logo_b64}" width="140" height="auto" style="display:inline-block;">'
-    else:
-        logo_html = '<div style="font-size:6rem; line-height:1;">🏛️</div>'
+    logo_html = f'<img src="data:image/png;base64,{logo_b64}" width="140" height="auto" style="display:inline-block;">' if logo_b64 else '<div style="font-size:6rem; line-height:1;">🏛️</div>'
 
     st.markdown(f"""
     <style>
         .welcome-wrapper {{
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 70vh;
-            text-align: center;
-            padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; min-height: 70vh; text-align: center; padding: 20px;
         }}
         .welcome-logo {{
             animation: logoEntry 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
                        logoPulse 3s ease-in-out 2s infinite;
-            opacity: 0;
-            filter: drop-shadow(0 8px 24px rgba(0,0,0,0.12));
+            opacity: 0; filter: drop-shadow(0 8px 24px rgba(0,0,0,0.12));
         }}
         @keyframes logoEntry {{
             0% {{ opacity: 0; transform: scale(0.3) translateY(30px); filter: blur(8px); }}
@@ -1167,70 +1093,41 @@ def halaman_welcome():
             50% {{ transform: scale(1.03); }}
         }}
         .welcome-title {{
-            animation: textSlideUp 0.8s ease-out 0.4s forwards;
-            opacity: 0;
-            font-family: 'Inter', sans-serif;
-            font-size: 2.2rem;
-            font-weight: 800;
-            color: #0f172a;
-            letter-spacing: -0.03em;
-            margin: 24px 0 0 0;
-            line-height: 1.2;
+            animation: textSlideUp 0.8s ease-out 0.4s forwards; opacity: 0;
+            font-family: 'Inter', sans-serif; font-size: 2.2rem; font-weight: 800;
+            color: #0f172a; letter-spacing: -0.03em; margin: 24px 0 0 0; line-height: 1.2;
         }}
         .welcome-subtitle {{
-            animation: textSlideUp 0.8s ease-out 0.6s forwards;
-            opacity: 0;
-            font-family: 'Inter', sans-serif;
-            font-size: 1.05rem;
-            font-weight: 500;
-            color: #64748b;
-            margin: 8px 0 0 0;
+            animation: textSlideUp 0.8s ease-out 0.6s forwards; opacity: 0;
+            font-family: 'Inter', sans-serif; font-size: 1.05rem; font-weight: 500;
+            color: #64748b; margin: 8px 0 0 0;
         }}
         .welcome-line {{
-            animation: lineExpand 0.6s ease-out 0.8s forwards;
-            opacity: 0;
-            width: 0px;
-            height: 3px;
+            animation: lineExpand 0.6s ease-out 0.8s forwards; opacity: 0;
+            width: 0px; height: 3px;
             background: linear-gradient(90deg, #3b82f6, #60a5fa, #93c5fd);
-            margin: 20px auto;
-            border-radius: 2px;
+            margin: 20px auto; border-radius: 2px;
         }}
         @keyframes lineExpand {{
             from {{ opacity: 0; width: 0px; }}
             to {{ opacity: 1; width: 100px; }}
         }}
         .welcome-hint {{
-            animation: textSlideUp 0.8s ease-out 1.0s forwards;
-            opacity: 0;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.88rem;
-            font-weight: 400;
-            color: #94a3b8;
-            margin: 8px 0 0 0;
+            animation: textSlideUp 0.8s ease-out 1.0s forwards; opacity: 0;
+            font-family: 'Inter', sans-serif; font-size: 0.88rem;
+            font-weight: 400; color: #94a3b8; margin: 8px 0 0 0;
         }}
         .welcome-credit {{
-            animation: creditFloat 0.8s ease-out 1.3s forwards;
-            opacity: 0;
-            margin-top: 60px;
-            padding-top: 20px;
-            border-top: 1px solid #e5e7eb;
+            animation: creditFloat 0.8s ease-out 1.3s forwards; opacity: 0;
+            margin-top: 60px; padding-top: 20px; border-top: 1px solid #e5e7eb;
         }}
         .welcome-credit-label {{
-            font-family: 'Inter', sans-serif;
-            font-size: 0.65rem;
-            font-weight: 400;
-            color: #94a3b8;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            margin: 0 0 4px 0;
+            font-family: 'Inter', sans-serif; font-size: 0.65rem; font-weight: 400;
+            color: #94a3b8; letter-spacing: 0.05em; text-transform: uppercase; margin: 0 0 4px 0;
         }}
         .welcome-credit-name {{
-            font-family: 'Inter', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: #475569;
-            letter-spacing: 0.01em;
-            margin: 0;
+            font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 700;
+            color: #475569; letter-spacing: 0.01em; margin: 0;
         }}
         @keyframes textSlideUp {{
             from {{ opacity: 0; transform: translateY(20px); filter: blur(4px); }}
@@ -1265,12 +1162,10 @@ def main():
 
     with st.sidebar:
         logo_b64 = st.session_state.get("logo_b64")
-
         if logo_b64:
             st.markdown(f"""
             <div style="text-align:center; padding:18px 0 6px 0;">
-                <img src="data:image/png;base64,{logo_b64}"
-                     width="78" height="auto"
+                <img src="data:image/png;base64,{logo_b64}" width="78" height="auto"
                      style="display:inline-block; filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4));">
             </div>
             """, unsafe_allow_html=True)
