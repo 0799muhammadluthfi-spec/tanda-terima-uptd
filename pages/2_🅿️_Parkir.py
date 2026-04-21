@@ -44,23 +44,16 @@ with st.sidebar:
     logo_b64 = st.session_state.get("logo_b64")
     if logo_b64:
         st.markdown(
-            f"""
-            <div style="text-align:center; padding:18px 0 6px 0;">
-                <img src="data:image/png;base64,{logo_b64}"
-                     width="78" height="auto"
-                     style="display:inline-block;
-                            filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4));">
-            </div>
-            """,
+            f'<div style="text-align:center; padding:18px 0 6px 0;">'
+            f'<img src="data:image/png;base64,{logo_b64}" width="78" height="auto" '
+            f'style="display:inline-block; filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4));">'
+            f'</div>',
             unsafe_allow_html=True
         )
     else:
         st.markdown(
-            """
-            <div style="text-align:center; padding:18px 0 6px 0;">
-                <div style="font-size:3rem;">🏛️</div>
-            </div>
-            """,
+            '<div style="text-align:center; padding:18px 0 6px 0;">'
+            '<div style="font-size:3rem;">🏛️</div></div>',
             unsafe_allow_html=True
         )
 
@@ -69,20 +62,14 @@ with st.sidebar:
         <div style="text-align:center; padding:4px 0 14px 0;
                     border-bottom:1px solid rgba(255,255,255,0.08);
                     margin-bottom:14px;">
-            <p style="font-family:'Inter',sans-serif;
-                      font-size:1.05rem; font-weight:800;
-                      color:#f1f5f9 !important;
-                      letter-spacing:-0.02em;
+            <p style="font-family:'Inter',sans-serif; font-size:1.05rem; font-weight:800;
+                      color:#f1f5f9 !important; letter-spacing:-0.02em;
                       margin:0 0 4px 0; line-height:1.3;">
-                UPTD PASAR KANDANGAN
-            </p>
-            <p style="font-family:'Inter',sans-serif;
-                      font-size:0.78rem; font-weight:600;
-                      color:#94a3b8 !important;
-                      letter-spacing:0.04em;
+                UPTD PASAR KANDANGAN</p>
+            <p style="font-family:'Inter',sans-serif; font-size:0.78rem; font-weight:600;
+                      color:#94a3b8 !important; letter-spacing:0.04em;
                       margin:0; line-height:1.4;">
-                KABUPATEN HULU SUNGAI SELATAN
-            </p>
+                KABUPATEN HULU SUNGAI SELATAN</p>
         </div>
         """,
         unsafe_allow_html=True
@@ -91,54 +78,25 @@ with st.sidebar:
     st.page_link("app_web.py", label="🏠  Beranda", use_container_width=True)
 
     st.markdown(
-        """
-        <div style="padding: 8px 4px 4px 4px;">
-            <p style="font-family:'Inter',sans-serif;
-                      font-size:0.7rem; font-weight:600;
-                      color:#64748b !important;
-                      text-transform:uppercase;
-                      letter-spacing:0.06em;
-                      margin:0 0 6px 0;">
-                MODUL
-            </p>
-        </div>
-        """,
+        '<div style="padding: 8px 4px 4px 4px;">'
+        '<p style="font-family:\'Inter\',sans-serif; font-size:0.7rem; font-weight:600;'
+        'color:#64748b !important; text-transform:uppercase; letter-spacing:0.06em;'
+        'margin:0 0 6px 0;">MODUL</p></div>',
         unsafe_allow_html=True
     )
 
-    st.page_link(
-        "pages/1_📋_SK_Toko.py",
-        label="📋  SK Toko",
-        use_container_width=True
-    )
-    st.page_link(
-        "pages/2_🅿️_Parkir.py",
-        label="🅿️  Parkir",
-        use_container_width=True
-    )
-    st.page_link(
-        "pages/3_💰_Kas.py",
-        label="💰  Kas UPTD",
-        use_container_width=True
-    )
+    st.page_link("pages/1_📋_SK_Toko.py", label="📋  SK Toko", use_container_width=True)
+    st.page_link("pages/2_🅿️_Parkir.py", label="🅿️  Parkir", use_container_width=True)
+    st.page_link("pages/3_💰_Kas.py", label="💰  Kas UPTD", use_container_width=True)
 
     st.markdown(
         """
         <div style="text-align:center; padding:24px 0 8px 0;
-                    border-top:1px solid rgba(255,255,255,0.06);
-                    margin-top:40px;">
-            <p style="font-family:'Inter',sans-serif;
-                      font-size:0.56rem; font-weight:400;
-                      color:#64748b !important;
-                      margin:0; line-height:1.7;">
-                Developed by
-            </p>
-            <p style="font-family:'Inter',sans-serif;
-                      font-size:0.68rem; font-weight:700;
-                      color:#94a3b8 !important;
-                      margin:2px 0 0 0;">
-                M. Luthfi Renaldi
-            </p>
+                    border-top:1px solid rgba(255,255,255,0.06); margin-top:40px;">
+            <p style="font-family:'Inter',sans-serif; font-size:0.56rem;
+                      color:#64748b !important; margin:0; line-height:1.7;">Developed by</p>
+            <p style="font-family:'Inter',sans-serif; font-size:0.68rem; font-weight:700;
+                      color:#94a3b8 !important; margin:2px 0 0 0;">M. Luthfi Renaldi</p>
         </div>
         """,
         unsafe_allow_html=True
@@ -156,7 +114,7 @@ def parse_tanggal_input(tgl_input_user: str):
     except:
         return None
 
-def ambil_info_tanggal_parkir(df_p: pd.DataFrame, tgl_input_user: str):
+def ambil_info_tanggal_parkir(df_p, tgl_input_user):
     dt_user = parse_tanggal_input(tgl_input_user)
     if dt_user is None or df_p.empty or "Tanggal" not in df_p.columns:
         return None, pd.DataFrame(), None, "-", 0, 0
@@ -173,9 +131,9 @@ def ambil_info_tanggal_parkir(df_p: pd.DataFrame, tgl_input_user: str):
 
     df_petugas_sama = df[(df["Nama_Petugas"] == nama_p) & (df.index < idx)]
     if not df_petugas_sama.empty:
-        idx_terakhir_petugas = df_petugas_sama.index[-1]
-        sisa_r2 = pd.to_numeric(df_petugas_sama.loc[idx_terakhir_petugas, "Sisa_Stok_R2"], errors="coerce")
-        sisa_r4 = pd.to_numeric(df_petugas_sama.loc[idx_terakhir_petugas, "Sisa_Stok_R4"], errors="coerce")
+        idx_last = df_petugas_sama.index[-1]
+        sisa_r2 = pd.to_numeric(df_petugas_sama.loc[idx_last, "Sisa_Stok_R2"], errors="coerce")
+        sisa_r4 = pd.to_numeric(df_petugas_sama.loc[idx_last, "Sisa_Stok_R4"], errors="coerce")
     else:
         sisa_r2 = 0
         sisa_r4 = 0
@@ -185,15 +143,15 @@ def ambil_info_tanggal_parkir(df_p: pd.DataFrame, tgl_input_user: str):
 
     return dt_user, baris, idx, nama_p, sisa_r2, sisa_r4
 
-def render_log_rekap(df_p: pd.DataFrame, dt_user):
+def render_log_rekap(df_p, dt_user):
     with st.expander("📊 LOG INPUT & STATUS BULAN INI", expanded=False):
         if "Total_Karcis_R2" not in df_p.columns:
             st.info("Belum ada data.")
             return
 
         df_isi = df_p[
-            (df_p["Total_Karcis_R2"].astype(str).str.strip().apply(lambda x: x not in ["-", "nan", ""])) |
-            (df_p["Total_Karcis_R4"].astype(str).str.strip().apply(lambda x: x not in ["-", "nan", ""]))
+            (df_p["Total_Karcis_R2"].astype(str).str.strip().apply(lambda x: x not in ["-","nan",""])) |
+            (df_p["Total_Karcis_R4"].astype(str).str.strip().apply(lambda x: x not in ["-","nan",""]))
         ].copy()
 
         if not df_isi.empty:
@@ -203,8 +161,7 @@ def render_log_rekap(df_p: pd.DataFrame, dt_user):
                 last = df_isi.sort_values(by="Tgl_Sort", ascending=False).head(1)
             else:
                 last = last.head(1)
-
-            kolom = ["Tanggal", "Nama_Petugas", "Total_Karcis_R2", "Total_Karcis_R4", "MPP_Roda_R2", "MPP_Roda_R4"]
+            kolom = ["Tanggal","Nama_Petugas","Total_Karcis_R2","Total_Karcis_R4","MPP_Roda_R2","MPP_Roda_R4"]
             kolom_ada = [k for k in kolom if k in last.columns]
             st.subheader("📋 Input Terakhir")
             st.dataframe(last[kolom_ada], hide_index=True, use_container_width=True)
@@ -213,21 +170,21 @@ def render_log_rekap(df_p: pd.DataFrame, dt_user):
 
         st.divider()
         st.subheader("📅 Tanggal Belum Diinput (Awal Bulan s/d Hari Ini)")
-        df_kosong_bulan = daftar_tanggal_kosong_bulan_ini(df_p)
-        if not df_kosong_bulan.empty:
-            st.dataframe(df_kosong_bulan, hide_index=True, use_container_width=True)
+        df_kosong = daftar_tanggal_kosong_bulan_ini(df_p)
+        if not df_kosong.empty:
+            st.dataframe(df_kosong, hide_index=True, use_container_width=True)
         else:
             st.success("✅ Tidak ada tanggal kosong bulan ini.")
 
-def render_log_stok(df_p: pd.DataFrame, dt_user):
+def render_log_stok(df_p, dt_user):
     with st.expander("📊 LOG INPUT & STATUS BULAN INI", expanded=False):
         if "Pengambilan_Karcis_R2" not in df_p.columns:
             st.info("Belum ada data.")
             return
 
         df_isi = df_p[
-            (df_p["Pengambilan_Karcis_R2"].astype(str).str.strip().apply(lambda x: x not in ["-", "nan", ""])) |
-            (df_p["Pengambilan_Karcis_R4"].astype(str).str.strip().apply(lambda x: x not in ["-", "nan", ""]))
+            (df_p["Pengambilan_Karcis_R2"].astype(str).str.strip().apply(lambda x: x not in ["-","nan",""])) |
+            (df_p["Pengambilan_Karcis_R4"].astype(str).str.strip().apply(lambda x: x not in ["-","nan",""]))
         ].copy()
 
         if not df_isi.empty:
@@ -237,8 +194,7 @@ def render_log_stok(df_p: pd.DataFrame, dt_user):
                 last = df_isi.sort_values(by="Tgl_Sort", ascending=False).head(1)
             else:
                 last = last.head(1)
-
-            kolom = ["Tanggal", "Nama_Petugas", "Pengambilan_Karcis_R2", "Pengambilan_Karcis_R4"]
+            kolom = ["Tanggal","Nama_Petugas","Pengambilan_Karcis_R2","Pengambilan_Karcis_R4"]
             kolom_ada = [k for k in kolom if k in last.columns]
             st.subheader("📋 Input Terakhir")
             st.dataframe(last[kolom_ada], hide_index=True, use_container_width=True)
@@ -247,28 +203,28 @@ def render_log_stok(df_p: pd.DataFrame, dt_user):
 
         st.divider()
         st.subheader("📅 Tanggal Belum Diinput (Awal Bulan s/d Hari Ini)")
-        df_kosong_bulan = daftar_tanggal_kosong_bulan_ini(df_p)
-        if not df_kosong_bulan.empty:
-            st.dataframe(df_kosong_bulan, hide_index=True, use_container_width=True)
+        df_kosong = daftar_tanggal_kosong_bulan_ini(df_p)
+        if not df_kosong.empty:
+            st.dataframe(df_kosong, hide_index=True, use_container_width=True)
         else:
             st.success("✅ Tidak ada tanggal kosong bulan ini.")
 
-def render_log_konfirmasi(df_p: pd.DataFrame):
+def render_log_konfirmasi(df_p):
     with st.expander("📊 LOG INPUT & STATUS BULAN INI", expanded=False):
         if "Status_Khusus" not in df_p.columns:
             st.info("Belum ada data.")
             return
 
         df_isi = df_p[
-            (df_p["Status_Khusus"].astype(str).str.strip().apply(lambda x: x not in ["-", "nan", ""])) |
-            (df_p["Status_MPP"].astype(str).str.strip().apply(lambda x: x not in ["-", "nan", ""])) |
-            (df_p["Status_Cetak"].astype(str).str.strip().apply(lambda x: x not in ["-", "nan", ""]))
+            (df_p["Status_Khusus"].astype(str).str.strip().apply(lambda x: x not in ["-","nan",""])) |
+            (df_p["Status_MPP"].astype(str).str.strip().apply(lambda x: x not in ["-","nan",""])) |
+            (df_p["Status_Cetak"].astype(str).str.strip().apply(lambda x: x not in ["-","nan",""]))
         ].copy()
 
         if not df_isi.empty:
             df_isi["Tgl_Sort"] = pd.to_datetime(df_isi["Tanggal"], dayfirst=True, errors="coerce")
             last = df_isi.sort_values(by="Tgl_Sort", ascending=False).head(1)
-            kolom = ["Tanggal", "Nama_Petugas", "Status_Khusus", "Status_MPP", "Status_Cetak"]
+            kolom = ["Tanggal","Nama_Petugas","Status_Khusus","Status_MPP","Status_Cetak"]
             kolom_ada = [k for k in kolom if k in last.columns]
             st.subheader("📋 Konfirmasi Terakhir")
             st.dataframe(last[kolom_ada], hide_index=True, use_container_width=True)
@@ -277,9 +233,9 @@ def render_log_konfirmasi(df_p: pd.DataFrame):
 
         st.divider()
         st.subheader("⏳ Tanggal Belum Selesai Konfirmasi (Awal Bulan s/d Hari Ini)")
-        df_belum_konfirmasi = daftar_tanggal_belum_konfirmasi_bulan_ini(df_p)
-        if not df_belum_konfirmasi.empty:
-            st.dataframe(df_belum_konfirmasi, hide_index=True, use_container_width=True)
+        df_blm = daftar_tanggal_belum_konfirmasi_bulan_ini(df_p)
+        if not df_blm.empty:
+            st.dataframe(df_blm, hide_index=True, use_container_width=True)
         else:
             st.success("✅ Semua konfirmasi bulan ini sudah selesai.")
 
@@ -288,9 +244,6 @@ def render_log_konfirmasi(df_p: pd.DataFrame):
 # ==========================================
 df_p = load_data(conn_parkir, WS_PARKIR)
 
-# ==========================================
-# HEADER PAGE
-# ==========================================
 st.title("🅿️ MODUL PARKIR")
 
 if df_p.empty:
@@ -315,8 +268,7 @@ with tab1:
         st.warning(f"⚠️ Input parkir belum terisi mulai: **{tgl_belum.strftime('%d-%m-%Y')}**")
         with st.expander("📅 Lihat daftar tanggal yang belum diinput", expanded=False):
             if not df_belum.empty:
-                tampil = df_belum[["Tanggal", "Nama_Petugas"]].copy()
-                st.dataframe(tampil, use_container_width=True, hide_index=True)
+                st.dataframe(df_belum[["Tanggal","Nama_Petugas"]], use_container_width=True, hide_index=True)
     else:
         st.success("✅ Semua data parkir sampai hari ini sudah terinput.")
 
@@ -329,12 +281,12 @@ with tab1:
     dt_user, baris, idx, nama_p, sisa_r2, sisa_r4 = ambil_info_tanggal_parkir(df_p, tgl_input_user)
 
     if baris.empty or idx is None:
-        st.warning("⚠️ Tanggal belum ada di jadwal Sheet. Silakan isi jadwal dulu.")
+        st.warning("⚠️ Tanggal belum ada di jadwal Sheet.")
     else:
         st.success(f"👤 PETUGAS: **{nama_p}** | 📅 **{format_tgl_hari_indo(tgl_input_user)}**")
-        col_s1, col_s2 = st.columns(2)
-        col_s1.metric(f"📊 Sisa Karcis R2 ({nama_p})", int(sisa_r2))
-        col_s2.metric(f"📊 Sisa Karcis R4 ({nama_p})", int(sisa_r4))
+        cs1, cs2 = st.columns(2)
+        cs1.metric(f"📊 Sisa R2 ({nama_p})", int(sisa_r2))
+        cs2.metric(f"📊 Sisa R4 ({nama_p})", int(sisa_r4))
 
         with st.form("form_rekap_harian", clear_on_submit=True):
             c1, c2 = st.columns(2)
@@ -345,39 +297,30 @@ with tab1:
                 tr4 = st.number_input("TOTAL KARCIS R4", min_value=0)
                 mr4 = st.number_input("MPP RODA R4", min_value=0)
 
-            cb1, cb2 = st.columns(2)
-            with cb1:
+            b1, b2 = st.columns(2)
+            with b1:
                 subm = st.form_submit_button("💾 SIMPAN REKAP", type="primary", use_container_width=True)
-            with cb2:
+            with b2:
                 reset = st.form_submit_button("🔄 RESET FORM", use_container_width=True)
 
             if reset:
                 st.rerun()
 
             if subm:
-                pk2_lama = pd.to_numeric(df_p.loc[idx, "Pengambilan_Karcis_R2"], errors='coerce')
-                pk4_lama = pd.to_numeric(df_p.loc[idx, "Pengambilan_Karcis_R4"], errors='coerce')
-                pk2_lama = 0 if pd.isna(pk2_lama) else pk2_lama
-                pk4_lama = 0 if pd.isna(pk4_lama) else pk4_lama
+                pk2 = pd.to_numeric(df_p.loc[idx, "Pengambilan_Karcis_R2"], errors='coerce')
+                pk4 = pd.to_numeric(df_p.loc[idx, "Pengambilan_Karcis_R4"], errors='coerce')
+                pk2 = 0 if pd.isna(pk2) else pk2
+                pk4 = 0 if pd.isna(pk4) else pk4
 
-                sn2 = (pk2_lama + sisa_r2) - tr2
-                sn4 = (pk4_lama + sisa_r4) - tr4
+                sn2 = (pk2 + sisa_r2) - tr2
+                sn4 = (pk4 + sisa_r4) - tr4
 
-                tr2_str = str(tr2) if tr2 > 0 else "0"
-                tr4_str = str(tr4) if tr4 > 0 else "0"
-
-                karcis_r2_sekarang = str(df_p.loc[idx, "Total_Karcis_R2"]).strip()
-                sudah_diisi = karcis_r2_sekarang not in ["-", "nan", ""]
+                karcis_skrg = str(df_p.loc[idx, "Total_Karcis_R2"]).strip()
+                sudah_diisi = karcis_skrg not in ["-","nan",""]
 
                 data_baru = {
-                    "tr2_str": tr2_str,
-                    "mr2_str": str(mr2),
-                    "sn2_str": str(sn2),
-                    "kh2_str": str(tr2 - mr2),
-                    "tr4_str": tr4_str,
-                    "mr4_str": str(mr4),
-                    "sn4_str": str(sn4),
-                    "kh4_str": str(tr4 - mr4)
+                    "tr2": str(tr2), "mr2": str(mr2), "sn2": str(sn2), "kh2": str(tr2-mr2),
+                    "tr4": str(tr4), "mr4": str(mr4), "sn4": str(sn4), "kh4": str(tr4-mr4)
                 }
 
                 if sudah_diisi:
@@ -385,41 +328,30 @@ with tab1:
                     st.session_state["pending_idx"] = idx
                     st.session_state["show_confirm_parkir"] = True
                 else:
-                    df_update = df_p.copy()
-                    df_update.loc[idx, ["Total_Karcis_R2", "MPP_Roda_R2", "Sisa_Stok_R2", "Khusus_Roda_R2"]] = [
-                        data_baru["tr2_str"], data_baru["mr2_str"], data_baru["sn2_str"], data_baru["kh2_str"]
-                    ]
-                    df_update.loc[idx, ["Total_Karcis_R4", "MPP_Roda_R4", "Sisa_Stok_R4", "Khusus_Roda_R4"]] = [
-                        data_baru["tr4_str"], data_baru["mr4_str"], data_baru["sn4_str"], data_baru["kh4_str"]
-                    ]
-                    df_update.loc[idx, ["Status_Khusus", "Status_MPP", "Status_Cetak"]] = ["BELUM", "BELUM", "BELUM"]
-                    if safe_update(conn_parkir, WS_PARKIR, df_update):
-                        st.success("✅ Berhasil Diupdate!")
+                    df_u = df_p.copy()
+                    df_u.loc[idx, ["Total_Karcis_R2","MPP_Roda_R2","Sisa_Stok_R2","Khusus_Roda_R2"]] = [data_baru["tr2"], data_baru["mr2"], data_baru["sn2"], data_baru["kh2"]]
+                    df_u.loc[idx, ["Total_Karcis_R4","MPP_Roda_R4","Sisa_Stok_R4","Khusus_Roda_R4"]] = [data_baru["tr4"], data_baru["mr4"], data_baru["sn4"], data_baru["kh4"]]
+                    df_u.loc[idx, ["Status_Khusus","Status_MPP","Status_Cetak"]] = ["BELUM","BELUM","BELUM"]
+                    if safe_update(conn_parkir, WS_PARKIR, df_u):
+                        st.success("✅ Berhasil!")
                         st.rerun()
 
         if st.session_state.get("show_confirm_parkir"):
-            st.warning(f"⚠️ Data setoran untuk tanggal **{tgl_input_user}** sudah pernah diisi! Yakin ingin menimpanya?")
-            col_c1, col_c2 = st.columns(2)
-            if col_c1.button("✅ YA, TIMPA DATA", type="primary", key="btn_timpa_parkir"):
+            st.warning(f"⚠️ Data **{tgl_input_user}** sudah diisi! Yakin timpa?")
+            cc1, cc2 = st.columns(2)
+            if cc1.button("✅ YA, TIMPA", type="primary", key="btn_timpa_parkir"):
                 d = st.session_state["pending_parkir"]
                 p_idx = st.session_state["pending_idx"]
-
-                df_update = df_p.copy()
-                df_update.loc[p_idx, ["Total_Karcis_R2", "MPP_Roda_R2", "Sisa_Stok_R2", "Khusus_Roda_R2"]] = [
-                    d["tr2_str"], d["mr2_str"], d["sn2_str"], d["kh2_str"]
-                ]
-                df_update.loc[p_idx, ["Total_Karcis_R4", "MPP_Roda_R4", "Sisa_Stok_R4", "Khusus_Roda_R4"]] = [
-                    d["tr4_str"], d["mr4_str"], d["sn4_str"], d["kh4_str"]
-                ]
-                if str(df_update.loc[p_idx, "Status_Cetak"]).strip() != "SUDAH":
-                    df_update.loc[p_idx, ["Status_Khusus", "Status_MPP", "Status_Cetak"]] = ["BELUM", "BELUM", "BELUM"]
-
-                if safe_update(conn_parkir, WS_PARKIR, df_update):
+                df_u = df_p.copy()
+                df_u.loc[p_idx, ["Total_Karcis_R2","MPP_Roda_R2","Sisa_Stok_R2","Khusus_Roda_R2"]] = [d["tr2"], d["mr2"], d["sn2"], d["kh2"]]
+                df_u.loc[p_idx, ["Total_Karcis_R4","MPP_Roda_R4","Sisa_Stok_R4","Khusus_Roda_R4"]] = [d["tr4"], d["mr4"], d["sn4"], d["kh4"]]
+                if str(df_u.loc[p_idx, "Status_Cetak"]).strip() != "SUDAH":
+                    df_u.loc[p_idx, ["Status_Khusus","Status_MPP","Status_Cetak"]] = ["BELUM","BELUM","BELUM"]
+                if safe_update(conn_parkir, WS_PARKIR, df_u):
                     st.session_state["show_confirm_parkir"] = False
-                    st.success("✅ Berhasil Ditimpa!")
+                    st.success("✅ Ditimpa!")
                     st.rerun()
-
-            if col_c2.button("❌ BATAL", key="btn_batal_parkir"):
+            if cc2.button("❌ BATAL", key="btn_batal_parkir"):
                 st.session_state["show_confirm_parkir"] = False
                 st.rerun()
 
@@ -434,14 +366,12 @@ with tab2:
     with c_btn2:
         tombol_refresh("ref_parkir_stok")
 
-    # SESUAI PERMINTAAN: jangan tampilkan success
-    tgl_belum_stok, df_belum_stok = cari_tanggal_belum_input_parkir(df_p)
-    if tgl_belum_stok:
-        st.warning(f"⚠️ Input parkir belum terisi mulai: **{tgl_belum_stok.strftime('%d-%m-%Y')}**")
+    tgl_belum_s, df_belum_s = cari_tanggal_belum_input_parkir(df_p)
+    if tgl_belum_s:
+        st.warning(f"⚠️ Input parkir belum terisi mulai: **{tgl_belum_s.strftime('%d-%m-%Y')}**")
         with st.expander("📅 Lihat daftar tanggal yang belum diinput", expanded=False):
-            if not df_belum_stok.empty:
-                tampil = df_belum_stok[["Tanggal", "Nama_Petugas"]].copy()
-                st.dataframe(tampil, use_container_width=True, hide_index=True)
+            if not df_belum_s.empty:
+                st.dataframe(df_belum_s[["Tanggal","Nama_Petugas"]], use_container_width=True, hide_index=True)
 
     tgl_input_stok = st.text_input(
         "🔍 MASUKKAN TANGGAL",
@@ -449,12 +379,12 @@ with tab2:
         key="tgl_input_parkir_stok"
     )
 
-    dt_user_stok, baris_stok, idx_stok, nama_p_stok, sisa_r2_stok, sisa_r4_stok = ambil_info_tanggal_parkir(df_p, tgl_input_stok)
+    dt_user_s, baris_s, idx_s, nama_p_s, _, _ = ambil_info_tanggal_parkir(df_p, tgl_input_stok)
 
-    if baris_stok.empty or idx_stok is None:
-        st.warning("⚠️ Tanggal belum ada di jadwal Sheet. Silakan isi jadwal dulu.")
+    if baris_s.empty or idx_s is None:
+        st.warning("⚠️ Tanggal belum ada di jadwal Sheet.")
     else:
-        st.info(f"Mengisi stok baru untuk petugas: **{nama_p_stok}**")
+        st.info(f"Mengisi stok baru untuk petugas: **{nama_p_s}**")
 
         with st.form("form_stok_baru", clear_on_submit=True):
             c1, c2 = st.columns(2)
@@ -463,23 +393,23 @@ with tab2:
             with c2:
                 pk4 = st.number_input("PENGAMBILAN KARCIS R4", min_value=0)
 
-            cb1, cb2 = st.columns(2)
-            with cb1:
+            b1, b2 = st.columns(2)
+            with b1:
                 subm_stok = st.form_submit_button("➕ TAMBAH STOK", type="primary", use_container_width=True)
-            with cb2:
+            with b2:
                 reset_stok = st.form_submit_button("🔄 RESET FORM", use_container_width=True)
 
             if reset_stok:
                 st.rerun()
 
             if subm_stok:
-                df_update = df_p.copy()
-                df_update.loc[idx_stok, ["Pengambilan_Karcis_R2", "Pengambilan_Karcis_R4"]] = [str(pk2), str(pk4)]
-                if safe_update(conn_parkir, WS_PARKIR, df_update):
+                df_u = df_p.copy()
+                df_u.loc[idx_s, ["Pengambilan_Karcis_R2","Pengambilan_Karcis_R4"]] = [str(pk2), str(pk4)]
+                if safe_update(conn_parkir, WS_PARKIR, df_u):
                     st.success("✅ Stok Berhasil Ditambahkan!")
                     st.rerun()
 
-    render_log_stok(df_p, dt_user_stok)
+    render_log_stok(df_p, dt_user_s)
 
 # ==========================================
 # TAB 3 - KONFIRMASI
@@ -491,59 +421,59 @@ with tab3:
         tombol_refresh("ref_parkir_konfirmasi")
 
     if "Total_Karcis_R2" not in df_p.columns or "Total_Karcis_R4" not in df_p.columns:
-        st.error("❌ Kolom tidak ditemukan di worksheet DATA_PARKIR.")
+        st.error("❌ Kolom tidak ditemukan.")
     else:
-        kondisi_angka_r2 = df_p["Total_Karcis_R2"].astype(str).str.strip().str.isnumeric()
-        kondisi_angka_r4 = df_p["Total_Karcis_R4"].astype(str).str.strip().str.isnumeric()
-        df_pen = df_p[kondisi_angka_r2 | kondisi_angka_r4].copy()
+        angka_r2 = df_p["Total_Karcis_R2"].astype(str).str.strip().str.isnumeric()
+        angka_r4 = df_p["Total_Karcis_R4"].astype(str).str.strip().str.isnumeric()
+        df_pen = df_p[angka_r2 | angka_r4].copy()
 
         if df_pen.empty:
             st.info("TIDAK ADA DATA KONFIRMASI.")
         else:
             df_pen["Tgl_Temp"] = pd.to_datetime(df_pen["Tanggal"], dayfirst=True, errors="coerce").dt.date
-            df_terfilter = df_pen[
+            df_fil = df_pen[
                 (df_pen["Status_Khusus"] != "SUDAH") |
                 (df_pen["Status_MPP"] != "SUDAH") |
                 (df_pen["Status_Cetak"] != "SUDAH") |
                 (df_pen["Tgl_Temp"] == hari_ini)
             ].copy()
 
-            if df_terfilter.empty:
-                st.info("TIDAK ADA DATA KONFIRMASI (Semua data lama sudah Lunas).")
+            if df_fil.empty:
+                st.info("Semua data sudah Lunas.")
             else:
-                df_terfilter = df_terfilter.sort_index(ascending=False).head(10)
+                df_fil = df_fil.sort_index(ascending=False).head(10)
 
-                for i, row in df_terfilter.iterrows():
-                    stat_k = str(row.get("Status_Khusus", "BELUM")).strip()
-                    stat_m = str(row.get("Status_MPP", "BELUM")).strip()
-                    stat_c = str(row.get("Status_Cetak", "BELUM")).strip()
-                    lunas = (stat_k == "SUDAH") and (stat_m == "SUDAH") and (stat_c == "SUDAH")
-                    ikon = "✅ [SELESAI]" if lunas else "📦 [BELUM SELESAI]"
+                for i, row in df_fil.iterrows():
+                    sk = str(row.get("Status_Khusus","BELUM")).strip()
+                    sm = str(row.get("Status_MPP","BELUM")).strip()
+                    sc = str(row.get("Status_Cetak","BELUM")).strip()
+                    lunas = (sk == "SUDAH") and (sm == "SUDAH") and (sc == "SUDAH")
+                    ikon = "✅ [SELESAI]" if lunas else "📦 [BELUM]"
 
                     with st.expander(f"{ikon} {row['Tanggal']} - {row['Nama_Petugas']}", expanded=not lunas):
                         if lunas:
-                            st.success("✨ PROSES SELESAI: Data ini akan otomatis hilang besok.")
+                            st.success("✨ SELESAI")
 
                         ck, cm_col = st.columns(2)
 
                         with ck:
                             st.write(f"**KHUSUS**\nR2: {row.get('Khusus_Roda_R2','-')} | R4: {row.get('Khusus_Roda_R4','-')}")
-                            if stat_k != "SUDAH":
+                            if sk != "SUDAH":
                                 if st.button("TERIMA KHUSUS", key=f"k_{i}", use_container_width=True):
-                                    df_update = df_p.copy()
-                                    df_update.loc[i, "Status_Khusus"] = "SUDAH"
-                                    if safe_update(conn_parkir, WS_PARKIR, df_update):
+                                    df_u = df_p.copy()
+                                    df_u.loc[i, "Status_Khusus"] = "SUDAH"
+                                    if safe_update(conn_parkir, WS_PARKIR, df_u):
                                         st.rerun()
                             else:
-                                st.success("✅ Khusus Diterima")
+                                st.success("✅ Diterima")
 
                         with cm_col:
                             st.write(f"**MPP**\nR2: {row.get('MPP_Roda_R2','-')} | R4: {row.get('MPP_Roda_R4','-')}")
-                            if stat_m != "SUDAH":
+                            if sm != "SUDAH":
                                 if st.button("TERIMA MPP", key=f"m_{i}", type="primary", use_container_width=True):
-                                    df_update = df_p.copy()
-                                    df_update.loc[i, "Status_MPP"] = "SUDAH"
-                                    if safe_update(conn_parkir, WS_PARKIR, df_update):
+                                    df_u = df_p.copy()
+                                    df_u.loc[i, "Status_MPP"] = "SUDAH"
+                                    if safe_update(conn_parkir, WS_PARKIR, df_u):
                                         st.rerun()
                             else:
                                 st.download_button(
@@ -553,13 +483,13 @@ with tab3:
                                     key=f"p_{i}",
                                     use_container_width=True
                                 )
-                                if stat_c != "SUDAH":
+                                if sc != "SUDAH":
                                     if st.button("✅ SUDAH CETAK", key=f"c_{i}", use_container_width=True):
-                                        df_update = df_p.copy()
-                                        df_update.loc[i, "Status_Cetak"] = "SUDAH"
-                                        if safe_update(conn_parkir, WS_PARKIR, df_update):
+                                        df_u = df_p.copy()
+                                        df_u.loc[i, "Status_Cetak"] = "SUDAH"
+                                        if safe_update(conn_parkir, WS_PARKIR, df_u):
                                             st.rerun()
                                 else:
-                                    st.success("✅ Telah Dicetak")
+                                    st.success("✅ Dicetak")
 
     render_log_konfirmasi(df_p)
