@@ -40,6 +40,7 @@ KOLOM_KAS = [
     "PPN", "PPH_21_22_23", "Biaya_Admin_Penyedia",
     "Bersih", "Jenis_Keluar", "Nota",
     "Sumber_Anggaran",
+    "Tujuan_Anggaran",
     "Sisa_Uang_Kas_Seluruh_Sebelumnya",
     "Sisa_Uang_Kas_Sebelumnya",
     "Sisa_Uang_Di_ATM",
