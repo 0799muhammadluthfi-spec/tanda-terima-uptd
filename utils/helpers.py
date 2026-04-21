@@ -215,38 +215,43 @@ def tombol_refresh(key_btn: str):
 # ==========================================
 # FUNGSI KHUSUS PARKIR
 # ==========================================
-def cari_tanggal_belum_input_parkir(df_p: pd.DataFrame):
+def daftar_tanggal_kosong_bulan_ini(df_p: pd.DataFrame) -> pd.DataFrame:
     try:
         if df_p.empty or "Tanggal" not in df_p.columns:
-            return None, pd.DataFrame()
-        if "Total_Karcis_R2" not in df_p.columns or "Total_Karcis_R4" not in df_p.columns:
-            return None, pd.DataFrame()
+            return pd.DataFrame(columns=["Tanggal", "Nama_Petugas"])
+        if "Total_Karcis_R2" not in df_p.columns:
+            return pd.DataFrame(columns=["Tanggal", "Nama_Petugas"])
 
         df = df_p.copy()
+
+        df["Tgl_Bersih"] = df["Tanggal"].astype(str).str.strip().str.replace("/", "-", regex=False)
         df["Tgl_Cek"] = pd.to_datetime(
-            df["Tanggal"], dayfirst=True, errors="coerce"
+            df["Tgl_Bersih"], dayfirst=True, errors="coerce"
         ).dt.date
+
         hari_ini = datetime.now().date()
+        awal_bulan = hari_ini.replace(day=1)
 
         kondisi_belum = (
             df["Total_Karcis_R2"].astype(str).str.strip().isin(
-                ["-","nan","","None","null"]) &
+                ["-", "nan", "", "None", "null"]) &
             df["Total_Karcis_R4"].astype(str).str.strip().isin(
-                ["-","nan","","None","null"])
+                ["-", "nan", "", "None", "null"])
         )
-        df_belum = df[
+
+        hasil = df[
             df["Tgl_Cek"].notna() &
+            (df["Tgl_Cek"] >= awal_bulan) &
             (df["Tgl_Cek"] <= hari_ini) &
             kondisi_belum
         ].copy()
 
-        if df_belum.empty:
-            return None, df_belum
+        if hasil.empty:
+            return pd.DataFrame(columns=["Tanggal", "Nama_Petugas"])
 
-        tanggal_awal = df_belum.sort_values("Tgl_Cek").iloc[0]["Tgl_Cek"]
-        return tanggal_awal, df_belum
+        return hasil.sort_values("Tgl_Cek")[["Tanggal", "Nama_Petugas"]]
     except:
-        return None, pd.DataFrame()
+        return pd.DataFrame(columns=["Tanggal", "Nama_Petugas"])
 
 def daftar_tanggal_kosong_bulan_ini(df_p: pd.DataFrame) -> pd.DataFrame:
     try:
