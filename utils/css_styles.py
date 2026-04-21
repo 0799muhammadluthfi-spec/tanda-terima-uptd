@@ -425,21 +425,6 @@ CSS_GLOBAL = """
             padding-left: 1rem;
             padding-right: 1rem;
         }
-
-        /* Auto-hide sidebar di HP */
-        [data-testid="stSidebar"] {
-            transform: translateX(-100%) !important;
-            transition: transform 0.3s ease !important;
-        }
-
-        [data-testid="stSidebar"][aria-expanded="true"] {
-            transform: translateX(0) !important;
-        }
-
-        /* Perkecil sidebar di HP */
-        [data-testid="stSidebar"] > div {
-            width: 260px !important;
-        }
     }
 
     /* ============ ANIMASI KONTEN ============ */
