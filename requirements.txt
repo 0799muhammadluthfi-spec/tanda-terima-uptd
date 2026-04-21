@@ -1,5 +1,6 @@
 streamlit
 pandas
 reportlab
-openpyxl
-st-gsheets-connection
+streamlit-gsheets-connection
+gspread
+google-auth
