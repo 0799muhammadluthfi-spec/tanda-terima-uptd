@@ -6,6 +6,7 @@ import pandas as pd
 from datetime import datetime
 from streamlit_gsheets import GSheetsConnection
 
+from utils.css_styles import inject_css
 from utils.helpers import (
     WS_PARKIR,
     load_data,
