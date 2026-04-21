@@ -182,41 +182,73 @@ def render_log_stok(df_p, dt_user):
             st.info("Belum ada data.")
             return
 
-        # Filter baris yang punya data sisa stok
-        df_stok = df_p[
-            (df_p["Sisa_Stok_R2"].astype(str).str.strip().apply(lambda x: x not in ["-","nan",""])) |
-            (df_p["Sisa_Stok_R4"].astype(str).str.strip().apply(lambda x: x not in ["-","nan",""]))
+        # Ambil semua nama petugas unik (termasuk yang belum ada stok)
+        semua_petugas = df_p["Nama_Petugas"].unique()
+
+        # Filter baris yang SUDAH punya data stok
+        df_stok = df_p.copy()
+        df_stok["_r2"] = df_stok["Sisa_Stok_R2"].astype(str).str.strip()
+        df_stok["_r4"] = df_stok["Sisa_Stok_R4"].astype(str).str.strip()
+
+        df_ada_stok = df_stok[
+            (df_stok["_r2"].apply(lambda x: x not in ["-", "nan", "", "None", "null", "0"])) |
+            (df_stok["_r4"].apply(lambda x: x not in ["-", "nan", "", "None", "null", "0"]))
         ].copy()
 
-        if df_stok.empty:
-            st.info("Belum ada data stok.")
-            return
+        if not df_ada_stok.empty:
+            df_ada_stok["Tgl_Sort"] = pd.to_datetime(
+                df_ada_stok["Tanggal"], dayfirst=True, errors="coerce"
+            )
+            df_ada_stok = df_ada_stok.sort_values("Tgl_Sort", ascending=False)
 
-        # Ambil data terakhir per petugas
-        df_stok["Tgl_Sort"] = pd.to_datetime(df_stok["Tanggal"], dayfirst=True, errors="coerce")
-        df_stok = df_stok.sort_values("Tgl_Sort", ascending=False)
-
-        # Ambil baris terakhir per petugas
-        petugas_list = df_stok["Nama_Petugas"].unique()
-
-        for petugas in petugas_list:
-            if petugas in ["-", "nan", "", "None"]:
+        ada_data = False
+        for petugas in semua_petugas:
+            if str(petugas).strip() in ["-", "nan", "", "None", "null"]:
                 continue
 
-            data_petugas = df_stok[df_stok["Nama_Petugas"] == petugas].iloc[0]
+            # Cari data stok terakhir untuk petugas ini
+            data_petugas = df_ada_stok[df_ada_stok["Nama_Petugas"] == petugas]
 
-            sisa_r2 = data_petugas.get("Sisa_Stok_R2", "-")
-            sisa_r4 = data_petugas.get("Sisa_Stok_R4", "-")
-            tgl_terakhir = data_petugas.get("Tanggal", "-")
+            if not data_petugas.empty:
+                row = data_petugas.iloc[0]
 
-            st.markdown(f"### 👤 {petugas}")
-            st.caption(f"Data terakhir: {tgl_terakhir}")
+                sisa_r2_raw = str(row["Sisa_Stok_R2"]).strip()
+                sisa_r4_raw = str(row["Sisa_Stok_R4"]).strip()
 
-            c1, c2 = st.columns(2)
-            c1.metric("🏍️ Sisa Karcis R2", sisa_r2)
-            c2.metric("🚗 Sisa Karcis R4", sisa_r4)
+                try:
+                    sisa_r2 = int(float(sisa_r2_raw)) if sisa_r2_raw not in ["-", "nan", "", "None", "null"] else 0
+                except:
+                    sisa_r2 = 0
+
+                try:
+                    sisa_r4 = int(float(sisa_r4_raw)) if sisa_r4_raw not in ["-", "nan", "", "None", "null"] else 0
+                except:
+                    sisa_r4 = 0
+
+                tgl_terakhir = str(row["Tanggal"]).strip()
+                if tgl_terakhir in ["-", "nan", "", "None"]:
+                    tgl_terakhir = "-"
+
+                st.markdown(f"### 👤 {petugas}")
+                st.caption(f"Data stok terakhir: {tgl_terakhir}")
+
+                c1, c2 = st.columns(2)
+                c1.metric("🏍️ Sisa Karcis R2", sisa_r2)
+                c2.metric("🚗 Sisa Karcis R4", sisa_r4)
+            else:
+                # Petugas ada tapi belum pernah ada data stok
+                st.markdown(f"### 👤 {petugas}")
+                st.caption("Belum ada data stok")
+
+                c1, c2 = st.columns(2)
+                c1.metric("🏍️ Sisa Karcis R2", 0)
+                c2.metric("🚗 Sisa Karcis R4", 0)
 
             st.divider()
+            ada_data = True
+
+        if not ada_data:
+            st.info("Belum ada data petugas.")
             
 def render_log_konfirmasi(df_p):
     with st.expander("📊 LOG INPUT & STATUS BULAN INI", expanded=False):
