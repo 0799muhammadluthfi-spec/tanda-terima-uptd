@@ -4,6 +4,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+from streamlit_gsheets import GSheetsConnection
 
 from utils.css_styles import inject_css
 from utils.helpers import (
@@ -34,7 +35,7 @@ inject_css()
 # ==========================================
 # KONEKSI
 # ==========================================
-conn_sk = st.connection("gsheets_sk", type="GSheetsConnection")
+conn_sk = st.connection("gsheets_sk", type=GSheetsConnection)
 
 # ==========================================
 # SIDEBAR
