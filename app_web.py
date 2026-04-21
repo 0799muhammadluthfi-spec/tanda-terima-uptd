@@ -63,6 +63,7 @@ KOLOM_KAS = [
     "Bersih",
     "Jenis_Keluar",
     "Nota",
+    "Sumber_Anggaran",
     "Sisa_Uang_Kas_Seluruh_Sebelumnya",
     "Sisa_Uang_Kas_Sebelumnya",
     "Sisa_Uang_Di_ATM",
@@ -1499,7 +1500,19 @@ def halaman_kas(menu):
         last_seluruh, last_kas = get_last_kas_state(df_kas)
         next_no = get_next_no(df_kas)
 
-        # ── FIELD DASAR (di luar form) ──
+        # ── AMBIL SISA ATM & PENYEDIA DARI DATA TERAKHIR ──
+        last_atm = 0.0
+        last_penyedia = 0.0
+        try:
+            if not df_kas.empty:
+                d_sorted = urutkan_no(df_kas, ascending=True)
+                last_row = d_sorted.iloc[-1]
+                last_atm = to_float(last_row.get("Sisa_Uang_Di_ATM", 0))
+                last_penyedia = to_float(last_row.get("Sisa_Uang_Di_Penyedia", 0))
+        except:
+            pass
+
+        # ── FIELD DASAR ──
         c1, c2 = st.columns(2)
         with c1:
             tanggal_kas = st.text_input("TANGGAL *", value=datetime.now().strftime("%d-%m-%Y"), key="kas_tgl")
@@ -1519,8 +1532,11 @@ def halaman_kas(menu):
         bersih = 0.0
         jenis_keluar = "-"
         nota = "-"
+        sumber_anggaran = "-"
 
-        # ── DETAIL MASUK (muncul hanya kalau MASUK) ──
+        # ══════════════════════════════════════════
+        # DETAIL MASUK
+        # ══════════════════════════════════════════
         if jenis_transaksi == "MASUK":
             st.divider()
             st.subheader("📥 DETAIL UANG MASUK")
@@ -1537,14 +1553,15 @@ def halaman_kas(menu):
             pot_taktis = nominal * 0.05 if taktis_aktif else 0.0
             bersih = nominal - pot_pad - pot_taktis - ppn - pph - biaya_admin
 
-            # Preview potongan
             st.markdown("---")
             p1, p2, p3 = st.columns(3)
             p1.metric("Potongan PAD (10%)", rupiah(pot_pad))
             p2.metric("Potongan TAKTIS (5%)", rupiah(pot_taktis))
             p3.metric("💰 BERSIH", rupiah(bersih))
 
-        # ── DETAIL KELUAR (muncul hanya kalau KELUAR) ──
+        # ══════════════════════════════════════════
+        # DETAIL KELUAR
+        # ══════════════════════════════════════════
         else:
             st.divider()
             st.subheader("📤 DETAIL UANG KELUAR")
@@ -1554,36 +1571,96 @@ def halaman_kas(menu):
             with b2:
                 nota = st.selectbox("NOTA", ["ADA", "TIDAK ADA"], key="kas_nota")
 
+            st.divider()
+            st.subheader("💳 SUMBER ANGGARAN")
+            sumber_anggaran = st.selectbox(
+                "UANG KELUAR DARI MANA? *",
+                ["UANG KAS (DI TANGAN)", "UANG DI ATM", "UANG DI PENYEDIA"],
+                key="kas_sumber"
+            )
+
+            # Preview sisa sumber
+            if sumber_anggaran == "UANG KAS (DI TANGAN)":
+                st.info(f"💵 Sisa Uang Kas saat ini: **{rupiah(last_kas)}**")
+                if nominal > last_kas:
+                    st.warning(f"⚠️ Nominal keluar ({rupiah(nominal)}) melebihi sisa kas di tangan ({rupiah(last_kas)})")
+            elif sumber_anggaran == "UANG DI ATM":
+                st.info(f"🏧 Sisa Uang di ATM saat ini: **{rupiah(last_atm)}**")
+                if nominal > last_atm:
+                    st.warning(f"⚠️ Nominal keluar ({rupiah(nominal)}) melebihi sisa di ATM ({rupiah(last_atm)})")
+            elif sumber_anggaran == "UANG DI PENYEDIA":
+                st.info(f"🏢 Sisa Uang di Penyedia saat ini: **{rupiah(last_penyedia)}**")
+                if nominal > last_penyedia:
+                    st.warning(f"⚠️ Nominal keluar ({rupiah(nominal)}) melebihi sisa di Penyedia ({rupiah(last_penyedia)})")
+
         # ── SALDO TERAKHIR ──
         st.divider()
         st.subheader("📌 SALDO TERAKHIR")
-        s1, s2 = st.columns(2)
-        s1.metric("Sisa Uang Kas Seluruh Sebelumnya", rupiah(last_seluruh))
-        s2.metric("Sisa Uang Kas Sebelumnya", rupiah(last_kas))
+        s1, s2, s3, s4 = st.columns(4)
+        s1.metric("Kas Seluruh", rupiah(last_seluruh))
+        s2.metric("Kas di Tangan", rupiah(last_kas))
+        s3.metric("Di ATM", rupiah(last_atm))
+        s4.metric("Di Penyedia", rupiah(last_penyedia))
 
-        # ── POSISI SALDO ──
+        # ── POSISI SALDO BARU ──
         st.divider()
-        st.subheader("🏦 POSISI SALDO")
+        st.subheader("🏦 POSISI SALDO BARU")
+
+        # Hitung sisa berdasarkan sumber anggaran
+        if jenis_transaksi == "MASUK":
+            new_kas = last_kas + bersih
+            new_atm = last_atm
+            new_penyedia = last_penyedia
+        else:
+            # KELUAR: kurangi dari sumber yang dipilih
+            if sumber_anggaran == "UANG KAS (DI TANGAN)":
+                new_kas = last_kas - nominal
+                new_atm = last_atm
+                new_penyedia = last_penyedia
+            elif sumber_anggaran == "UANG DI ATM":
+                new_kas = last_kas
+                new_atm = last_atm - nominal
+                new_penyedia = last_penyedia
+            elif sumber_anggaran == "UANG DI PENYEDIA":
+                new_kas = last_kas
+                new_atm = last_atm
+                new_penyedia = last_penyedia - nominal
+            else:
+                new_kas = last_kas - nominal
+                new_atm = last_atm
+                new_penyedia = last_penyedia
+
         k1, k2 = st.columns(2)
         with k1:
-            sisa_atm = st.number_input("SISA UANG DI ATM", min_value=0.0, value=0.0, step=1000.0, format="%.0f", key="kas_atm")
+            sisa_atm = st.number_input(
+                "SISA UANG DI ATM",
+                value=float(new_atm),
+                step=1000.0,
+                format="%.0f",
+                key="kas_atm"
+            )
         with k2:
-            sisa_penyedia = st.number_input("SISA UANG DI PENYEDIA", min_value=0.0, value=0.0, step=1000.0, format="%.0f", key="kas_peny")
+            sisa_penyedia = st.number_input(
+                "SISA UANG DI PENYEDIA",
+                value=float(new_penyedia),
+                step=1000.0,
+                format="%.0f",
+                key="kas_peny"
+            )
 
         # ── HITUNG OTOMATIS ──
-        if jenis_transaksi == "MASUK":
-            sisa_uang_kas_auto = last_kas + bersih
-        else:
-            sisa_uang_kas_auto = last_kas - nominal
-
+        sisa_uang_kas_auto = new_kas
         sisa_uang_kas_seluruh = sisa_uang_kas_auto + sisa_atm + sisa_penyedia
 
         st.divider()
         st.subheader("🧮 HASIL PERHITUNGAN")
         r1, r2, r3 = st.columns(3)
-        r1.metric("BERSIH", rupiah(bersih if jenis_transaksi == "MASUK" else nominal))
-        r2.metric("SISA UANG KAS AUTO", rupiah(sisa_uang_kas_auto))
-        r3.metric("SISA UANG KAS SELURUH", rupiah(sisa_uang_kas_seluruh))
+        if jenis_transaksi == "MASUK":
+            r1.metric("BERSIH MASUK", rupiah(bersih))
+        else:
+            r1.metric("NOMINAL KELUAR", rupiah(nominal))
+        r2.metric("SISA KAS AUTO", rupiah(sisa_uang_kas_auto))
+        r3.metric("SISA KAS SELURUH", rupiah(sisa_uang_kas_seluruh))
 
         sisa_uang_kas = st.number_input(
             "SISA UANG KAS (OTOMATIS, BISA DIEDIT)",
@@ -1594,9 +1671,9 @@ def halaman_kas(menu):
         )
 
         selisih_kurang = sisa_uang_kas_seluruh - sisa_uang_kas
-        if selisih_kurang > 0:
+        if selisih_kurang > 0.5:
             st.warning(f"⚠️ SELISIH / KURANG: **{rupiah(selisih_kurang)}**")
-        elif selisih_kurang < 0:
+        elif selisih_kurang < -0.5:
             st.info(f"ℹ️ SELISIH / LEBIH: **{rupiah(abs(selisih_kurang))}**")
         else:
             st.success("✅ SELISIH: **Rp 0** (Pas)")
@@ -1636,6 +1713,7 @@ def halaman_kas(menu):
                     "Bersih": fmt_nominal(bersih if jenis_transaksi == "MASUK" else 0),
                     "Jenis_Keluar": jenis_keluar,
                     "Nota": nota,
+                    "Sumber_Anggaran": sumber_anggaran if jenis_transaksi == "KELUAR" else "-",
                     "Sisa_Uang_Kas_Seluruh_Sebelumnya": fmt_nominal(last_seluruh),
                     "Sisa_Uang_Kas_Sebelumnya": fmt_nominal(last_kas),
                     "Sisa_Uang_Di_ATM": fmt_nominal(sisa_atm),
@@ -1662,7 +1740,8 @@ def halaman_kas(menu):
                 "No", "Tanggal", "Keterangan", "Jenis_Transaksi", "Nominal",
                 "PAD_Aktif", "TAKTIS_Aktif", "Potongan_PAD", "Potongan_TAKTIS",
                 "PPN", "PPH_21_22_23", "Biaya_Admin_Penyedia", "Bersih",
-                "Jenis_Keluar", "Nota", "Sisa_Uang_Di_ATM", "Sisa_Uang_Di_Penyedia",
+                "Jenis_Keluar", "Nota", "Sumber_Anggaran",
+                "Sisa_Uang_Di_ATM", "Sisa_Uang_Di_Penyedia",
                 "Sisa_Uang_Kas_Seluruh", "Sisa_Uang_Kas", "Selisih_Kurang"
             ]
             kolom_ada = [k for k in kolom_tampil if k in tampil.columns]
