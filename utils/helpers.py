@@ -266,8 +266,8 @@ def cari_tanggal_belum_input_parkir(df_p: pd.DataFrame):
         hari_ini = today_wita()
 
         kondisi_belum = (
-            df["Total_Karcis_R2"].astype(str).str.strip().isin(["-", "nan", "", "None", "null"]) &
-            df["Total_Karcis_R4"].astype(str).str.strip().isin(["-", "nan", "", "None", "null"])
+            df["Total_Karcis_R2"].astype(str).str.strip().isin(["-", "nan", "", "None", "null", "0"]) &
+            df["Total_Karcis_R4"].astype(str).str.strip().isin(["-", "nan", "", "None", "null", "0"])
         )
 
         df_belum = df[
@@ -300,8 +300,8 @@ def daftar_tanggal_kosong_bulan_ini(df_p: pd.DataFrame) -> pd.DataFrame:
         awal_bulan = hari_ini.replace(day=1)
 
         kondisi_belum = (
-            df["Total_Karcis_R2"].astype(str).str.strip().isin(["-", "nan", "", "None", "null"]) &
-            df["Total_Karcis_R4"].astype(str).str.strip().isin(["-", "nan", "", "None", "null"])
+            df["Total_Karcis_R2"].astype(str).str.strip().isin(["-", "nan", "", "None", "null", "0"]) &
+            df["Total_Karcis_R4"].astype(str).str.strip().isin(["-", "nan", "", "None", "null", "0"])
         )
 
         hasil = df[
