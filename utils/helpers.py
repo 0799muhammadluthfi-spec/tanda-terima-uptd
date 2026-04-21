@@ -4,6 +4,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 # ==========================================
 # NAMA WORKSHEET
@@ -11,6 +12,15 @@ from datetime import datetime
 WS_SK = "DATA_PERPANJANGAN_SK"
 WS_PARKIR = "DATA_PARKIR"
 WS_KAS = "DATA_KAS"
+
+# ==========================================
+# TIMEZONE WITA
+# ==========================================
+def now_wita():
+    return datetime.now(ZoneInfo("Asia/Makassar"))
+
+def today_wita():
+    return now_wita().date()
 
 # ==========================================
 # KOLOM STANDAR
@@ -253,7 +263,7 @@ def cari_tanggal_belum_input_parkir(df_p: pd.DataFrame):
         df["Tgl_Bersih"] = df["Tanggal"].astype(str).str.strip().str.replace("/", "-", regex=False)
         df["Tgl_Cek"] = pd.to_datetime(df["Tgl_Bersih"], dayfirst=True, errors="coerce").dt.date
 
-        hari_ini = datetime.now().date()
+        hari_ini = today_wita()
 
         kondisi_belum = (
             df["Total_Karcis_R2"].astype(str).str.strip().isin(["-", "nan", "", "None", "null"]) &
@@ -286,7 +296,7 @@ def daftar_tanggal_kosong_bulan_ini(df_p: pd.DataFrame) -> pd.DataFrame:
         df["Tgl_Bersih"] = df["Tanggal"].astype(str).str.strip().str.replace("/", "-", regex=False)
         df["Tgl_Cek"] = pd.to_datetime(df["Tgl_Bersih"], dayfirst=True, errors="coerce").dt.date
 
-        hari_ini = datetime.now().date()
+        hari_ini = today_wita()
         awal_bulan = hari_ini.replace(day=1)
 
         kondisi_belum = (
@@ -326,7 +336,7 @@ def daftar_tanggal_belum_konfirmasi_bulan_ini(df_p: pd.DataFrame) -> pd.DataFram
         df["Tgl_Bersih"] = df["Tanggal"].astype(str).str.strip().str.replace("/", "-", regex=False)
         df["Tgl_Cek"] = pd.to_datetime(df["Tgl_Bersih"], dayfirst=True, errors="coerce").dt.date
 
-        hari_ini = datetime.now().date()
+        hari_ini = today_wita()
         awal_bulan = hari_ini.replace(day=1)
 
         kondisi_sudah_input = (
