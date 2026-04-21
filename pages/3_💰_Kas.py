@@ -31,7 +31,7 @@ st.set_page_config(
     page_title="Kas UPTD | UPTD Pasar Kandangan",
     page_icon="💰",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 inject_css()
