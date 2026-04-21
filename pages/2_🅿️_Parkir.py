@@ -341,7 +341,7 @@ if df_p.empty:
     st.warning("⚠️ Data PARKIR kosong atau worksheet tidak ditemukan.")
     st.stop()
 
-hari_ini = datetime.now().date()
+hari_ini = today_wita()
 
 tab1, tab2, tab3 = st.tabs(["📝 INPUT REKAP", "📦 INPUT STOK", "✅ KONFIRMASI"])
 
