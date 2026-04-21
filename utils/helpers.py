@@ -290,37 +290,42 @@ def daftar_tanggal_belum_konfirmasi_bulan_ini(df_p: pd.DataFrame) -> pd.DataFram
     try:
         if df_p.empty or "Tanggal" not in df_p.columns:
             return pd.DataFrame(
-                columns=["Tanggal","Nama_Petugas",
-                         "Status_Khusus","Status_MPP","Status_Cetak"])
+                columns=["Tanggal", "Nama_Petugas",
+                         "Status_Khusus", "Status_MPP", "Status_Cetak"])
 
         kolom_wajib = [
-            "Total_Karcis_R2","Total_Karcis_R4",
-            "Status_Khusus","Status_MPP","Status_Cetak","Nama_Petugas"
+            "Total_Karcis_R2", "Total_Karcis_R4",
+            "Status_Khusus", "Status_MPP", "Status_Cetak", "Nama_Petugas"
         ]
         for col in kolom_wajib:
             if col not in df_p.columns:
                 return pd.DataFrame(
-                    columns=["Tanggal","Nama_Petugas",
-                             "Status_Khusus","Status_MPP","Status_Cetak"])
+                    columns=["Tanggal", "Nama_Petugas",
+                             "Status_Khusus", "Status_MPP", "Status_Cetak"])
 
         df = df_p.copy()
+
+        df["Tgl_Bersih"] = df["Tanggal"].astype(str).str.strip().str.replace("/", "-", regex=False)
         df["Tgl_Cek"] = pd.to_datetime(
-            df["Tanggal"], dayfirst=True, errors="coerce"
+            df["Tgl_Bersih"], dayfirst=True, errors="coerce"
         ).dt.date
+
         hari_ini = datetime.now().date()
         awal_bulan = hari_ini.replace(day=1)
 
         kondisi_sudah_input = (
             df["Total_Karcis_R2"].astype(str).str.strip().apply(
-                lambda x: x not in ["-","nan","","None","null"]) |
+                lambda x: x not in ["-", "nan", "", "None", "null"]) |
             df["Total_Karcis_R4"].astype(str).str.strip().apply(
-                lambda x: x not in ["-","nan","","None","null"])
+                lambda x: x not in ["-", "nan", "", "None", "null"])
         )
+
         kondisi_belum_selesai = (
             (df["Status_Khusus"].astype(str).str.strip() != "SUDAH") |
             (df["Status_MPP"].astype(str).str.strip() != "SUDAH") |
             (df["Status_Cetak"].astype(str).str.strip() != "SUDAH")
         )
+
         hasil = df[
             df["Tgl_Cek"].notna() &
             (df["Tgl_Cek"] >= awal_bulan) &
@@ -331,17 +336,17 @@ def daftar_tanggal_belum_konfirmasi_bulan_ini(df_p: pd.DataFrame) -> pd.DataFram
 
         if hasil.empty:
             return pd.DataFrame(
-                columns=["Tanggal","Nama_Petugas",
-                         "Status_Khusus","Status_MPP","Status_Cetak"])
+                columns=["Tanggal", "Nama_Petugas",
+                         "Status_Khusus", "Status_MPP", "Status_Cetak"])
 
         return hasil.sort_values("Tgl_Cek")[
-            ["Tanggal","Nama_Petugas",
-             "Status_Khusus","Status_MPP","Status_Cetak"]
+            ["Tanggal", "Nama_Petugas",
+             "Status_Khusus", "Status_MPP", "Status_Cetak"]
         ]
     except:
         return pd.DataFrame(
-            columns=["Tanggal","Nama_Petugas",
-                     "Status_Khusus","Status_MPP","Status_Cetak"])
+            columns=["Tanggal", "Nama_Petugas",
+                     "Status_Khusus", "Status_MPP", "Status_Cetak"])
 
 # ==========================================
 # FUNGSI KHUSUS KAS
