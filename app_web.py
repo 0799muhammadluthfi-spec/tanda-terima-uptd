@@ -19,6 +19,9 @@ conn_sk = st.connection("gsheets_sk", type=GSheetsConnection)
 conn_parkir = st.connection("gsheets_parkir", type=GSheetsConnection)
 conn_kas = st.connection("gsheets_kas", type=GSheetsConnection)
 
+WS_SK     = "DATA_PERPANJANGAN_SK"
+WS_PARKIR = "DATA_PARKIR"
+
 def get_logo_base64():
     for nama_file in ["logo_hss.png", "logo.png", "Logo_HSS.png"]:
         if os.path.exists(nama_file):
@@ -177,12 +180,6 @@ st.markdown("""
     [data-testid="stSidebar"] .stButton {
         margin-bottom: 0px !important;
         margin-top: 0px !important;
-        animation: sidebarFadeIn 0.3s ease-out;
-    }
-
-    @keyframes sidebarFadeIn {
-        from { opacity: 0; transform: translateX(-8px); }
-        to { opacity: 1; transform: translateX(0); }
     }
 
     [data-testid="stSidebar"] .stButton > button {
@@ -199,7 +196,7 @@ st.markdown("""
         white-space: nowrap !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
-        transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
 
     [data-testid="stSidebar"] .stButton > button[kind="secondary"] {
@@ -209,9 +206,10 @@ st.markdown("""
     }
 
     [data-testid="stSidebar"] .stButton > button[kind="secondary"]:hover {
-        background: rgba(255,255,255,0.06) !important;
-        color: #cbd5e1 !important;
-        border-color: rgba(255,255,255,0.1) !important;
+        background: rgba(255,255,255,0.08) !important;
+        color: #e2e8f0 !important;
+        border-color: rgba(255,255,255,0.15) !important;
+        transform: translateX(4px) !important;
     }
 
     [data-testid="stSidebar"] .stButton > button[kind="primary"] {
@@ -221,8 +219,9 @@ st.markdown("""
     }
 
     [data-testid="stSidebar"] .stButton > button[kind="primary"]:hover {
-        background: rgba(96,165,250,0.18) !important;
+        background: rgba(96,165,250,0.22) !important;
         color: #93bbfc !important;
+        transform: translateX(4px) !important;
     }
 
     [data-testid="stSidebar"] .stButton > button p,
@@ -233,17 +232,16 @@ st.markdown("""
         white-space: nowrap !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
-        transition: color 0.15s ease !important;
     }
 
     .submenu-container {
         overflow: hidden;
-        animation: slideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         transform-origin: top;
     }
 
     @keyframes slideDown {
-        from { max-height: 0; opacity: 0; transform: translateY(-10px) scaleY(0.95); }
+        from { max-height: 0; opacity: 0; transform: translateY(-8px) scaleY(0.95); }
         to { max-height: 300px; opacity: 1; transform: translateY(0) scaleY(1); }
     }
 
@@ -328,11 +326,12 @@ st.markdown("""
         border: 1.5px solid #d1d5db !important;
         border-radius: 8px !important;
         padding: 10px 14px !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
     .main .stTextInput input:focus,
     .main .stNumberInput input:focus {
         border-color: #3b82f6 !important;
-        box-shadow: 0 0 0 3px rgba(59,130,246,0.1) !important;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.12) !important;
     }
     .main .stTextInput input::placeholder,
     .main .stNumberInput input::placeholder {
@@ -345,6 +344,11 @@ st.markdown("""
         border-radius: 10px;
         padding: 14px 18px !important;
         box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    [data-testid="stMetric"]:hover {
+        box-shadow: 0 4px 16px rgba(0,0,0,0.08) !important;
+        transform: translateY(-2px) !important;
     }
     [data-testid="stMetricLabel"] {
         font-size: 0.7rem !important;
@@ -367,10 +371,16 @@ st.markdown("""
         color: #374151 !important;
         border: 1.5px solid #d1d5db !important;
         background: #ffffff !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
     .main .stButton > button:hover {
         background: #f9fafb !important;
         color: #111827 !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+        transform: translateY(-1px) !important;
+    }
+    .main .stButton > button:active {
+        transform: translateY(0) !important;
     }
     .main .stButton > button[data-testid="baseButton-primary"],
     .main .stButton > button[kind="primary"] {
@@ -382,6 +392,8 @@ st.markdown("""
     .main .stButton > button[kind="primary"]:hover {
         background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
         color: #ffffff !important;
+        box-shadow: 0 4px 14px rgba(37,99,235,0.3) !important;
+        transform: translateY(-1px) !important;
     }
 
     .main .stDownloadButton > button {
@@ -396,10 +408,13 @@ st.markdown("""
         white-space: nowrap !important;
         overflow: visible !important;
         min-height: 40px !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
     .main .stDownloadButton > button:hover {
         background: linear-gradient(135deg, #059669, #047857) !important;
         color: #ffffff !important;
+        box-shadow: 0 4px 14px rgba(5,150,105,0.3) !important;
+        transform: translateY(-1px) !important;
     }
     .main .stDownloadButton > button p,
     .main .stDownloadButton > button span {
@@ -421,6 +436,10 @@ st.markdown("""
         border-radius: 10px !important;
         background: #ffffff !important;
         margin-bottom: 6px !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    [data-testid="stExpander"]:hover {
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05) !important;
     }
 
     [data-testid="stExpander"] summary > span > div > p,
@@ -462,14 +481,14 @@ st.markdown("""
     }
 
     .main .block-container {
-        animation: pageTransition 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        animation: pageEnter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
         max-width: 80%;
         margin: 0 auto;
     }
 
-    @keyframes pageTransition {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+    @keyframes pageEnter {
+        from { opacity: 0; transform: translateY(14px); filter: blur(2px); }
+        to { opacity: 1; transform: translateY(0); filter: blur(0); }
     }
 
     @media (max-width: 768px) {
@@ -497,38 +516,94 @@ st.markdown("""
     .main h2,
     .main h3,
     .main hr {
-        animation: smoothFadeIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+        animation: contentReveal 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
 
-    .main > div > div > div:nth-child(1) { animation-delay: 0.05s; }
-    .main > div > div > div:nth-child(2) { animation-delay: 0.1s; }
-    .main > div > div > div:nth-child(3) { animation-delay: 0.15s; }
-    .main > div > div > div:nth-child(4) { animation-delay: 0.2s; }
-    .main > div > div > div:nth-child(5) { animation-delay: 0.25s; }
-    .main > div > div > div:nth-child(6) { animation-delay: 0.3s; }
-    .main > div > div > div:nth-child(7) { animation-delay: 0.35s; }
-    .main > div > div > div:nth-child(8) { animation-delay: 0.4s; }
-    .main > div > div > div:nth-child(9) { animation-delay: 0.45s; }
-    .main > div > div > div:nth-child(10) { animation-delay: 0.5s; }
-    .main > div > div > div:nth-child(n+11) { animation-delay: 0.55s; }
+    .main > div > div > div:nth-child(1)  { animation-delay: 0.03s; }
+    .main > div > div > div:nth-child(2)  { animation-delay: 0.06s; }
+    .main > div > div > div:nth-child(3)  { animation-delay: 0.09s; }
+    .main > div > div > div:nth-child(4)  { animation-delay: 0.12s; }
+    .main > div > div > div:nth-child(5)  { animation-delay: 0.15s; }
+    .main > div > div > div:nth-child(6)  { animation-delay: 0.18s; }
+    .main > div > div > div:nth-child(7)  { animation-delay: 0.21s; }
+    .main > div > div > div:nth-child(8)  { animation-delay: 0.24s; }
+    .main > div > div > div:nth-child(9)  { animation-delay: 0.27s; }
+    .main > div > div > div:nth-child(10) { animation-delay: 0.30s; }
+    .main > div > div > div:nth-child(n+11) { animation-delay: 0.33s; }
 
-    .main [data-testid="stColumn"]:nth-child(1) { animation-delay: 0.1s; }
-    .main [data-testid="stColumn"]:nth-child(2) { animation-delay: 0.2s; }
-    .main [data-testid="stColumn"]:nth-child(3) { animation-delay: 0.3s; }
+    .main [data-testid="stColumn"]:nth-child(1) { animation-delay: 0.05s; }
+    .main [data-testid="stColumn"]:nth-child(2) { animation-delay: 0.10s; }
+    .main [data-testid="stColumn"]:nth-child(3) { animation-delay: 0.15s; }
+
+    @keyframes contentReveal {
+        from { opacity: 0; transform: translateY(10px); filter: blur(1.5px); }
+        to { opacity: 1; transform: translateY(0); filter: blur(0); }
+    }
 
     .main hr {
-        animation: smoothDivider 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+        animation: dividerExpand 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
         transform-origin: left;
     }
 
-    @keyframes smoothFadeIn {
-        from { opacity: 0; transform: translateY(12px); }
+    @keyframes dividerExpand {
+        from { opacity: 0; transform: scaleX(0); }
+        to { opacity: 1; transform: scaleX(1); }
+    }
+
+    [data-testid="stMetric"] {
+        animation: metricPop 0.45s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+    }
+    @keyframes metricPop {
+        from { opacity: 0; transform: scale(0.92) translateY(8px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    [data-testid="stForm"] {
+        animation: formSlide 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+    }
+    @keyframes formSlide {
+        from { opacity: 0; transform: translateY(8px) scale(0.995); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    [data-testid="stAlert"] {
+        animation: alertSlide 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    @keyframes alertSlide {
+        from { opacity: 0; transform: translateY(-4px); }
         to { opacity: 1; transform: translateY(0); }
     }
 
-    @keyframes smoothDivider {
-        from { opacity: 0; transform: scaleX(0); }
-        to { opacity: 1; transform: scaleX(1); }
+    [data-testid="stExpander"] {
+        animation: expanderIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    @keyframes expanderIn {
+        from { opacity: 0; transform: translateX(-6px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    [data-testid="stExpander"][open] > div > div {
+        animation: expandContent 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    @keyframes expandContent {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    [data-testid="stDataFrame"] {
+        animation: tableReveal 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+    }
+    @keyframes tableReveal {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .main .stDownloadButton > button {
+        animation: btnPop 0.4s cubic-bezier(0.34, 1.4, 0.64, 1) 0.1s both;
+    }
+    @keyframes btnPop {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
     }
 
 </style>
@@ -540,13 +615,7 @@ def tombol_refresh_pojok(key_btn):
         st.rerun()
 
 # ==========================================
-# NAMA WORKSHEET — sesuaikan di sini
-# ==========================================
-WS_SK     = "DATA_PERPANJANGAN_SK"   # FIX: nama tab sheet SK
-WS_PARKIR = "DATA_PARKIR"            # nama tab sheet Parkir
-
-# ==========================================
-# 2. FUNGSI HELPER (LOAD, SAVE, FORMAT)
+# 2. FUNGSI HELPER
 # ==========================================
 def load_data(conn_obj, worksheet: str) -> pd.DataFrame:
     try:
@@ -557,7 +626,6 @@ def load_data(conn_obj, worksheet: str) -> pd.DataFrame:
         for col in df.columns:
             df[col] = df[col].str.strip()
         df = df.replace(["nan", "None", "", "null", "NaN", "<NA>"], "-")
-        # FIX: pastikan kolom Status_Cetak ada di parkir
         if worksheet == WS_PARKIR:
             if "Status_Cetak" not in df.columns:
                 df["Status_Cetak"] = "BELUM"
@@ -614,7 +682,6 @@ def cari_tanggal_belum_input_parkir(df_p: pd.DataFrame):
     try:
         if df_p.empty or "Tanggal" not in df_p.columns:
             return None, pd.DataFrame()
-        # FIX: guard kolom sebelum akses
         if "Total_Karcis_R2" not in df_p.columns or "Total_Karcis_R4" not in df_p.columns:
             return None, pd.DataFrame()
         df = df_p.copy()
@@ -636,8 +703,70 @@ def cari_tanggal_belum_input_parkir(df_p: pd.DataFrame):
     except:
         return None, pd.DataFrame()
 
+# TAMBAHAN: Helper daftar tanggal kosong bulan ini
+def daftar_tanggal_kosong_bulan_ini(df_p: pd.DataFrame):
+    try:
+        if df_p.empty or "Tanggal" not in df_p.columns:
+            return pd.DataFrame(columns=["Tanggal", "Nama_Petugas"])
+        if "Total_Karcis_R2" not in df_p.columns or "Total_Karcis_R4" not in df_p.columns:
+            return pd.DataFrame(columns=["Tanggal", "Nama_Petugas"])
+        df = df_p.copy()
+        df["Tgl_Cek"] = pd.to_datetime(df["Tanggal"], dayfirst=True, errors="coerce").dt.date
+        hari_ini = datetime.now().date()
+        awal_bulan = hari_ini.replace(day=1)
+        kondisi_belum = (
+            df["Total_Karcis_R2"].astype(str).str.strip().isin(["-", "nan", "", "None", "null"]) &
+            df["Total_Karcis_R4"].astype(str).str.strip().isin(["-", "nan", "", "None", "null"])
+        )
+        hasil = df[
+            (df["Tgl_Cek"].notna()) &
+            (df["Tgl_Cek"] >= awal_bulan) &
+            (df["Tgl_Cek"] <= hari_ini) &
+            kondisi_belum
+        ].copy()
+        if hasil.empty:
+            return pd.DataFrame(columns=["Tanggal", "Nama_Petugas"])
+        return hasil.sort_values("Tgl_Cek")[["Tanggal", "Nama_Petugas"]]
+    except:
+        return pd.DataFrame(columns=["Tanggal", "Nama_Petugas"])
+
+# TAMBAHAN: Helper daftar tanggal belum konfirmasi bulan ini
+def daftar_tanggal_belum_konfirmasi_bulan_ini(df_p: pd.DataFrame):
+    try:
+        if df_p.empty or "Tanggal" not in df_p.columns:
+            return pd.DataFrame(columns=["Tanggal", "Nama_Petugas", "Status_Khusus", "Status_MPP", "Status_Cetak"])
+        kolom_wajib = ["Total_Karcis_R2", "Total_Karcis_R4", "Status_Khusus", "Status_MPP", "Status_Cetak", "Nama_Petugas"]
+        for col in kolom_wajib:
+            if col not in df_p.columns:
+                return pd.DataFrame(columns=["Tanggal", "Nama_Petugas", "Status_Khusus", "Status_MPP", "Status_Cetak"])
+        df = df_p.copy()
+        df["Tgl_Cek"] = pd.to_datetime(df["Tanggal"], dayfirst=True, errors="coerce").dt.date
+        hari_ini = datetime.now().date()
+        awal_bulan = hari_ini.replace(day=1)
+        kondisi_sudah_input = (
+            df["Total_Karcis_R2"].astype(str).str.strip().apply(lambda x: x not in ["-", "nan", "", "None", "null"]) |
+            df["Total_Karcis_R4"].astype(str).str.strip().apply(lambda x: x not in ["-", "nan", "", "None", "null"])
+        )
+        kondisi_belum_selesai = (
+            (df["Status_Khusus"].astype(str).str.strip() != "SUDAH") |
+            (df["Status_MPP"].astype(str).str.strip() != "SUDAH") |
+            (df["Status_Cetak"].astype(str).str.strip() != "SUDAH")
+        )
+        hasil = df[
+            (df["Tgl_Cek"].notna()) &
+            (df["Tgl_Cek"] >= awal_bulan) &
+            (df["Tgl_Cek"] <= hari_ini) &
+            kondisi_sudah_input &
+            kondisi_belum_selesai
+        ].copy()
+        if hasil.empty:
+            return pd.DataFrame(columns=["Tanggal", "Nama_Petugas", "Status_Khusus", "Status_MPP", "Status_Cetak"])
+        return hasil.sort_values("Tgl_Cek")[["Tanggal", "Nama_Petugas", "Status_Khusus", "Status_MPP", "Status_Cetak"]]
+    except:
+        return pd.DataFrame(columns=["Tanggal", "Nama_Petugas", "Status_Khusus", "Status_MPP", "Status_Cetak"])
+
 # ==========================================
-# 3. FUNGSI PDF (SK TOKO & PARKIR)
+# 3. FUNGSI PDF — TIDAK DIUBAH
 # ==========================================
 def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
     buffer = BytesIO()
@@ -683,7 +812,6 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
     c.save(); buffer.seek(0); return buffer
 
 def cetak_tanda_terima_parkir(data):
-    # FIX: konversi Series ke dict jika perlu
     if isinstance(data, pd.Series):
         data = data.to_dict()
     buffer = BytesIO()
@@ -694,7 +822,6 @@ def cetak_tanda_terima_parkir(data):
     c.setLineWidth(1.2); c.rect(x_awal, y_bottom, lebar_box, tinggi_box)
     y_gp = y_bottom - 1.0 * cm; c.setDash(1, 3); c.setLineWidth(0.5); c.line(0, y_gp, lebar_kertas, y_gp); c.setDash()
     tgl_dis = format_tgl_hari_indo(data.get('Tanggal', '-'))
-    # FIX: safe konversi MPP
     def _safe_int(v):
         try:
             s = str(v).strip()
@@ -724,7 +851,6 @@ def halaman_pengantaran():
     c_head.header("📝 INPUT PENGANTARAN BERKAS")
     with c_btn: tombol_refresh_pojok("ref_pengantaran")
 
-    # FIX: gunakan WS_SK
     df_sk = load_data(conn_sk, WS_SK)
     col_stat1, col_stat2, col_stat3 = st.columns(3)
     total = len(df_sk) if not df_sk.empty else 0
@@ -775,7 +901,6 @@ def halaman_pengambilan_sk():
     with c_btn:
         tombol_refresh_pojok("ref_ambil")
 
-    # FIX: gunakan WS_SK
     df_m = load_data(conn_sk, WS_SK)
     if df_m.empty:
         st.warning("⚠️ Data kosong atau worksheet tidak ditemukan.")
@@ -832,11 +957,9 @@ def halaman_parkir(menu):
     c_head.header(f"🅿️ {menu}")
     with c_btn: tombol_refresh_pojok("ref_parkir")
 
-    # FIX: gunakan WS_PARKIR
     df_p = load_data(conn_parkir, WS_PARKIR)
     hari_ini = datetime.now().date()
 
-    # FIX: guard df_p kosong — jangan lanjut kalau kosong
     if df_p.empty:
         st.warning("⚠️ Data PARKIR kosong atau worksheet tidak ditemukan.")
         return
@@ -858,7 +981,6 @@ def halaman_parkir(menu):
         key="tgl_input_parkir"
     )
 
-    # FIX: inisialisasi semua variabel default
     dt_user = None
     baris = pd.DataFrame()
     idx = None
@@ -895,7 +1017,6 @@ def halaman_parkir(menu):
         sisa_r4 = 0 if pd.isna(sisa_r4) else sisa_r4
 
     if menu == "INPUT REKAP":
-        # FIX: guard idx
         if idx is None:
             st.warning("⚠️ Data tidak ditemukan untuk tanggal tersebut.")
             return
@@ -971,7 +1092,6 @@ def halaman_parkir(menu):
                 st.rerun()
 
     elif menu == "INPUT STOK":
-        # FIX: guard idx
         if idx is None:
             st.warning("⚠️ Data tidak ditemukan untuk tanggal tersebut.")
             return
@@ -997,7 +1117,6 @@ def halaman_parkir(menu):
                 if safe_update(conn_parkir, WS_PARKIR, df_p): st.success("✅ Stok Berhasil Ditambahkan!"); st.rerun()
 
     elif menu == "KONFIRMASI":
-        # FIX: guard kolom sebelum akses
         if "Total_Karcis_R2" not in df_p.columns or "Total_Karcis_R4" not in df_p.columns:
             st.error("❌ Kolom tidak ditemukan di worksheet DATA_PARKIR.")
             return
@@ -1031,7 +1150,6 @@ def halaman_parkir(menu):
                     with st.expander(f"{ikon} {row['Tanggal']} - {row['Nama_Petugas']}", expanded=not lunas):
                         if lunas:
                             st.success("✨ PROSES SELESAI: Data ini akan otomatis hilang besok.")
-                        # FIX: rename cm → cm_col agar tidak bentrok dengan import cm
                         ck, cm_col = st.columns(2)
                         with ck:
                             st.write(f"**KHUSUS**\nR2: {row.get('Khusus_Roda_R2','-')} | R4: {row.get('Khusus_Roda_R4','-')}")
@@ -1048,7 +1166,6 @@ def halaman_parkir(menu):
                                     df_p.loc[i, "Status_MPP"] = "SUDAH"
                                     safe_update(conn_parkir, WS_PARKIR, df_p); st.rerun()
                             else:
-                                # FIX: row.to_dict() agar tidak error
                                 st.download_button("🖨️ CETAK PDF MPP", data=cetak_tanda_terima_parkir(row.to_dict()), file_name=f"MPP_{row['Tanggal']}.pdf", key=f"p{i}", use_container_width=True)
                                 if stat_c != "SUDAH":
                                     if st.button("✅ SUDAH CETAK", key=f"c{i}", use_container_width=True):
@@ -1059,63 +1176,93 @@ def halaman_parkir(menu):
 
     if 'Tgl_Temp' in df_p.columns: df_p = df_p.drop(columns=['Tgl_Temp'])
 
-    with st.expander("📊 LOG INPUT TERAKHIR", expanded=False):
+    with st.expander("📊 LOG INPUT & STATUS BULAN INI", expanded=False):
         if menu == "INPUT REKAP":
-            # FIX: guard kolom
-            if "Total_Karcis_R2" not in df_p.columns: st.info("Belum ada data."); return
-            df_isi = df_p[
-                (df_p["Total_Karcis_R2"].astype(str).str.strip().apply(lambda x: x not in ["-", "nan", ""])) |
-                (df_p["Total_Karcis_R4"].astype(str).str.strip().apply(lambda x: x not in ["-", "nan", ""]))
-            ].copy()
-            if not df_isi.empty:
-                df_isi["Tgl_Sort"] = pd.to_datetime(df_isi["Tanggal"], dayfirst=True, errors="coerce").dt.date
-                last = df_isi[df_isi["Tgl_Sort"] == dt_user] if dt_user else pd.DataFrame()
-                if last.empty:
-                    last = df_isi.sort_values(by="Tgl_Sort", ascending=False).head(1)
-                else:
-                    last = last.head(1)
-                kolom = ["Tanggal", "Nama_Petugas", "Total_Karcis_R2", "Total_Karcis_R4", "MPP_Roda_R2", "MPP_Roda_R4"]
-                kolom_ada = [k for k in kolom if k in last.columns]
-                st.dataframe(last[kolom_ada], hide_index=True, use_container_width=True)
+            if "Total_Karcis_R2" not in df_p.columns:
+                st.info("Belum ada data.")
             else:
-                st.info("Belum ada data yang diinput.")
+                df_isi = df_p[
+                    (df_p["Total_Karcis_R2"].astype(str).str.strip().apply(lambda x: x not in ["-", "nan", ""])) |
+                    (df_p["Total_Karcis_R4"].astype(str).str.strip().apply(lambda x: x not in ["-", "nan", ""]))
+                ].copy()
+                if not df_isi.empty:
+                    df_isi["Tgl_Sort"] = pd.to_datetime(df_isi["Tanggal"], dayfirst=True, errors="coerce").dt.date
+                    last = df_isi[df_isi["Tgl_Sort"] == dt_user] if dt_user else pd.DataFrame()
+                    if last.empty:
+                        last = df_isi.sort_values(by="Tgl_Sort", ascending=False).head(1)
+                    else:
+                        last = last.head(1)
+                    kolom = ["Tanggal", "Nama_Petugas", "Total_Karcis_R2", "Total_Karcis_R4", "MPP_Roda_R2", "MPP_Roda_R4"]
+                    kolom_ada = [k for k in kolom if k in last.columns]
+                    st.subheader("📋 Input Terakhir")
+                    st.dataframe(last[kolom_ada], hide_index=True, use_container_width=True)
+                else:
+                    st.info("Belum ada data yang diinput.")
+
+                st.divider()
+                st.subheader("📅 Tanggal Belum Diinput (Awal Bulan s/d Hari Ini)")
+                df_kosong_bulan = daftar_tanggal_kosong_bulan_ini(df_p)
+                if not df_kosong_bulan.empty:
+                    st.dataframe(df_kosong_bulan, hide_index=True, use_container_width=True)
+                else:
+                    st.success("✅ Tidak ada tanggal kosong bulan ini.")
 
         elif menu == "INPUT STOK":
-            # FIX: guard kolom
-            if "Pengambilan_Karcis_R2" not in df_p.columns: st.info("Belum ada data."); return
-            df_isi = df_p[
-                (df_p["Pengambilan_Karcis_R2"].astype(str).str.strip().apply(lambda x: x not in ["-", "nan", ""])) |
-                (df_p["Pengambilan_Karcis_R4"].astype(str).str.strip().apply(lambda x: x not in ["-", "nan", ""]))
-            ].copy()
-            if not df_isi.empty:
-                df_isi["Tgl_Sort"] = pd.to_datetime(df_isi["Tanggal"], dayfirst=True, errors="coerce").dt.date
-                last = df_isi[df_isi["Tgl_Sort"] == dt_user] if dt_user else pd.DataFrame()
-                if last.empty:
-                    last = df_isi.sort_values(by="Tgl_Sort", ascending=False).head(1)
-                else:
-                    last = last.head(1)
-                kolom = ["Tanggal", "Nama_Petugas", "Pengambilan_Karcis_R2", "Pengambilan_Karcis_R4"]
-                kolom_ada = [k for k in kolom if k in last.columns]
-                st.dataframe(last[kolom_ada], hide_index=True, use_container_width=True)
+            if "Pengambilan_Karcis_R2" not in df_p.columns:
+                st.info("Belum ada data.")
             else:
-                st.info("Belum ada data yang diinput.")
+                df_isi = df_p[
+                    (df_p["Pengambilan_Karcis_R2"].astype(str).str.strip().apply(lambda x: x not in ["-", "nan", ""])) |
+                    (df_p["Pengambilan_Karcis_R4"].astype(str).str.strip().apply(lambda x: x not in ["-", "nan", ""]))
+                ].copy()
+                if not df_isi.empty:
+                    df_isi["Tgl_Sort"] = pd.to_datetime(df_isi["Tanggal"], dayfirst=True, errors="coerce").dt.date
+                    last = df_isi[df_isi["Tgl_Sort"] == dt_user] if dt_user else pd.DataFrame()
+                    if last.empty:
+                        last = df_isi.sort_values(by="Tgl_Sort", ascending=False).head(1)
+                    else:
+                        last = last.head(1)
+                    kolom = ["Tanggal", "Nama_Petugas", "Pengambilan_Karcis_R2", "Pengambilan_Karcis_R4"]
+                    kolom_ada = [k for k in kolom if k in last.columns]
+                    st.subheader("📋 Input Terakhir")
+                    st.dataframe(last[kolom_ada], hide_index=True, use_container_width=True)
+                else:
+                    st.info("Belum ada data yang diinput.")
+
+                st.divider()
+                st.subheader("📅 Tanggal Belum Diinput (Awal Bulan s/d Hari Ini)")
+                df_kosong_bulan = daftar_tanggal_kosong_bulan_ini(df_p)
+                if not df_kosong_bulan.empty:
+                    st.dataframe(df_kosong_bulan, hide_index=True, use_container_width=True)
+                else:
+                    st.success("✅ Tidak ada tanggal kosong bulan ini.")
 
         elif menu == "KONFIRMASI":
-            # FIX: guard kolom
-            if "Status_Khusus" not in df_p.columns: st.info("Belum ada data."); return
-            df_isi = df_p[
-                (df_p["Status_Khusus"].astype(str).str.strip().apply(lambda x: x not in ["-", "nan", ""])) |
-                (df_p["Status_MPP"].astype(str).str.strip().apply(lambda x: x not in ["-", "nan", ""])) |
-                (df_p["Status_Cetak"].astype(str).str.strip().apply(lambda x: x not in ["-", "nan", ""]))
-            ].copy()
-            if not df_isi.empty:
-                df_isi["Tgl_Sort"] = pd.to_datetime(df_isi["Tanggal"], dayfirst=True, errors="coerce")
-                last = df_isi.sort_values(by="Tgl_Sort", ascending=False).head(1)
-                kolom = ["Tanggal", "Nama_Petugas", "Status_Khusus", "Status_MPP", "Status_Cetak"]
-                kolom_ada = [k for k in kolom if k in last.columns]
-                st.dataframe(last[kolom_ada], hide_index=True, use_container_width=True)
+            if "Status_Khusus" not in df_p.columns:
+                st.info("Belum ada data.")
             else:
-                st.info("Belum ada data yang diinput.")
+                df_isi = df_p[
+                    (df_p["Status_Khusus"].astype(str).str.strip().apply(lambda x: x not in ["-", "nan", ""])) |
+                    (df_p["Status_MPP"].astype(str).str.strip().apply(lambda x: x not in ["-", "nan", ""])) |
+                    (df_p["Status_Cetak"].astype(str).str.strip().apply(lambda x: x not in ["-", "nan", ""]))
+                ].copy()
+                if not df_isi.empty:
+                    df_isi["Tgl_Sort"] = pd.to_datetime(df_isi["Tanggal"], dayfirst=True, errors="coerce")
+                    last = df_isi.sort_values(by="Tgl_Sort", ascending=False).head(1)
+                    kolom = ["Tanggal", "Nama_Petugas", "Status_Khusus", "Status_MPP", "Status_Cetak"]
+                    kolom_ada = [k for k in kolom if k in last.columns]
+                    st.subheader("📋 Konfirmasi Terakhir")
+                    st.dataframe(last[kolom_ada], hide_index=True, use_container_width=True)
+                else:
+                    st.info("Belum ada data yang diinput.")
+
+                st.divider()
+                st.subheader("⏳ Tanggal Belum Selesai Konfirmasi (Awal Bulan s/d Hari Ini)")
+                df_belum_konfirmasi = daftar_tanggal_belum_konfirmasi_bulan_ini(df_p)
+                if not df_belum_konfirmasi.empty:
+                    st.dataframe(df_belum_konfirmasi, hide_index=True, use_container_width=True)
+                else:
+                    st.success("✅ Semua konfirmasi bulan ini sudah selesai.")
 
 # ==========================================
 # 6. HALAMAN WELCOME
@@ -1131,48 +1278,54 @@ def halaman_welcome():
             justify-content: center; min-height: 70vh; text-align: center; padding: 20px;
         }}
         .welcome-logo {{
-            animation: logoEntry 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
-                       logoPulse 3s ease-in-out 2s infinite;
+            animation: logoEntry 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+                       logoPulse 3.5s ease-in-out 2s infinite;
             opacity: 0; filter: drop-shadow(0 8px 24px rgba(0,0,0,0.12));
+            will-change: transform, opacity;
         }}
         @keyframes logoEntry {{
             0% {{ opacity: 0; transform: scale(0.3) translateY(30px); filter: blur(8px); }}
             50% {{ opacity: 1; filter: blur(0px); }}
-            70% {{ transform: scale(1.08) translateY(-5px); }}
+            70% {{ transform: scale(1.06) translateY(-4px); }}
             100% {{ opacity: 1; transform: scale(1) translateY(0); filter: blur(0px); }}
         }}
         @keyframes logoPulse {{
             0%, 100% {{ transform: scale(1); }}
-            50% {{ transform: scale(1.03); }}
+            50% {{ transform: scale(1.03); filter: drop-shadow(0 12px 32px rgba(59,130,246,0.15)); }}
         }}
         .welcome-title {{
-            animation: textSlideUp 0.8s ease-out 0.4s forwards; opacity: 0;
+            animation: textSlideUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.35s forwards; opacity: 0;
             font-family: 'Inter', sans-serif; font-size: 2.2rem; font-weight: 800;
             color: #0f172a; letter-spacing: -0.03em; margin: 24px 0 0 0; line-height: 1.2;
+            will-change: transform, opacity;
         }}
         .welcome-subtitle {{
-            animation: textSlideUp 0.8s ease-out 0.6s forwards; opacity: 0;
+            animation: textSlideUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.5s forwards; opacity: 0;
             font-family: 'Inter', sans-serif; font-size: 1.05rem; font-weight: 500;
             color: #64748b; margin: 8px 0 0 0;
+            will-change: transform, opacity;
         }}
         .welcome-line {{
-            animation: lineExpand 0.6s ease-out 0.8s forwards; opacity: 0;
+            animation: lineExpand 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.7s forwards; opacity: 0;
             width: 0px; height: 3px;
             background: linear-gradient(90deg, #3b82f6, #60a5fa, #93c5fd);
             margin: 20px auto; border-radius: 2px;
+            will-change: width, opacity;
         }}
         @keyframes lineExpand {{
             from {{ opacity: 0; width: 0px; }}
             to {{ opacity: 1; width: 100px; }}
         }}
         .welcome-hint {{
-            animation: textSlideUp 0.8s ease-out 1.0s forwards; opacity: 0;
+            animation: textSlideUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.85s forwards; opacity: 0;
             font-family: 'Inter', sans-serif; font-size: 0.88rem;
             font-weight: 400; color: #94a3b8; margin: 8px 0 0 0;
+            will-change: transform, opacity;
         }}
         .welcome-credit {{
-            animation: creditFloat 0.8s ease-out 1.3s forwards; opacity: 0;
+            animation: creditFloat 0.7s cubic-bezier(0.22, 1, 0.36, 1) 1.1s forwards; opacity: 0;
             margin-top: 60px; padding-top: 20px; border-top: 1px solid #e5e7eb;
+            will-change: transform, opacity;
         }}
         .welcome-credit-label {{
             font-family: 'Inter', sans-serif; font-size: 0.65rem; font-weight: 400;
@@ -1183,11 +1336,11 @@ def halaman_welcome():
             color: #475569; letter-spacing: 0.01em; margin: 0;
         }}
         @keyframes textSlideUp {{
-            from {{ opacity: 0; transform: translateY(20px); filter: blur(4px); }}
+            from {{ opacity: 0; transform: translateY(16px); filter: blur(3px); }}
             to {{ opacity: 1; transform: translateY(0); filter: blur(0px); }}
         }}
         @keyframes creditFloat {{
-            from {{ opacity: 0; transform: translateY(15px); }}
+            from {{ opacity: 0; transform: translateY(12px); }}
             to {{ opacity: 1; transform: translateY(0); }}
         }}
     </style>
