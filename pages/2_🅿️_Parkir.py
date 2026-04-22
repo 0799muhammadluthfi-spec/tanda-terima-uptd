@@ -145,38 +145,48 @@ def ambil_info_tanggal_parkir(df_p, tgl_input_user):
 
 def render_log_rekap(df_p, dt_user):
     with st.expander("📊 LOG INPUT & STATUS BULAN INI", expanded=False):
-        if "Total_Karcis_R2" not in df_p.columns or "Tanggal" not in df_p.columns:
+        if df_p.empty or "Tanggal" not in df_p.columns:
             st.info("Belum ada data.")
+            return
+
+        if "Total_Karcis_R2" not in df_p.columns or "Total_Karcis_R4" not in df_p.columns:
+            st.info("Kolom total karcis belum tersedia.")
             return
 
         hari_ini = today_wita()
         awal_bulan = hari_ini.replace(day=1)
 
-        df_isi = df_p.copy()
-        df_isi["Tgl_Bersih"] = df_isi["Tanggal"].astype(str).str.strip().str.replace("/", "-", regex=False)
-        df_isi["Tgl_Sort"] = pd.to_datetime(df_isi["Tgl_Bersih"], dayfirst=True, errors="coerce").dt.date
+        df = df_p.copy()
+        df["Tgl_Bersih"] = df["Tanggal"].astype(str).str.strip().str.replace("/", "-", regex=False)
+        df["Tgl_Sort"] = pd.to_datetime(df["Tgl_Bersih"], dayfirst=True, errors="coerce").dt.date
 
-        # Hanya data sampai hari ini
-        df_isi = df_isi[
-            (df_isi["Tgl_Sort"].notna()) &
-            (df_isi["Tgl_Sort"] <= hari_ini)
+        # Hanya tanggal dari awal bulan sampai hari ini
+        df = df[
+            (df["Tgl_Sort"].notna()) &
+            (df["Tgl_Sort"] >= awal_bulan) &
+            (df["Tgl_Sort"] <= hari_ini)
         ].copy()
 
-        # Data yang SUDAH diisi
-        df_sudah = df_isi[
-            ~(
-                df_isi["Total_Karcis_R2"].astype(str).str.strip().isin(["-", "nan", "", "None", "null"]) &
-                df_isi["Total_Karcis_R4"].astype(str).str.strip().isin(["-", "nan", "", "None", "null"])
-            )
+        def is_kosong(v):
+            txt = str(v).strip().lower().replace("\xa0", "").replace("\t", "")
+            return txt in ["", "-", "nan", "none", "null", "<na>", "<n/a>"]
+
+        # Sudah input kalau salah satu / dua-duanya ada angka, termasuk 0
+        df_sudah = df[
+            ~(df["Total_Karcis_R2"].apply(is_kosong) & df["Total_Karcis_R4"].apply(is_kosong))
         ].copy()
 
+        # Belum input kalau dua-duanya kosong
+        df_kosong = df[
+            (df["Total_Karcis_R2"].apply(is_kosong) & df["Total_Karcis_R4"].apply(is_kosong))
+        ].copy()
+
+        # =========================
+        # INPUT TERAKHIR
+        # =========================
+        st.subheader("📋 Input Terakhir")
         if not df_sudah.empty:
-            last = df_sudah[df_sudah["Tgl_Sort"] == dt_user] if dt_user else pd.DataFrame()
-            if last.empty:
-                last = df_sudah.sort_values(by="Tgl_Sort", ascending=False).head(1)
-            else:
-                last = last.head(1)
-
+            last = df_sudah.sort_values(by="Tgl_Sort", ascending=False).head(1)
             kolom = [
                 "Tanggal",
                 "Nama_Petugas",
@@ -186,24 +196,15 @@ def render_log_rekap(df_p, dt_user):
                 "MPP_Roda_R4"
             ]
             kolom_ada = [k for k in kolom if k in last.columns]
-
-            st.subheader("📋 Input Terakhir")
             st.dataframe(last[kolom_ada], hide_index=True, use_container_width=True)
         else:
             st.info("Belum ada data yang diinput.")
 
+        # =========================
+        # TANGGAL BELUM DIINPUT
+        # =========================
         st.divider()
         st.subheader("📅 Tanggal Belum Diinput (Awal Bulan s/d Hari Ini)")
-
-        df_kosong = df_isi[
-            (df_isi["Tgl_Sort"] >= awal_bulan) &
-            (df_isi["Tgl_Sort"] <= hari_ini) &
-            (
-                df_isi["Total_Karcis_R2"].astype(str).str.strip().isin(["-", "nan", "", "None", "null"]) &
-                df_isi["Total_Karcis_R4"].astype(str).str.strip().isin(["-", "nan", "", "None", "null"])
-            )
-        ].copy()
-
         if not df_kosong.empty:
             st.dataframe(
                 df_kosong.sort_values("Tgl_Sort")[["Tanggal", "Nama_Petugas"]],
