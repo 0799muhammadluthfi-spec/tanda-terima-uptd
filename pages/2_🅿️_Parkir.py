@@ -165,8 +165,8 @@ def render_log_rekap(df_p, dt_user):
         # Data yang SUDAH diisi
         df_sudah = df_isi[
             ~(
-                df_isi["Total_Karcis_R2"].astype(str).str.strip().isin(["-", "nan", "", "None", "null", "0"]) &
-                df_isi["Total_Karcis_R4"].astype(str).str.strip().isin(["-", "nan", "", "None", "null", "0"])
+                df_isi["Total_Karcis_R2"].astype(str).str.strip().isin(["-", "nan", "", "None", "null"]) &
+                df_isi["Total_Karcis_R4"].astype(str).str.strip().isin(["-", "nan", "", "None", "null"])
             )
         ].copy()
 
@@ -199,8 +199,8 @@ def render_log_rekap(df_p, dt_user):
             (df_isi["Tgl_Sort"] >= awal_bulan) &
             (df_isi["Tgl_Sort"] <= hari_ini) &
             (
-                df_isi["Total_Karcis_R2"].astype(str).str.strip().isin(["-", "nan", "", "None", "null", "0"]) &
-                df_isi["Total_Karcis_R4"].astype(str).str.strip().isin(["-", "nan", "", "None", "null", "0"])
+                df_isi["Total_Karcis_R2"].astype(str).str.strip().isin(["-", "nan", "", "None", "null"]) &
+                df_isi["Total_Karcis_R4"].astype(str).str.strip().isin(["-", "nan", "", "None", "null"])
             )
         ].copy()
 
