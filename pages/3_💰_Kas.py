@@ -345,7 +345,7 @@ with tab1:
 
     # ── TOMBOL SIMPAN & RESET (POIN 7) ──
     st.divider()
-        cb1, cb2 = st.columns(2)
+    cb1, cb2 = st.columns(2)
     with cb1:
         simpan_kas = st.button(
             "💾 SIMPAN DATA KAS",
