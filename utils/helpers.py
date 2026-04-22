@@ -22,6 +22,13 @@ def now_wita():
 def today_wita():
     return now_wita().date()
 
+def total_karcis_belum_diisi(r2, r4):
+    def kosong(v):
+        txt = str(v).strip().lower().replace("\xa0", "").replace("\t", "")
+        return txt in ["", "-", "nan", "none", "null", "<na>", "<n/a>"]
+
+    return kosong(r2) and kosong(r4)
+
 # ==========================================
 # KOLOM STANDAR
 # ==========================================
@@ -265,24 +272,18 @@ def cari_tanggal_belum_input_parkir(df_p: pd.DataFrame):
 
         hari_ini = today_wita()
 
-        def is_belum_input(v):
-            txt = str(v).strip().lower().replace("\xa0", "").replace("\t", "")
-            if txt in ["", "-", "nan", "none", "null", "<na>", "<n/a>"]:
-                return True
-            try:
-                float(txt)
-                return False   # angka, termasuk 0 = SUDAH input
-            except:
-                return True    # selain angka dianggap belum input
-
-        df["Belum_R2"] = df["Total_Karcis_R2"].apply(is_belum_input)
-        df["Belum_R4"] = df["Total_Karcis_R4"].apply(is_belum_input)
+        df["Belum_Input"] = df.apply(
+            lambda row: total_karcis_belum_diisi(
+                row.get("Total_Karcis_R2", ""),
+                row.get("Total_Karcis_R4", "")
+            ),
+            axis=1
+        )
 
         df_belum = df[
-            df["Tgl_Cek"].notna() &
+            (df["Tgl_Cek"].notna()) &
             (df["Tgl_Cek"] <= hari_ini) &
-            (df["Belum_R2"]) &
-            (df["Belum_R4"])
+            (df["Belum_Input"])
         ].copy()
 
         if df_belum.empty:
@@ -293,7 +294,6 @@ def cari_tanggal_belum_input_parkir(df_p: pd.DataFrame):
 
     except Exception:
         return None, pd.DataFrame()
-
 
 def daftar_tanggal_kosong_bulan_ini(df_p: pd.DataFrame) -> pd.DataFrame:
     try:
@@ -343,25 +343,19 @@ def daftar_tanggal_kosong_bulan_ini(df_p: pd.DataFrame) -> pd.DataFrame:
         hari_ini = today_wita()
         awal_bulan = hari_ini.replace(day=1)
 
-        def is_belum_input(v):
-            txt = str(v).strip().lower().replace("\xa0", "").replace("\t", "")
-            if txt in ["", "-", "nan", "none", "null", "<na>", "<n/a>"]:
-                return True
-            try:
-                float(txt)
-                return False
-            except:
-                return True
-
-        df["Belum_R2"] = df["Total_Karcis_R2"].apply(is_belum_input)
-        df["Belum_R4"] = df["Total_Karcis_R4"].apply(is_belum_input)
+        df["Belum_Input"] = df.apply(
+            lambda row: total_karcis_belum_diisi(
+                row.get("Total_Karcis_R2", ""),
+                row.get("Total_Karcis_R4", "")
+            ),
+            axis=1
+        )
 
         hasil = df[
-            df["Tgl_Cek"].notna() &
+            (df["Tgl_Cek"].notna()) &
             (df["Tgl_Cek"] >= awal_bulan) &
             (df["Tgl_Cek"] <= hari_ini) &
-            (df["Belum_R2"]) &
-            (df["Belum_R4"])
+            (df["Belum_Input"])
         ].copy()
 
         if hasil.empty:
