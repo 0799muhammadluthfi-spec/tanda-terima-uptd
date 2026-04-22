@@ -220,30 +220,36 @@ def render_log_stok(df_p, dt_user):
             st.info("Belum ada data.")
             return
 
-        hari_ini = datetime.now().date()
+        hari_ini = today_wita()
 
-        # Ambil semua nama petugas unik
         semua_petugas = df_p["Nama_Petugas"].unique()
 
-        # Siapkan data dengan tanggal
         df_stok = df_p.copy()
         df_stok["Tgl_Sort"] = pd.to_datetime(
-            df_stok["Tanggal"], dayfirst=True, errors="coerce"
+            df_stok["Tanggal"].astype(str).str.strip().str.replace("/", "-", regex=False),
+            dayfirst=True, errors="coerce"
         ).dt.date
 
-        # Filter: hanya tanggal hari ini atau sebelumnya
         df_stok = df_stok[
             (df_stok["Tgl_Sort"].notna()) &
             (df_stok["Tgl_Sort"] <= hari_ini)
         ]
 
-        # Filter: hanya yang punya data sisa stok (bukan "-", "nan", kosong)
         df_stok["_r2"] = df_stok["Sisa_Stok_R2"].astype(str).str.strip()
         df_stok["_r4"] = df_stok["Sisa_Stok_R4"].astype(str).str.strip()
 
+        def is_ada_stok(v):
+            txt = str(v).strip().lower()
+            if txt in ["", "-", "nan", "none", "null", "<na>"]:
+                return False
+            try:
+                float(txt)
+                return True
+            except:
+                return False
+
         df_ada_stok = df_stok[
-            (df_stok["_r2"].apply(lambda x: x not in ["-", "nan", "", "None", "null"])) |
-            (df_stok["_r4"].apply(lambda x: x not in ["-", "nan", "", "None", "null"]))
+            df_stok["_r2"].apply(is_ada_stok) | df_stok["_r4"].apply(is_ada_stok)
         ].copy()
 
         if not df_ada_stok.empty:
@@ -254,7 +260,6 @@ def render_log_stok(df_p, dt_user):
             if str(petugas).strip() in ["-", "nan", "", "None", "null"]:
                 continue
 
-            # Cari data stok terakhir untuk petugas ini
             data_petugas = df_ada_stok[df_ada_stok["Nama_Petugas"] == petugas]
 
             if not data_petugas.empty:
@@ -264,25 +269,40 @@ def render_log_stok(df_p, dt_user):
                 sisa_r4_raw = str(row["Sisa_Stok_R4"]).strip()
 
                 try:
-                    sisa_r2 = int(float(sisa_r2_raw)) if sisa_r2_raw not in ["-", "nan", "", "None", "null"] else 0
+                    sisa_r2 = int(float(sisa_r2_raw)) if sisa_r2_raw.lower() not in ["-", "nan", "", "none", "null"] else 0
                 except:
                     sisa_r2 = 0
 
                 try:
-                    sisa_r4 = int(float(sisa_r4_raw)) if sisa_r4_raw not in ["-", "nan", "", "None", "null"] else 0
+                    sisa_r4 = int(float(sisa_r4_raw)) if sisa_r4_raw.lower() not in ["-", "nan", "", "none", "null"] else 0
                 except:
                     sisa_r4 = 0
 
                 tgl_terakhir = str(row["Tanggal"]).strip()
-                if tgl_terakhir in ["-", "nan", "", "None"]:
+                if tgl_terakhir.lower() in ["-", "nan", "", "none"]:
                     tgl_terakhir = "-"
 
                 st.markdown(f"### 👤 {petugas}")
                 st.caption(f"Data stok terakhir: {tgl_terakhir}")
 
                 c1, c2 = st.columns(2)
-                c1.metric("🏍️ Sisa Karcis R2", sisa_r2)
-                c2.metric("🚗 Sisa Karcis R4", sisa_r4)
+
+                # R2 dengan warna
+                if sisa_r2 < 0:
+                    c1.error(f"🏍️ Sisa Karcis R2: **{sisa_r2}** ❌ MINUS")
+                elif sisa_r2 == 0:
+                    c1.warning(f"🏍️ Sisa Karcis R2: **{sisa_r2}** ⚠️ HABIS")
+                else:
+                    c1.metric("🏍️ Sisa Karcis R2", sisa_r2)
+
+                # R4 dengan warna
+                if sisa_r4 < 0:
+                    c2.error(f"🚗 Sisa Karcis R4: **{sisa_r4}** ❌ MINUS")
+                elif sisa_r4 == 0:
+                    c2.warning(f"🚗 Sisa Karcis R4: **{sisa_r4}** ⚠️ HABIS")
+                else:
+                    c2.metric("🚗 Sisa Karcis R4", sisa_r4)
+
             else:
                 st.markdown(f"### 👤 {petugas}")
                 st.caption("Belum ada data stok")
