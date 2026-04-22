@@ -265,23 +265,33 @@ def cari_tanggal_belum_input_parkir(df_p: pd.DataFrame):
 
         hari_ini = today_wita()
 
-        kondisi_belum = (
-            df["Total_Karcis_R2"].astype(str).str.strip().isin(["-", "nan", "", "None", "null"]) &
-            df["Total_Karcis_R4"].astype(str).str.strip().isin(["-", "nan", "", "None", "null"])
-        )
+        def is_belum_input(v):
+            txt = str(v).strip().lower().replace("\xa0", "").replace("\t", "")
+            if txt in ["", "-", "nan", "none", "null", "<na>", "<n/a>"]:
+                return True
+            try:
+                float(txt)
+                return False   # angka, termasuk 0 = SUDAH input
+            except:
+                return True    # selain angka dianggap belum input
+
+        df["Belum_R2"] = df["Total_Karcis_R2"].apply(is_belum_input)
+        df["Belum_R4"] = df["Total_Karcis_R4"].apply(is_belum_input)
 
         df_belum = df[
             df["Tgl_Cek"].notna() &
             (df["Tgl_Cek"] <= hari_ini) &
-            kondisi_belum
+            (df["Belum_R2"]) &
+            (df["Belum_R4"])
         ].copy()
 
         if df_belum.empty:
-            return None, df_belum
+            return None, pd.DataFrame()
 
         tanggal_awal = df_belum.sort_values("Tgl_Cek").iloc[0]["Tgl_Cek"]
         return tanggal_awal, df_belum
-    except:
+
+    except Exception:
         return None, pd.DataFrame()
 
 
@@ -319,18 +329,12 @@ def daftar_tanggal_kosong_bulan_ini(df_p: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame(columns=["Tanggal", "Nama_Petugas"])
 
 
-def daftar_tanggal_belum_konfirmasi_bulan_ini(df_p: pd.DataFrame) -> pd.DataFrame:
+def daftar_tanggal_kosong_bulan_ini(df_p: pd.DataFrame) -> pd.DataFrame:
     try:
         if df_p.empty or "Tanggal" not in df_p.columns:
-            return pd.DataFrame(columns=["Tanggal", "Nama_Petugas", "Status_Khusus", "Status_MPP", "Status_Cetak"])
-
-        kolom_wajib = [
-            "Total_Karcis_R2", "Total_Karcis_R4",
-            "Status_Khusus", "Status_MPP", "Status_Cetak", "Nama_Petugas"
-        ]
-        for col in kolom_wajib:
-            if col not in df_p.columns:
-                return pd.DataFrame(columns=["Tanggal", "Nama_Petugas", "Status_Khusus", "Status_MPP", "Status_Cetak"])
+            return pd.DataFrame(columns=["Tanggal", "Nama_Petugas"])
+        if "Total_Karcis_R2" not in df_p.columns or "Total_Karcis_R4" not in df_p.columns:
+            return pd.DataFrame(columns=["Tanggal", "Nama_Petugas"])
 
         df = df_p.copy()
         df["Tgl_Bersih"] = df["Tanggal"].astype(str).str.strip().str.replace("/", "-", regex=False)
@@ -339,31 +343,34 @@ def daftar_tanggal_belum_konfirmasi_bulan_ini(df_p: pd.DataFrame) -> pd.DataFram
         hari_ini = today_wita()
         awal_bulan = hari_ini.replace(day=1)
 
-        kondisi_sudah_input = (
-            df["Total_Karcis_R2"].astype(str).str.strip().apply(lambda x: x not in ["-", "nan", "", "None", "null"]) |
-            df["Total_Karcis_R4"].astype(str).str.strip().apply(lambda x: x not in ["-", "nan", "", "None", "null"])
-        )
+        def is_belum_input(v):
+            txt = str(v).strip().lower().replace("\xa0", "").replace("\t", "")
+            if txt in ["", "-", "nan", "none", "null", "<na>", "<n/a>"]:
+                return True
+            try:
+                float(txt)
+                return False
+            except:
+                return True
 
-        kondisi_belum_selesai = (
-            (df["Status_Khusus"].astype(str).str.strip() != "SUDAH") |
-            (df["Status_MPP"].astype(str).str.strip() != "SUDAH") |
-            (df["Status_Cetak"].astype(str).str.strip() != "SUDAH")
-        )
+        df["Belum_R2"] = df["Total_Karcis_R2"].apply(is_belum_input)
+        df["Belum_R4"] = df["Total_Karcis_R4"].apply(is_belum_input)
 
         hasil = df[
             df["Tgl_Cek"].notna() &
             (df["Tgl_Cek"] >= awal_bulan) &
             (df["Tgl_Cek"] <= hari_ini) &
-            kondisi_sudah_input &
-            kondisi_belum_selesai
+            (df["Belum_R2"]) &
+            (df["Belum_R4"])
         ].copy()
 
         if hasil.empty:
-            return pd.DataFrame(columns=["Tanggal", "Nama_Petugas", "Status_Khusus", "Status_MPP", "Status_Cetak"])
+            return pd.DataFrame(columns=["Tanggal", "Nama_Petugas"])
 
-        return hasil.sort_values("Tgl_Cek")[["Tanggal", "Nama_Petugas", "Status_Khusus", "Status_MPP", "Status_Cetak"]]
-    except:
-        return pd.DataFrame(columns=["Tanggal", "Nama_Petugas", "Status_Khusus", "Status_MPP", "Status_Cetak"])
+        return hasil.sort_values("Tgl_Cek")[["Tanggal", "Nama_Petugas"]]
+
+    except Exception:
+        return pd.DataFrame(columns=["Tanggal", "Nama_Petugas"])
 
 # ==========================================
 # FUNGSI KHUSUS KAS
