@@ -461,13 +461,6 @@ with tab2:
     with c_btn2:
         tombol_refresh("ref_parkir_stok")
 
-    tgl_belum_s, df_belum_s = cari_tanggal_belum_input_parkir(df_p)
-    if tgl_belum_s:
-        st.warning(f"⚠️ Input parkir belum terisi mulai: **{tgl_belum_s.strftime('%d-%m-%Y')}**")
-        with st.expander("📅 Lihat daftar tanggal yang belum diinput", expanded=False):
-            if not df_belum_s.empty:
-                st.dataframe(df_belum_s[["Tanggal","Nama_Petugas"]], use_container_width=True, hide_index=True)
-
     tgl_input_stok = st.text_input(
         "🔍 MASUKKAN TANGGAL",
         value=datetime.now().strftime("%d-%m-%Y"),
