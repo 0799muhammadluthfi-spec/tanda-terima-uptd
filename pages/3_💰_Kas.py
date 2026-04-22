@@ -350,16 +350,12 @@ with tab1:
         )
     with cb2:
         if st.button("🔄 RESET", use_container_width=True, key="btn_reset_kas"):
-            # Hapus semua session state key kas
-            keys_kas = [
-                "kas_tgl", "kas_ket", "kas_jenis", "kas_nom",
-                "kas_pad", "kas_taktis", "kas_ppn", "kas_pph",
-                "kas_admin", "kas_jk", "kas_nota", "kas_sumber",
-                "kas_tujuan", "kas_sisa_tangan", "kas_atm", "kas_peny"
-            ]
-            for k in keys_kas:
-                if k in st.session_state:
-                    del st.session_state[k]
+            keys_to_delete = []
+            for k in st.session_state:
+                if k.startswith("kas_"):
+                    keys_to_delete.append(k)
+            for k in keys_to_delete:
+                del st.session_state[k]
             st.rerun()
 
     if simpan_kas:
