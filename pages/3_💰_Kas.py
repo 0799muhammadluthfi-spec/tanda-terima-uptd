@@ -41,6 +41,11 @@ inject_css()
 # ==========================================
 conn_kas = st.connection("gsheets_kas", type=GSheetsConnection)
 
+def reset_form_kas():
+    keys_to_delete = [k for k in list(st.session_state.keys()) if k.startswith("kas_")]
+    for k in keys_to_delete:
+        del st.session_state[k]
+
 # ==========================================
 # SIDEBAR
 # ==========================================
@@ -340,7 +345,7 @@ with tab1:
 
     # ── TOMBOL SIMPAN & RESET (POIN 7) ──
     st.divider()
-    cb1, cb2 = st.columns(2)
+        cb1, cb2 = st.columns(2)
     with cb1:
         simpan_kas = st.button(
             "💾 SIMPAN DATA KAS",
@@ -349,14 +354,12 @@ with tab1:
             key="btn_simpan_kas"
         )
     with cb2:
-        if st.button("🔄 RESET", use_container_width=True, key="btn_reset_kas"):
-            keys_to_delete = []
-            for k in st.session_state:
-                if k.startswith("kas_"):
-                    keys_to_delete.append(k)
-            for k in keys_to_delete:
-                del st.session_state[k]
-            st.rerun()
+        st.button(
+            "🔄 RESET",
+            use_container_width=True,
+            key="btn_reset_kas",
+            on_click=reset_form_kas
+        )
 
     if simpan_kas:
         if not keterangan.strip():
