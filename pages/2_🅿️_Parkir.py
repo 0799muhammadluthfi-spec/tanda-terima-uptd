@@ -554,7 +554,7 @@ with tab3:
                         ck, cm_col = st.columns(2)
 
                         with ck:
-                            st.write(f"**KHUSUS**\nR2: {row.get('Khusus_Roda_R2','-')} | R4: {row.get('Khusus_Roda_R4','-')}")
+                            st.write(f"**TOTAL**\nR2: {row.get('Total_Karcis_R2','-')} | R4: {row.get('Total_Karcis_R4','-')}")
                             if sk != "SUDAH":
                                 if st.button("TERIMA KHUSUS", key=f"k_{i}", use_container_width=True):
                                     df_u = df_p.copy()
