@@ -367,9 +367,6 @@ with tab1:
     tgl_belum, df_belum = cari_tanggal_belum_input_parkir(df_p)
     if tgl_belum:
         st.warning(f"⚠️ Input parkir belum terisi mulai: **{tgl_belum.strftime('%d-%m-%Y')}**")
-        with st.expander("📅 Lihat daftar tanggal yang belum diinput", expanded=False):
-            if not df_belum.empty:
-                st.dataframe(df_belum[["Tanggal","Nama_Petugas"]], use_container_width=True, hide_index=True)
     else:
         st.success("✅ Semua data parkir sampai hari ini sudah terinput.")
 
