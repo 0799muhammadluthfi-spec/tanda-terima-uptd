@@ -41,15 +41,14 @@ inject_css()
 # ==========================================
 conn_kas = st.connection("gsheets_kas", type=GSheetsConnection)
 
+# ==========================================
+# RESET COUNTER
+# ==========================================
 if "kas_reset_counter" not in st.session_state:
     st.session_state["kas_reset_counter"] = 0
 
 def reset_form_kas():
     st.session_state["kas_reset_counter"] += 1
-    keys_to_delete = [k for k in list(st.session_state.keys()) if k.startswith("kas_")]
-    for k in keys_to_delete:
-        if k != "kas_reset_counter":
-            del st.session_state[k]
 
 # ==========================================
 # SIDEBAR
@@ -139,6 +138,9 @@ m4.metric("💵 Saldo Kas Tangan", rupiah(saldo_kas))
 
 st.divider()
 
+# ==========================================
+# TAB
+# ==========================================
 tab1, tab2 = st.tabs(["📝 INPUT KAS", "📊 DATA KAS"])
 
 # ==========================================
@@ -146,8 +148,8 @@ tab1, tab2 = st.tabs(["📝 INPUT KAS", "📊 DATA KAS"])
 # ==========================================
 with tab1:
     st.subheader("📝 FORM INPUT KAS")
-    kas_key = f"kas_{st.session_state['kas_reset_counter']}"
 
+    rc = st.session_state["kas_reset_counter"]
     last_seluruh, last_kas, last_atm, last_penyedia = get_last_kas_state(df_kas)
     next_no = get_next_no(df_kas)
 
@@ -156,18 +158,18 @@ with tab1:
     with c1:
         tanggal_kas = st.text_input(
             "TANGGAL *",
-            value=datetime.now().strftime("%d-%m-%Y"),
-            key=f"{kas_key}_tgl"
+            value=datetime.now().strftime("%d/%m/%Y"),
+            key=f"kas_{rc}_tgl"
         )
         keterangan = st.text_input(
             "KETERANGAN *",
-            key=f"{kas_key}_ket"
+            key=f"kas_{rc}_ket"
         ).strip().upper()
     with c2:
         jenis_transaksi = st.selectbox(
             "JENIS TRANSAKSI *",
             ["MASUK", "KELUAR"],
-            key=f"{kas_key}_jenis"
+            key=f"kas_{rc}_jenis"
         )
         nominal = st.number_input(
             "NOMINAL *",
@@ -175,7 +177,7 @@ with tab1:
             value=0.0,
             step=1000.0,
             format="%.0f",
-            key=f"{kas_key}_nom"
+            key=f"kas_{rc}_nom"
         )
 
     # ── Default ──
@@ -201,12 +203,35 @@ with tab1:
 
         a1, a2 = st.columns(2)
         with a1:
-            pad_aktif = st.checkbox("PAD (Potongan 10%)", value=False, key=f"{kas_key}_pad")
-            ppn = st.number_input("PPN", min_value=0.0, value=0.0, step=1000.0, format="%.0f", key=f"{kas_key}_ppn")
-            biaya_admin = st.number_input("BIAYA ADMIN PENYEDIA", min_value=0.0, value=0.0, step=1000.0, format="%.0f", key=f"{kas_key}_admin")
+            pad_aktif = st.checkbox(
+                "PAD (Potongan 10%)",
+                value=False,
+                key=f"kas_{rc}_pad"
+            )
+            ppn = st.number_input(
+                "PPN",
+                min_value=0.0, value=0.0,
+                step=1000.0, format="%.0f",
+                key=f"kas_{rc}_ppn"
+            )
+            biaya_admin = st.number_input(
+                "BIAYA ADMIN PENYEDIA",
+                min_value=0.0, value=0.0,
+                step=1000.0, format="%.0f",
+                key=f"kas_{rc}_admin"
+            )
         with a2:
-            taktis_aktif = st.checkbox("TAKTIS (Potongan 5%)", value=False, key=f"{kas_key}_taktis")
-            pph = st.number_input("PPH 21/22/23", min_value=0.0, value=0.0, step=1000.0, format="%.0f", key=f"{kas_key}_pph")
+            taktis_aktif = st.checkbox(
+                "TAKTIS (Potongan 5%)",
+                value=False,
+                key=f"kas_{rc}_taktis"
+            )
+            pph = st.number_input(
+                "PPH 21/22/23",
+                min_value=0.0, value=0.0,
+                step=1000.0, format="%.0f",
+                key=f"kas_{rc}_pph"
+            )
 
         pot_pad = nominal * 0.10 if pad_aktif else 0.0
         pot_taktis = nominal * 0.05 if taktis_aktif else 0.0
@@ -218,13 +243,12 @@ with tab1:
         p2.metric("Potongan TAKTIS (5%)", rupiah(pot_taktis))
         p3.metric("💰 BERSIH", rupiah(bersih))
 
-        # ── TUJUAN ANGGARAN MASUK (POIN 4) ──
         st.divider()
         st.subheader("🎯 TUJUAN ANGGARAN MASUK")
         tujuan_anggaran = st.selectbox(
             "UANG MASUK DIARAHKAN KE MANA? *",
             ["SALDO KAS (DI TANGAN)", "UANG DI ATM", "UANG DI PENYEDIA"],
-            key=f"{kas_key}_tujuan"
+            key=f"kas_{rc}_tujuan"
         )
 
     # ══════════════════════════════════════════
@@ -236,16 +260,24 @@ with tab1:
 
         b1, b2 = st.columns(2)
         with b1:
-            jenis_keluar = st.selectbox("JENIS KELUAR", ["DISBURSEMENT", "REIMBURSE"], key=f"{kas_key}_jk")
+            jenis_keluar = st.selectbox(
+                "JENIS KELUAR",
+                ["DISBURSEMENT", "REIMBURSE"],
+                key=f"kas_{rc}_jk"
+            )
         with b2:
-            nota = st.selectbox("NOTA", ["ADA", "TIDAK ADA"], key=f"{kas_key}_nota")
+            nota = st.selectbox(
+                "NOTA",
+                ["ADA", "TIDAK ADA"],
+                key=f"kas_{rc}_nota"
+            )
 
         st.divider()
         st.subheader("💳 SUMBER ANGGARAN")
         sumber_anggaran = st.selectbox(
             "UANG KELUAR DARI MANA? *",
             ["UANG KAS (DI TANGAN)", "UANG DI ATM", "UANG DI PENYEDIA"],
-            key=f"{kas_key}_sumber"ey="kas_sumber"
+            key=f"kas_{rc}_sumber"
         )
 
         if sumber_anggaran == "UANG KAS (DI TANGAN)":
@@ -270,7 +302,7 @@ with tab1:
     s3.metric("Di ATM", rupiah(last_atm))
     s4.metric("Di Penyedia", rupiah(last_penyedia))
 
-    # ── HITUNG SALDO BARU (POIN 5 & 6) ──
+    # ── HITUNG SALDO BARU ──
     if jenis_transaksi == "MASUK":
         if tujuan_anggaran == "SALDO KAS (DI TANGAN)":
             new_kas = last_kas + bersih
@@ -306,7 +338,7 @@ with tab1:
             new_atm = last_atm
             new_penyedia = last_penyedia
 
-    # ── POSISI SALDO BARU (POIN 5) ──
+    # ── POSISI SALDO BARU ──
     st.divider()
     st.subheader("🏦 POSISI SALDO BARU")
 
@@ -317,7 +349,7 @@ with tab1:
             value=float(new_kas),
             step=1000.0,
             format="%.0f",
-            key=f"{kas_key}_sisa_tangan"
+            key=f"kas_{rc}_sisa_tangan"
         )
     with k2:
         sisa_atm = st.number_input(
@@ -325,7 +357,7 @@ with tab1:
             value=float(new_atm),
             step=1000.0,
             format="%.0f",
-            key=f"{kas_key}_atm"
+            key=f"kas_{rc}_atm"
         )
     with k3:
         sisa_penyedia = st.number_input(
@@ -333,23 +365,30 @@ with tab1:
             value=float(new_penyedia),
             step=1000.0,
             format="%.0f",
-            key=f"{kas_key}_peny"
+            key=f"kas_{rc}_peny"
         )
 
-    # ── HASIL PERHITUNGAN ──
+    # ── HITUNG SALDO SELURUH ──
     sisa_uang_kas_seluruh = sisa_kas_input + sisa_atm + sisa_penyedia
 
     # ── SELISIH ──
-    selisih_kurang = sisa_uang_kas_seluruh - sisa_kas_input
+    # Selisih = Kas Auto (hitungan) - Kas Tangan (input fisik)
+    selisih_kurang = new_kas - sisa_kas_input
+
+    st.divider()
 
     if selisih_kurang > 0.5:
-        st.warning(f"⚠️ SELISIH / KURANG: **{rupiah(selisih_kurang)}** (uang di tangan kurang dari seharusnya)")
+        st.warning(
+            f"⚠️ **SELISIH KURANG: {rupiah(selisih_kurang)}**  \n"
+            f"Uang di tangan lebih sedikit dari seharusnya."
+        )
     elif selisih_kurang < -0.5:
-        st.success(f"✅ SELISIH / LEBIH: **{rupiah(abs(selisih_kurang))}** (uang di tangan lebih dari seharusnya)")
-    else:
-        st.success("✅ SELISIH: **Rp 0** (Pas)")
+        st.success(
+            f"✅ **SELISIH LEBIH: {rupiah(abs(selisih_kurang))}**  \n"
+            f"Uang di tangan lebih banyak dari seharusnya."
+        )
 
-    # ── TOMBOL SIMPAN & RESET (POIN 7) ──
+    # ── TOMBOL SIMPAN & RESET ──
     st.divider()
     cb1, cb2 = st.columns(2)
     with cb1:
@@ -360,11 +399,57 @@ with tab1:
             key="btn_simpan_kas"
         )
     with cb2:
-        reset_kas = st.button("🔄 RESET", use_container_width=True, key="btn_reset_kas")
+        st.button(
+            "🔄 RESET",
+            use_container_width=True,
+            key="btn_reset_kas",
+            on_click=reset_form_kas
+        )
 
-    if reset_kas:
-        reset_form_kas()
-        st.rerun()
+    if simpan_kas:
+        if not keterangan.strip():
+            st.error("❌ Keterangan wajib diisi.")
+        elif nominal <= 0:
+            st.error("❌ Nominal harus lebih dari 0.")
+        elif jenis_transaksi == "MASUK" and bersih < 0:
+            st.error("❌ Hasil bersih tidak boleh negatif.")
+        else:
+            new_row = {
+                "No": str(next_no),
+                "Tanggal": tanggal_kas,
+                "Keterangan": keterangan,
+                "Jenis_Transaksi": jenis_transaksi,
+                "Nominal": fmt_nominal(nominal),
+                "PAD_Aktif": "YA" if pad_aktif else "TIDAK",
+                "TAKTIS_Aktif": "YA" if taktis_aktif else "TIDAK",
+                "Potongan_PAD": fmt_nominal(pot_pad),
+                "Potongan_TAKTIS": fmt_nominal(pot_taktis),
+                "PPN": fmt_nominal(ppn),
+                "PPH_21_22_23": fmt_nominal(pph),
+                "Biaya_Admin_Penyedia": fmt_nominal(biaya_admin),
+                "Bersih": fmt_nominal(bersih if jenis_transaksi == "MASUK" else 0),
+                "Jenis_Keluar": jenis_keluar,
+                "Nota": nota,
+                "Sumber_Anggaran": sumber_anggaran if jenis_transaksi == "KELUAR" else "-",
+                "Tujuan_Anggaran": tujuan_anggaran if jenis_transaksi == "MASUK" else "-",
+                "Sisa_Uang_Kas_Seluruh_Sebelumnya": fmt_nominal(last_seluruh),
+                "Sisa_Uang_Kas_Sebelumnya": fmt_nominal(last_kas),
+                "Sisa_Uang_Di_ATM": fmt_nominal(sisa_atm),
+                "Sisa_Uang_Di_Penyedia": fmt_nominal(sisa_penyedia),
+                "Sisa_Uang_Kas_Seluruh": fmt_nominal(sisa_uang_kas_seluruh),
+                "Sisa_Uang_Kas_Auto": fmt_nominal(new_kas),
+                "Sisa_Uang_Kas": fmt_nominal(sisa_kas_input),
+                "Selisih_Kurang": fmt_nominal(selisih_kurang)
+            }
+
+            df_baru = pd.concat(
+                [df_kas, pd.DataFrame([new_row])],
+                ignore_index=True
+            )
+            if safe_update(conn_kas, WS_KAS, df_baru):
+                st.success("✅ Data kas berhasil disimpan!")
+                reset_form_kas()
+                st.rerun()
 
 # ==========================================
 # TAB 2 - DATA KAS
