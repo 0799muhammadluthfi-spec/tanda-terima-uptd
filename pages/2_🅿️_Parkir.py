@@ -365,7 +365,6 @@ with tab1:
             tombol_refresh("ref_parkir_rekap")
 
     tgl_belum, df_belum = cari_tanggal_belum_input_parkir(df_p)
-
     if tgl_belum:
         st.warning(f"⚠️ Input parkir belum terisi mulai: **{tgl_belum.strftime('%d-%m-%Y')}**")
         with st.expander("📅 Lihat daftar tanggal yang belum diinput", expanded=False):
