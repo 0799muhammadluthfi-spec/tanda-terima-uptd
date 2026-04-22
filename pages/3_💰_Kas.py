@@ -342,51 +342,117 @@ with tab1:
     st.divider()
     st.subheader("🏦 POSISI SALDO BARU")
 
+    # Key untuk widget
+    key_sisa = f"kas_{rc}_sisa_tangan"
+    key_atm = f"kas_{rc}_atm"
+    key_peny = f"kas_{rc}_peny"
+
+    # Auto update: kalau user belum edit manual → ikut hitungan
+    # Kalau user sudah edit → tetap pakai angka user
+    auto_kas_key = f"kas_{rc}_auto_kas"
+    auto_atm_key = f"kas_{rc}_auto_atm"
+    auto_peny_key = f"kas_{rc}_auto_peny"
+
+    # Kas di Tangan
+    if key_sisa not in st.session_state:
+        st.session_state[key_sisa] = float(new_kas)
+    else:
+        old_auto = st.session_state.get(auto_kas_key, None)
+        if old_auto is not None and abs(st.session_state[key_sisa] - old_auto) < 0.5:
+            st.session_state[key_sisa] = float(new_kas)
+    st.session_state[auto_kas_key] = float(new_kas)
+
+    # ATM
+    if key_atm not in st.session_state:
+        st.session_state[key_atm] = float(new_atm)
+    else:
+        old_auto_atm = st.session_state.get(auto_atm_key, None)
+        if old_auto_atm is not None and abs(st.session_state[key_atm] - old_auto_atm) < 0.5:
+            st.session_state[key_atm] = float(new_atm)
+    st.session_state[auto_atm_key] = float(new_atm)
+
+    # Penyedia
+    if key_peny not in st.session_state:
+        st.session_state[key_peny] = float(new_penyedia)
+    else:
+        old_auto_peny = st.session_state.get(auto_peny_key, None)
+        if old_auto_peny is not None and abs(st.session_state[key_peny] - old_auto_peny) < 0.5:
+            st.session_state[key_peny] = float(new_penyedia)
+    st.session_state[auto_peny_key] = float(new_penyedia)
+
     k1, k2, k3 = st.columns(3)
     with k1:
         sisa_kas_input = st.number_input(
-            "SISA KAS DI TANGAN",
-            value=float(new_kas),
+            "SISA KAS DI TANGAN (OTOMATIS, BISA DIEDIT)",
             step=1000.0,
             format="%.0f",
-            key=f"kas_{rc}_sisa_tangan"
+            key=key_sisa
         )
     with k2:
         sisa_atm = st.number_input(
             "SISA UANG DI ATM",
-            value=float(new_atm),
             step=1000.0,
             format="%.0f",
-            key=f"kas_{rc}_atm"
+            key=key_atm
         )
     with k3:
         sisa_penyedia = st.number_input(
             "SISA UANG DI PENYEDIA",
-            value=float(new_penyedia),
             step=1000.0,
             format="%.0f",
-            key=f"kas_{rc}_peny"
+            key=key_peny
         )
 
     # ── HITUNG SALDO SELURUH ──
     sisa_uang_kas_seluruh = sisa_kas_input + sisa_atm + sisa_penyedia
 
     # ── SELISIH ──
-    # Selisih = Kas Auto (hitungan) - Kas Tangan (input fisik)
-    selisih_kurang = new_kas - sisa_kas_input
+    # Selisih transaksi ini
+    selisih_transaksi = new_kas - sisa_kas_input
+
+    # Ambil total selisih lama dari data terakhir
+    total_selisih_lama = 0.0
+    try:
+        df_valid = df_kas[df_kas["No"] != "-"].copy()
+        if not df_valid.empty:
+            total_selisih_lama = to_float(df_valid["Selisih_Kurang"].iloc[-1])
+    except:
+        total_selisih_lama = 0.0
+
+    # Total selisih kumulatif
+    total_selisih = total_selisih_lama + selisih_transaksi
+
+    # Nilai selisih yang akan disimpan = total_selisih
+    selisih_kurang = total_selisih
 
     st.divider()
+    st.subheader("📊 SELISIH")
 
-    if selisih_kurang > 0.5:
-        st.warning(
-            f"⚠️ **SELISIH KURANG: {rupiah(selisih_kurang)}**  \n"
-            f"Uang di tangan lebih sedikit dari seharusnya."
-        )
-    elif selisih_kurang < -0.5:
-        st.success(
-            f"✅ **SELISIH LEBIH: {rupiah(abs(selisih_kurang))}**  \n"
-            f"Uang di tangan lebih banyak dari seharusnya."
-        )
+    # Selisih transaksi sekarang
+    if abs(selisih_transaksi) > 0.5:
+        if selisih_transaksi > 0:
+            st.warning(
+                f"⚠️ **SELISIH TRANSAKSI INI: KURANG {rupiah(selisih_transaksi)}**"
+            )
+        else:
+            st.info(
+                f"ℹ️ **SELISIH TRANSAKSI INI: LEBIH {rupiah(abs(selisih_transaksi))}**"
+            )
+
+    # Total selisih kumulatif — SELALU TAMPIL
+    if abs(total_selisih) > 0.5:
+        if total_selisih > 0:
+            st.error(
+                f"❌ **TOTAL SELISIH: KURANG {rupiah(total_selisih)}**  \n"
+                f"Total uang di tangan masih kurang {rupiah(total_selisih)}."
+            )
+        else:
+            st.success(
+                f"✅ **TOTAL SELISIH: LEBIH {rupiah(abs(total_selisih))}**  \n"
+                f"Total uang di tangan masih lebih {rupiah(abs(total_selisih))}."
+            )
+    else:
+        st.success("✅ **TOTAL SELISIH: Rp 0** (Tidak ada selisih)")
 
     # ── TOMBOL SIMPAN & RESET ──
     st.divider()
