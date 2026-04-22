@@ -361,18 +361,20 @@ with tab1:
     c_head, c_btn = st.columns([0.88, 0.12])
     c_head.subheader("📝 INPUT REKAP HARIAN")
     with c_btn:
-        tombol_refresh("ref_parkir_rekap")
+            tombol_refresh("ref_parkir_rekap")
 
     tgl_belum, df_belum = cari_tanggal_belum_input_parkir(df_p)
+
     with st.expander("DEBUG CEK DATA PARKIR", expanded=False):
-    df_debug = df_p.copy()
-    df_debug["Tgl_Bersih"] = df_debug["Tanggal"].astype(str).str.strip().str.replace("/", "-", regex=False)
-    df_debug["Tgl_Cek"] = pd.to_datetime(df_debug["Tgl_Bersih"], dayfirst=True, errors="coerce").dt.date
-    st.dataframe(
-        df_debug[["Tanggal", "Nama_Petugas", "Total_Karcis_R2", "Total_Karcis_R4", "Tgl_Cek"]].tail(20),
-        use_container_width=True,
-        hide_index=True
-    )
+        df_debug = df_p.copy()
+        df_debug["Tgl_Bersih"] = df_debug["Tanggal"].astype(str).str.strip().str.replace("/", "-", regex=False)
+        df_debug["Tgl_Cek"] = pd.to_datetime(df_debug["Tgl_Bersih"], dayfirst=True, errors="coerce").dt.date
+        st.dataframe(
+            df_debug[["Tanggal", "Nama_Petugas", "Total_Karcis_R2", "Total_Karcis_R4", "Tgl_Cek"]].tail(20),
+            use_container_width=True,
+            hide_index=True
+        )
+
     if tgl_belum:
         st.warning(f"⚠️ Input parkir belum terisi mulai: **{tgl_belum.strftime('%d-%m-%Y')}**")
         with st.expander("📅 Lihat daftar tanggal yang belum diinput", expanded=False):
