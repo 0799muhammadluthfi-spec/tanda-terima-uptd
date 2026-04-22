@@ -556,7 +556,7 @@ with tab3:
                         with ck:
                             st.write(f"**TOTAL**\nR2: {row.get('Total_Karcis_R2','-')} | R4: {row.get('Total_Karcis_R4','-')}")
                             if sk != "SUDAH":
-                                if st.button("TERIMA KHUSUS", key=f"k_{i}", use_container_width=True):
+                                if st.button("TERIMA TOTAL", key=f"k_{i}", use_container_width=True):
                                     df_u = df_p.copy()
                                     df_u.loc[i, "Status_Khusus"] = "SUDAH"
                                     if safe_update(conn_parkir, WS_PARKIR, df_u):
