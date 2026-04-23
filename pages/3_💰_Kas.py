@@ -503,7 +503,7 @@ with tab1:
                 "Sisa_Uang_Kas_Seluruh": fmt_nominal(total_auto),
                 "Sisa_Uang_Kas_Auto": fmt_nominal(new_kas),
                 "Sisa_Uang_Kas": fmt_nominal(new_kas),
-                "Selisih_Kurang": fmt_nominal(total_selisih_lama),
+                "Selisih_Kurang": "0",
                 "Jenis_Record": "TRANSAKSI",
                 "Kas_Fisik_Pengecekan": "-",
                 "Selisih_Pengecekan": "0",
