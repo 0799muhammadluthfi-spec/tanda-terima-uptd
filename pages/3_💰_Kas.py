@@ -14,7 +14,6 @@ from utils.helpers import (
     safe_update,
     get_next_no,
     pastikan_kolom,
-    urutkan_no,
     tampilkan_n_terakhir,
     tombol_refresh,
     to_float,
@@ -40,6 +39,17 @@ inject_css()
 # KONEKSI
 # ==========================================
 conn_kas = st.connection("gsheets_kas", type=GSheetsConnection)
+
+# ==========================================
+# KOLOM TAMBAHAN INTERNAL
+# ==========================================
+KOLOM_TAMBAHAN_KAS = [
+    "Jenis_Record",
+    "Kas_Fisik_Pengecekan",
+    "Selisih_Pengecekan",
+    "Status_Selisih_Aktif",
+    "Tanggal_Pengecekan"
+]
 
 # ==========================================
 # RESET COUNTER
@@ -118,8 +128,12 @@ with st.sidebar:
 df_kas = load_data(conn_kas, WS_KAS)
 df_kas = pastikan_kolom(df_kas, KOLOM_KAS)
 
+for col in KOLOM_TAMBAHAN_KAS:
+    if col not in df_kas.columns:
+        df_kas[col] = "-"
+
 # ==========================================
-# HEADER — 6 METRIC (2 baris × 3 kolom)
+# HEADER RINGKASAN
 # ==========================================
 st.title("💰 KAS UPTD")
 
@@ -131,17 +145,140 @@ with c_btn:
 total_masuk_bersih, total_keluar, saldo_seluruh, saldo_kas = hitung_ringkasan_kas(df_kas)
 last_seluruh, last_kas, last_atm, last_penyedia = get_last_kas_state(df_kas)
 
-# Baris 1
+# 2 baris x 3 kolom
 r1c1, r1c2, r1c3 = st.columns(3)
 r1c1.metric("📥 Total Masuk Bersih", rupiah(total_masuk_bersih))
 r1c2.metric("📤 Total Keluar", rupiah(total_keluar))
 r1c3.metric("🏦 Saldo Kas Seluruh", rupiah(last_seluruh))
 
-# Baris 2
 r2c1, r2c2, r2c3 = st.columns(3)
 r2c1.metric("💵 Kas di Tangan", rupiah(last_kas))
 r2c2.metric("🏧 ATM", rupiah(last_atm))
 r2c3.metric("🏢 Penyedia", rupiah(last_penyedia))
+
+st.divider()
+
+# ==========================================
+# ALERT SELISIH TERSIMPAN
+# ==========================================
+df_cek = df_kas[
+    (df_kas["No"] != "-") &
+    (df_kas["Jenis_Record"] == "PENGECEKAN")
+].copy()
+
+if not df_cek.empty:
+    try:
+        df_cek["_sort_no"] = pd.to_numeric(df_cek["No"], errors="coerce")
+        df_cek = df_cek.sort_values("_sort_no", ascending=True)
+        cek_terakhir = df_cek.iloc[-1]
+
+        status_aktif = str(cek_terakhir.get("Status_Selisih_Aktif", "TIDAK")).strip().upper()
+        nilai_selisih = to_float(cek_terakhir.get("Selisih_Pengecekan", 0))
+        tgl_cek = str(cek_terakhir.get("Tanggal_Pengecekan", "-")).strip()
+
+        if status_aktif == "YA" and abs(nilai_selisih) > 0.5:
+            if nilai_selisih > 0:
+                st.error(
+                    f"❌ **PERINGATAN SELISIH AKTIF**  \n"
+                    f"Pengecekan terakhir pada **{tgl_cek}** menunjukkan "
+                    f"**KURANG {rupiah(nilai_selisih)}**."
+                )
+            else:
+                st.success(
+                    f"✅ **PERINGATAN SELISIH AKTIF**  \n"
+                    f"Pengecekan terakhir pada **{tgl_cek}** menunjukkan "
+                    f"**LEBIH {rupiah(abs(nilai_selisih))}**."
+                )
+    except:
+        pass
+
+# ==========================================
+# PENGECEKAN SELISIH
+# ==========================================
+st.subheader("🔎 Pengecekan Selisih Kas")
+aktif_cek = st.toggle(
+    "Aktifkan pengecekan selisih",
+    value=False,
+    key="toggle_pengecekan_selisih"
+)
+
+if aktif_cek:
+    st.info(
+        "Bagian ini **hanya untuk pengecekan**. "
+        "Tidak mengubah transaksi kas, hanya menyimpan hasil audit selisih."
+    )
+
+    st.metric("💵 Kas di Tangan (Hitungan Sistem)", rupiah(last_kas))
+
+    kas_fisik = st.number_input(
+        "INPUT KAS DI TANGAN FISIK",
+        value=float(last_kas),
+        step=1000.0,
+        format="%.0f",
+        key="input_kas_fisik_cek"
+    )
+
+    selisih_cek = last_kas - kas_fisik
+
+    if selisih_cek > 0.5:
+        st.warning(
+            f"⚠️ **HASIL CEK: KURANG {rupiah(selisih_cek)}**  \n"
+            f"Uang fisik di tangan lebih sedikit dari hitungan sistem."
+        )
+    elif selisih_cek < -0.5:
+        st.success(
+            f"✅ **HASIL CEK: LEBIH {rupiah(abs(selisih_cek))}**  \n"
+            f"Uang fisik di tangan lebih banyak dari hitungan sistem."
+        )
+    else:
+        st.success("✅ **HASIL CEK: PAS / Rp 0**")
+
+    if st.button(
+        "💾 SIMPAN HASIL PENGECEKAN",
+        use_container_width=True,
+        type="primary",
+        key="btn_simpan_pengecekan"
+    ):
+        next_no_cek = get_next_no(df_kas)
+        status_aktif = "YA" if abs(selisih_cek) > 0.5 else "TIDAK"
+
+        row_cek = {
+            "No": str(next_no_cek),
+            "Tanggal": datetime.now().strftime("%d/%m/%Y"),
+            "Keterangan": "PENGECEKAN SELISIH KAS",
+            "Jenis_Transaksi": "PENGECEKAN",
+            "Nominal": "0",
+            "PAD_Aktif": "TIDAK",
+            "TAKTIS_Aktif": "TIDAK",
+            "Potongan_PAD": "0",
+            "Potongan_TAKTIS": "0",
+            "PPN": "0",
+            "PPH_21_22_23": "0",
+            "Biaya_Admin_Penyedia": "0",
+            "Bersih": "0",
+            "Jenis_Keluar": "-",
+            "Nota": "-",
+            "Sumber_Anggaran": "-",
+            "Tujuan_Anggaran": "-",
+            "Sisa_Uang_Kas_Seluruh_Sebelumnya": fmt_nominal(last_seluruh),
+            "Sisa_Uang_Kas_Sebelumnya": fmt_nominal(last_kas),
+            "Sisa_Uang_Di_ATM": fmt_nominal(last_atm),
+            "Sisa_Uang_Di_Penyedia": fmt_nominal(last_penyedia),
+            "Sisa_Uang_Kas_Seluruh": fmt_nominal(last_seluruh),
+            "Sisa_Uang_Kas_Auto": fmt_nominal(last_kas),
+            "Sisa_Uang_Kas": fmt_nominal(last_kas),
+            "Selisih_Kurang": fmt_nominal(selisih_cek),
+            "Jenis_Record": "PENGECEKAN",
+            "Kas_Fisik_Pengecekan": fmt_nominal(kas_fisik),
+            "Selisih_Pengecekan": fmt_nominal(selisih_cek),
+            "Status_Selisih_Aktif": status_aktif,
+            "Tanggal_Pengecekan": datetime.now().strftime("%d/%m/%Y")
+        }
+
+        df_baru = pd.concat([df_kas, pd.DataFrame([row_cek])], ignore_index=True)
+        if safe_update(conn_kas, WS_KAS, df_baru):
+            st.success("✅ Hasil pengecekan berhasil disimpan!")
+            st.rerun()
 
 st.divider()
 
@@ -159,7 +296,7 @@ with tab1:
     rc = st.session_state["kas_reset_counter"]
     next_no = get_next_no(df_kas)
 
-    # ── FIELD DASAR ──
+    # FIELD DASAR
     c1, c2 = st.columns(2)
     with c1:
         tanggal_kas = st.text_input(
@@ -186,7 +323,6 @@ with tab1:
             key=f"kas_{rc}_nom"
         )
 
-    # ── Default ──
     pad_aktif = False
     taktis_aktif = False
     pot_pad = 0.0
@@ -200,9 +336,6 @@ with tab1:
     sumber_anggaran = "-"
     tujuan_anggaran = "-"
 
-    # ══════════════════════════════════════════
-    # DETAIL MASUK
-    # ══════════════════════════════════════════
     if jenis_transaksi == "MASUK":
         st.divider()
         st.subheader("📥 DETAIL UANG MASUK")
@@ -234,18 +367,23 @@ with tab1:
             key=f"kas_{rc}_tujuan"
         )
 
-    # ══════════════════════════════════════════
-    # DETAIL KELUAR
-    # ══════════════════════════════════════════
     else:
         st.divider()
         st.subheader("📤 DETAIL UANG KELUAR")
 
         b1, b2 = st.columns(2)
         with b1:
-            jenis_keluar = st.selectbox("JENIS KELUAR", ["DISBURSEMENT", "REIMBURSE"], key=f"kas_{rc}_jk")
+            jenis_keluar = st.selectbox(
+                "JENIS KELUAR",
+                ["DISBURSEMENT", "REIMBURSE"],
+                key=f"kas_{rc}_jk"
+            )
         with b2:
-            nota = st.selectbox("NOTA", ["ADA", "TIDAK ADA"], key=f"kas_{rc}_nota")
+            nota = st.selectbox(
+                "NOTA",
+                ["ADA", "TIDAK ADA"],
+                key=f"kas_{rc}_nota"
+            )
 
         st.divider()
         st.subheader("💳 SUMBER ANGGARAN")
@@ -268,16 +406,7 @@ with tab1:
             if nominal > last_penyedia and nominal > 0:
                 st.warning(f"⚠️ Melebihi sisa Penyedia ({rupiah(last_penyedia)})")
 
-    # ── SALDO TERAKHIR ──
-    st.divider()
-    st.subheader("📌 SALDO TERAKHIR")
-    s1, s2, s3, s4 = st.columns(4)
-    s1.metric("Kas Seluruh", rupiah(last_seluruh))
-    s2.metric("Kas di Tangan", rupiah(last_kas))
-    s3.metric("Di ATM", rupiah(last_atm))
-    s4.metric("Di Penyedia", rupiah(last_penyedia))
-
-    # ── HITUNG SALDO BARU ──
+    # HITUNG SALDO OTOMATIS TRANSAKSI
     if jenis_transaksi == "MASUK":
         if tujuan_anggaran == "SALDO KAS (DI TANGAN)":
             new_kas = last_kas + bersih
@@ -313,70 +442,16 @@ with tab1:
             new_atm = last_atm
             new_penyedia = last_penyedia
 
-    # ── POSISI SALDO BARU (OTOMATIS) ──
-    st.divider()
-    st.subheader("🏦 POSISI SALDO BARU (OTOMATIS)")
-
     total_auto = new_kas + new_atm + new_penyedia
 
-    k1, k2, k3, k4 = st.columns(4)
-    k1.metric("💵 Kas di Tangan", rupiah(new_kas))
-    k2.metric("🏧 ATM", rupiah(new_atm))
-    k3.metric("🏢 Penyedia", rupiah(new_penyedia))
-    k4.metric("🏦 Total Kas Seluruh", rupiah(total_auto))
-
-    st.caption("Input uang kas fisik di tangan untuk cek selisih:")
-
-    sisa_kas_input = st.number_input(
-        "INPUT UANG KAS DI TANGAN (FISIK)",
-        value=float(new_kas),
-        step=1000.0,
-        format="%.0f",
-        key=f"kas_{rc}_sisa_tangan"
-    )
-
-    sisa_atm = float(new_atm)
-    sisa_penyedia = float(new_penyedia)
-    sisa_uang_kas_seluruh = total_auto
-
-    # ── SELISIH ──
-    selisih_transaksi = new_kas - sisa_kas_input
-
-    total_selisih_lama = 0.0
-    try:
-        df_valid = df_kas[df_kas["No"] != "-"].copy()
-        if not df_valid.empty:
-            total_selisih_lama = to_float(df_valid["Selisih_Kurang"].iloc[-1])
-    except:
-        total_selisih_lama = 0.0
-
-    total_selisih = total_selisih_lama + selisih_transaksi
-    selisih_kurang = total_selisih
-
     st.divider()
-    st.subheader("📊 SELISIH")
+    st.subheader("🏦 HASIL SALDO OTOMATIS TRANSAKSI")
+    h1, h2, h3, h4 = st.columns(4)
+    h1.metric("💵 Kas di Tangan", rupiah(new_kas))
+    h2.metric("🏧 ATM", rupiah(new_atm))
+    h3.metric("🏢 Penyedia", rupiah(new_penyedia))
+    h4.metric("🏦 Total Kas Seluruh", rupiah(total_auto))
 
-    if abs(selisih_transaksi) > 0.5:
-        if selisih_transaksi > 0:
-            st.warning(f"⚠️ **SELISIH TRANSAKSI INI: KURANG {rupiah(selisih_transaksi)}**")
-        else:
-            st.info(f"ℹ️ **SELISIH TRANSAKSI INI: LEBIH {rupiah(abs(selisih_transaksi))}**")
-
-    if abs(total_selisih) > 0.5:
-        if total_selisih > 0:
-            st.error(
-                f"❌ **TOTAL SELISIH: KURANG {rupiah(total_selisih)}**  \n"
-                f"Total uang di tangan masih kurang {rupiah(total_selisih)}."
-            )
-        else:
-            st.success(
-                f"✅ **TOTAL SELISIH: LEBIH {rupiah(abs(total_selisih))}**  \n"
-                f"Total uang di tangan masih lebih {rupiah(abs(total_selisih))}."
-            )
-    else:
-        st.success("✅ **TOTAL SELISIH: Rp 0** (Tidak ada selisih)")
-
-    # ── TOMBOL SIMPAN & RESET ──
     st.divider()
     cb1, cb2 = st.columns(2)
     with cb1:
@@ -423,18 +498,20 @@ with tab1:
                 "Tujuan_Anggaran": tujuan_anggaran if jenis_transaksi == "MASUK" else "-",
                 "Sisa_Uang_Kas_Seluruh_Sebelumnya": fmt_nominal(last_seluruh),
                 "Sisa_Uang_Kas_Sebelumnya": fmt_nominal(last_kas),
-                "Sisa_Uang_Di_ATM": fmt_nominal(sisa_atm),
-                "Sisa_Uang_Di_Penyedia": fmt_nominal(sisa_penyedia),
-                "Sisa_Uang_Kas_Seluruh": fmt_nominal(sisa_uang_kas_seluruh),
+                "Sisa_Uang_Di_ATM": fmt_nominal(new_atm),
+                "Sisa_Uang_Di_Penyedia": fmt_nominal(new_penyedia),
+                "Sisa_Uang_Kas_Seluruh": fmt_nominal(total_auto),
                 "Sisa_Uang_Kas_Auto": fmt_nominal(new_kas),
-                "Sisa_Uang_Kas": fmt_nominal(sisa_kas_input),
-                "Selisih_Kurang": fmt_nominal(selisih_kurang)
+                "Sisa_Uang_Kas": fmt_nominal(new_kas),
+                "Selisih_Kurang": fmt_nominal(total_selisih_lama),
+                "Jenis_Record": "TRANSAKSI",
+                "Kas_Fisik_Pengecekan": "-",
+                "Selisih_Pengecekan": "0",
+                "Status_Selisih_Aktif": "TIDAK",
+                "Tanggal_Pengecekan": "-"
             }
 
-            df_baru = pd.concat(
-                [df_kas, pd.DataFrame([new_row])],
-                ignore_index=True
-            )
+            df_baru = pd.concat([df_kas, pd.DataFrame([new_row])], ignore_index=True)
             if safe_update(conn_kas, WS_KAS, df_baru):
                 st.success("✅ Data kas berhasil disimpan!")
                 reset_form_kas()
@@ -452,7 +529,10 @@ with tab2:
     if df_kas.empty or len(df_kas[df_kas["No"] != "-"]) == 0:
         st.info("Belum ada data kas.")
     else:
-        tampil = df_kas[df_kas["No"] != "-"].copy()
+        tampil = df_kas[
+            (df_kas["No"] != "-") &
+            (df_kas["Jenis_Record"] != "PENGECEKAN")
+        ].copy()
 
         kolom_tampil = [
             "No", "Tanggal", "Keterangan",
@@ -487,12 +567,11 @@ with tab3:
     if df_kas.empty:
         st.info("Belum ada data kas.")
     else:
-        # Filter transaksi REIMBURSE yang belum dikoreksi
         df_reimburse = df_kas[
             (df_kas["No"] != "-") &
             (df_kas["Jenis_Transaksi"] == "KELUAR") &
             (df_kas["Jenis_Keluar"] == "REIMBURSE") &
-            (~df_kas["Keterangan"].str.contains("SUDAH DIKOREKSI", case=False, na=False))
+            (~df_kas["Keterangan"].astype(str).str.contains("SUDAH DIKOREKSI", case=False, na=False))
         ].copy()
 
         if df_reimburse.empty:
@@ -519,17 +598,22 @@ with tab3:
                     st.divider()
 
                     if st.button(
-                        f"🔁 KOREKSI → Kembalikan ke Kas",
+                        "🔁 KOREKSI → Kembalikan ke Kas",
                         key=f"koreksi_{idx}",
                         type="primary",
                         use_container_width=True
                     ):
-                        # 1. Tandai transaksi lama sebagai SUDAH DIKOREKSI
-                        df_kas.loc[idx, "Keterangan"] = f"{ket} [SUDAH DIKOREKSI]"
-                        df_kas.loc[idx, "Jenis_Keluar"] = "DISBURSEMENT"
+                        df_update = df_kas.copy()
 
-                        # 2. Buat transaksi MASUK koreksi
-                        next_no_koreksi = get_next_no(df_kas)
+                        # tandai transaksi lama
+                        df_update.loc[idx, "Keterangan"] = f"{ket} [SUDAH DIKOREKSI]"
+                        df_update.loc[idx, "Jenis_Keluar"] = "DISBURSEMENT"
+
+                        # ambil saldo terakhir terbaru
+                        ls, lk, la, lp = get_last_kas_state(df_update)
+
+                        # buat transaksi masuk koreksi
+                        next_no_koreksi = get_next_no(df_update)
                         koreksi_row = {
                             "No": str(next_no_koreksi),
                             "Tanggal": datetime.now().strftime("%d/%m/%Y"),
@@ -547,23 +631,25 @@ with tab3:
                             "Jenis_Keluar": "-",
                             "Nota": "-",
                             "Sumber_Anggaran": "-",
-                            "Tujuan_Anggaran": sumber,
-                            "Sisa_Uang_Kas_Seluruh_Sebelumnya": fmt_nominal(last_seluruh),
-                            "Sisa_Uang_Kas_Sebelumnya": fmt_nominal(last_kas),
-                            "Sisa_Uang_Di_ATM": fmt_nominal(last_atm),
-                            "Sisa_Uang_Di_Penyedia": fmt_nominal(last_penyedia),
-                            "Sisa_Uang_Kas_Seluruh": fmt_nominal(last_seluruh + to_float(nom)),
-                            "Sisa_Uang_Kas_Auto": fmt_nominal(last_kas + to_float(nom)),
-                            "Sisa_Uang_Kas": fmt_nominal(last_kas + to_float(nom)),
-                            "Selisih_Kurang": "0"
+                            "Tujuan_Anggaran": sumber if sumber in ["UANG KAS (DI TANGAN)", "UANG DI ATM", "UANG DI PENYEDIA"] else "SALDO KAS (DI TANGAN)",
+                            "Sisa_Uang_Kas_Seluruh_Sebelumnya": fmt_nominal(ls),
+                            "Sisa_Uang_Kas_Sebelumnya": fmt_nominal(lk),
+                            "Sisa_Uang_Di_ATM": fmt_nominal(la),
+                            "Sisa_Uang_Di_Penyedia": fmt_nominal(lp),
+                            "Sisa_Uang_Kas_Seluruh": fmt_nominal(ls + to_float(nom)),
+                            "Sisa_Uang_Kas_Auto": fmt_nominal(lk + to_float(nom)),
+                            "Sisa_Uang_Kas": fmt_nominal(lk + to_float(nom)),
+                            "Selisih_Kurang": fmt_nominal(to_float(df_update[df_update['No'] != '-']['Selisih_Kurang'].iloc[-1]) if not df_update[df_update['No'] != '-'].empty else 0),
+                            "Jenis_Record": "TRANSAKSI",
+                            "Kas_Fisik_Pengecekan": "-",
+                            "Selisih_Pengecekan": "0",
+                            "Status_Selisih_Aktif": "TIDAK",
+                            "Tanggal_Pengecekan": "-"
                         }
 
-                        df_kas = pd.concat(
-                            [df_kas, pd.DataFrame([koreksi_row])],
-                            ignore_index=True
-                        )
+                        df_update = pd.concat([df_update, pd.DataFrame([koreksi_row])], ignore_index=True)
 
-                        if safe_update(conn_kas, WS_KAS, df_kas):
+                        if safe_update(conn_kas, WS_KAS, df_update):
                             st.success(
                                 f"✅ Transaksi Reimburse **{ket}** berhasil dikoreksi!\n\n"
                                 f"Uang **{rupiah(to_float(nom))}** dikembalikan ke kas."
