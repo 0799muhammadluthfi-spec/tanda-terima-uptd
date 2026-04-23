@@ -85,9 +85,9 @@ with st.sidebar:
         unsafe_allow_html=True
     )
 
-    st.page_link("pages/1_📋_SK_Toko.py", label="📋  SK Toko", use_container_width=True)
-    st.page_link("pages/2_🅿️_Parkir.py", label="🅿️  Parkir", use_container_width=True)
-    st.page_link("pages/3_💰_Kas.py", label="💰  Kas UPTD", use_container_width=True)
+    st.page_link("pages/1_📋_SK_Toko.py", label="📋  SK TOKO", use_container_width=True)
+    st.page_link("pages/2_🅿️_Parkir.py", label="🅿️  PARKIR", use_container_width=True)
+    st.page_link("pages/3_💰_Kas.py", label="💰  KAS UPTD", use_container_width=True)
 
     st.markdown(
         """
