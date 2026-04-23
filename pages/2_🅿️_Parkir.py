@@ -412,6 +412,16 @@ with tab1:
             mr2 = st.number_input("MPP RODA R2", min_value=0)
             mr4 = st.number_input("MPP RODA R4", min_value=0)
 
+            # Preview Khusus Karcis
+            kh2 = tr2 - mr2
+            kh4 = tr4 - mr4
+
+            st.divider()
+            st.subheader("📋 Preview Khusus Karcis")
+            pk1, pk2_col = st.columns(2)
+            pk1.metric("🏍️ Khusus R2 (Total - MPP)", kh2)
+            pk2_col.metric("🚗 Khusus R4 (Total - MPP)", kh4)
+
             b1, b2 = st.columns(2)
             with b1:
                 subm = st.form_submit_button("💾 SIMPAN REKAP", type="primary", use_container_width=True)
