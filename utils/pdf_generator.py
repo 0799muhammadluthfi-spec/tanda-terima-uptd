@@ -5,6 +5,7 @@ import pandas as pd
 from io import BytesIO
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import cm
+from reportlab.pdfbase.pdfmetrics import stringWidth
 
 from utils.helpers import format_tgl_hari_indo, safe_int
 
@@ -91,32 +92,99 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
     c.rect(X_POS, Y_BASE, LEBAR_BOX, TINGGI_BOX)
     c.rect(X_POS + 0.15 * cm, Y_BASE + 0.15 * cm, LEBAR_BOX - 0.3 * cm, TINGGI_BOX - 0.3 * cm)
 
+    def wrap_text(text, max_width, font_name="Helvetica-Bold", font_size=10, max_lines=2):
+        text = str(text).upper().strip()
+        if not text or text in ["-", "NONE", "NAN"]:
+            return ["-"]
+
+        words = text.split()
+        lines = []
+        current = ""
+
+        for word in words:
+            test_line = word if current == "" else current + " " + word
+            if stringWidth(test_line, font_name, font_size) <= max_width:
+                current = test_line
+            else:
+                if current:
+                    lines.append(current)
+                current = word
+
+        if current:
+            lines.append(current)
+
+        # Batasi maksimal 2 baris agar layout tetap aman
+        if len(lines) > max_lines:
+            lines = lines[:max_lines]
+            while stringWidth(lines[-1] + "...", font_name, font_size) > max_width and len(lines[-1]) > 0:
+                lines[-1] = lines[-1][:-1]
+            lines[-1] += "..."
+
+        return lines
+
     y_tab = Y_BASE + 10.35 * cm
-    TINGGI_B = 1.05 * cm
+    TINGGI_B = 0.90 * cm
+    lebar_label = 6.5 * cm
+    lebar_value = 13.2 * cm
+    max_val_width = 12.2 * cm  # dikurangi padding kiri-kanan
+
     DETAIL_ROWS = [
         ("NOMOR URUT", data.get("No", "-")),
         ("TANGGAL TERIMA", format_tgl_hari_indo(data.get("Tanggal_Pengantaran", "-"))),
         ("TANGGAL PENGAMBILAN", format_tgl_hari_indo(data.get("Tanggal_Pengambilan", "-"))),
         ("NAMA & NOMOR TOKO", f"{data.get('Nama_Toko', '-')} - {data.get('No_Toko', '-')}"),
         ("NAMA PEMILIK (SK)", data.get("Nama_Pemilik_Asli", "-")),
+        ("NIK PEMILIK ASLI", data.get("No_NIK", "-")),
+        ("ALAMAT PEMILIK ASLI", data.get("Alamat", "-")),
         ("NAMA PENGANTAR", data.get("Nama_Pengantar_Berkas", "-"))
     ]
 
     for label, val in DETAIL_ROWS:
+        # Khusus alamat → auto wrap
+        if label == "ALAMAT PEMILIK ASLI":
+            value_lines = wrap_text(val, max_val_width, font_name="Helvetica-Bold", font_size=10, max_lines=2)
+            row_height = max(TINGGI_B, 0.45 * cm * len(value_lines) + 0.25 * cm)
+        else:
+            value_lines = [str(val).upper()]
+            row_height = TINGGI_B
+
+        # Gambar kotak row
         c.setLineWidth(1.5)
-        c.rect(X_POS + 0.15 * cm, y_tab - TINGGI_B, 6.5 * cm, TINGGI_B)
-        c.rect(X_POS + 6.65 * cm, y_tab - TINGGI_B, 13.2 * cm, TINGGI_B)
+        c.rect(X_POS + 0.15 * cm, y_tab - row_height, lebar_label, row_height)
+        c.rect(X_POS + 6.65 * cm, y_tab - row_height, lebar_value, row_height)
+
+        # Label kiri
         c.setFont("Helvetica-Bold", 9)
-        c.drawString(X_POS + 0.4 * cm, y_tab - 0.7 * cm, label)
+        label_y = y_tab - (row_height / 2) - 0.12 * cm
+        c.drawString(X_POS + 0.4 * cm, label_y, label)
+
+        # Value kanan
         c.setFont("Helvetica-Bold", 10)
-        c.drawString(X_POS + 7.0 * cm, y_tab - 0.7 * cm, str(val).upper())
-        y_tab -= TINGGI_B
+        start_y = y_tab - 0.38 * cm
+        for i, line in enumerate(value_lines):
+            c.drawString(X_POS + 7.0 * cm, start_y - (i * 0.42 * cm), line)
+
+        y_tab -= row_height
+
+    # =========================
+    # BAGIAN PERHATIAN
+    # =========================
+    # Turunkan otomatis, tapi jangan sampai menyentuh garis tabel
+    y_notice_title = min(Y_BASE + 1.35 * cm, y_tab - 0.18 * cm)
+    y_notice_1 = y_notice_title - 0.42 * cm
+    y_notice_2 = y_notice_1 - 0.42 * cm
+
+    # Jaga supaya baris terakhir tidak menyentuh garis bawah box
+    if y_notice_2 < Y_BASE + 0.30 * cm:
+        y_notice_2 = Y_BASE + 0.30 * cm
+        y_notice_1 = y_notice_2 + 0.42 * cm
+        y_notice_title = y_notice_1 + 0.42 * cm
 
     c.setFont("Helvetica-Bold", 10)
-    c.drawString(X_POS + 0.6 * cm, Y_BASE + 2.8 * cm, "PERHATIAN:")
+    c.drawString(X_POS + 0.6 * cm, y_notice_title, "PERHATIAN:")
     c.setFont("Helvetica", 9)
-    c.drawString(X_POS + 0.6 * cm, Y_BASE + 2.2 * cm, "1. Simpan tanda terima ini sebagai syarat pengambilan SK asli.")
-    c.drawString(X_POS + 0.6 * cm, Y_BASE + 1.6 * cm, "2. Pengambilan SK hanya dapat dilakukan di jam kerja UPTD.")
+    c.drawString(X_POS + 0.6 * cm, y_notice_1, "1. Simpan tanda terima ini sebagai syarat pengambilan SK asli.")
+    c.drawString(X_POS + 0.6 * cm, y_notice_2, "2. Pengambilan SK hanya dapat dilakukan di jam kerja UPTD.")
 
     c.save()
     buffer.seek(0)
