@@ -152,8 +152,11 @@ with tab1:
             tgl_terima = st.text_input("TANGGAL TERIMA *", value=datetime.now().strftime("%d-%m-%Y"))
             nama_toko = st.text_input("NAMA TOKO *").strip().upper()
             no_toko = st.text_input("NOMOR TOKO *").strip().upper()
+            no_nik = st.text_input("NO NIK PEMILIK ASLI").strip()
+
         with col2:
             nama_pemilik = st.text_input("NAMA PEMILIK SK *").strip().upper()
+            alamat = st.text_input("ALAMAT PEMILIK ASLI").strip().upper()
             nama_pengantar = st.text_input("NAMA PENGANTAR *").strip().upper()
             nama_penerima = st.text_input("NAMA PENERIMA *").strip().upper()
 
@@ -181,6 +184,8 @@ with tab1:
                     "Nama_Toko": nama_toko,
                     "No_Toko": no_toko,
                     "Nama_Pemilik_Asli": nama_pemilik,
+                    "No_NIK": no_nik if no_nik else "-",
+                    "Alamat": alamat if alamat else "-",
                     "Nama_Pengantar_Berkas": nama_pengantar,
                     "Penerima_Berkas": nama_penerima
                 }
