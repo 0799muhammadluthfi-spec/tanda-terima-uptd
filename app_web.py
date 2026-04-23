@@ -141,17 +141,17 @@ with st.sidebar:
 
     st.page_link(
         "pages/1_📋_SK_Toko.py",
-        label="📋  SK Toko",
+        label="📋  SK TOKO",
         use_container_width=True
     )
     st.page_link(
         "pages/2_🅿️_Parkir.py",
-        label="🅿️  Parkir",
+        label="🅿️  PARKIR",
         use_container_width=True
     )
     st.page_link(
         "pages/3_💰_Kas.py",
-        label="💰  Kas UPTD",
+        label="💰  KAS UPTD",
         use_container_width=True
     )
 
