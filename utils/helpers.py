@@ -445,22 +445,37 @@ def get_last_kas_state(df_kas: pd.DataFrame):
         if df_kas.empty:
             return 0.0, 0.0, 0.0, 0.0
 
-        d = urutkan_no(df_kas, ascending=True)
-        d_valid = d[d["No"] != "-"]
+        d = df_kas.copy()
 
-        if d_valid.empty:
+        if "No" not in d.columns:
             return 0.0, 0.0, 0.0, 0.0
 
-        last = d_valid.iloc[-1]
-        last_seluruh = to_float(last.get("Sisa_Uang_Kas_Seluruh", 0))
-        last_kas = to_float(last.get("Sisa_Uang_Kas", 0))
+        d = d[d["No"] != "-"].copy()
+
+        # Ambil hanya transaksi, abaikan pengecekan
+        if "Jenis_Record" in d.columns:
+            d = d[
+                (d["Jenis_Record"].astype(str).str.strip() == "TRANSAKSI") |
+                (d["Jenis_Record"].astype(str).str.strip() == "-") |
+                (d["Jenis_Record"].astype(str).str.strip() == "")
+            ].copy()
+
+        if d.empty:
+            return 0.0, 0.0, 0.0, 0.0
+
+        d["_sort_no"] = pd.to_numeric(d["No"], errors="coerce")
+        d = d.sort_values("_sort_no", ascending=True)
+
+        last = d.iloc[-1]
+
+        last_kas = to_float(last.get("Sisa_Uang_Kas_Auto", 0))
         last_atm = to_float(last.get("Sisa_Uang_Di_ATM", 0))
         last_penyedia = to_float(last.get("Sisa_Uang_Di_Penyedia", 0))
+        last_seluruh = last_kas + last_atm + last_penyedia
 
         return last_seluruh, last_kas, last_atm, last_penyedia
     except:
         return 0.0, 0.0, 0.0, 0.0
-
 
 def hitung_ringkasan_kas(df_kas: pd.DataFrame):
     try:
