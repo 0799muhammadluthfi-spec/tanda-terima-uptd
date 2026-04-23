@@ -106,9 +106,9 @@ with st.sidebar:
         'margin:0 0 6px 0;">MODUL</p></div>',
         unsafe_allow_html=True
     )
-    st.page_link("pages/1_📋_SK_Toko.py", label="📋  SK Toko", use_container_width=True)
-    st.page_link("pages/2_🅿️_Parkir.py", label="🅿️  Parkir", use_container_width=True)
-    st.page_link("pages/3_💰_Kas.py", label="💰  Kas UPTD", use_container_width=True)
+    st.page_link("pages/1_📋_SK_Toko.py", label="📋  SK TOKO", use_container_width=True)
+    st.page_link("pages/2_🅿️_Parkir.py", label="🅿️  PARKIR", use_container_width=True)
+    st.page_link("pages/3_💰_Kas.py", label="💰  KAS UPTD", use_container_width=True)
     st.markdown(
         """
         <div style="text-align:center; padding:24px 0 8px 0;
@@ -322,6 +322,9 @@ with tab1:
             format="%.0f",
             key=f"kas_{rc}_nom"
         )
+
+        if nominal > 0:
+            st.caption(f"💰 {rupiah(nominal)}")
 
     pad_aktif = False
     taktis_aktif = False
