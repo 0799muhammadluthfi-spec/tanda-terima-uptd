@@ -58,6 +58,8 @@ KOLOM_SK = [
     "Nama_Toko",
     "No_Toko",
     "Nama_Pemilik_Asli",
+    "No_NIK",
+    "Alamat",
     "Nama_Pengantar_Berkas",
     "Penerima_Berkas"
 ]
