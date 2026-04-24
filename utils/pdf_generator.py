@@ -11,12 +11,13 @@ from utils.helpers import format_tgl_hari_indo, safe_int
 
 
 # ==========================================
-# PDF SK TOKO — FORMAT TIDAK DIUBAH
+# PDF SK TOKO
 # ==========================================
 def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
     buffer = BytesIO()
     UKURAN_KERTAS = (21.5 * cm, 33 * cm)
     c = canvas.Canvas(buffer, pagesize=UKURAN_KERTAS)
+
     M = 0.75 * cm
     TINGGI_POTONG = 12 * cm
     Y_POTONG = 33 * cm - TINGGI_POTONG
@@ -34,12 +35,17 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
         c.drawString(0.5 * cm, Y_POTONG + 0.15 * cm, "✂ --- Batas potong (Tinggi 12 cm) ---")
         c.setDash()
 
+    # ==========================================
+    # HALAMAN 1
+    # ==========================================
     gambar_garis_potong()
     c.setLineWidth(1.5)
     c.rect(X_POS, Y_BASE, LEBAR_BOX, TINGGI_BOX)
     c.rect(X_POS + 0.15 * cm, Y_BASE + 0.15 * cm, LEBAR_BOX - 0.3 * cm, TINGGI_BOX - 0.3 * cm)
+
     c.setFont("Helvetica-Bold", 13)
     c.drawCentredString(TENGAH, Y_BASE + 9.3 * cm, "TANDA TERIMA BERKAS PERPANJANGAN IZIN TOKO")
+
     c.setLineWidth(2)
     c.line(TENGAH - 5.5 * cm, Y_BASE + 9.0 * cm, TENGAH + 5.5 * cm, Y_BASE + 9.0 * cm)
 
@@ -56,30 +62,42 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
     for i, item in enumerate(SEMUA_BERKAS, 1):
         c.setFont("Helvetica-BoldOblique", 10)
         c.drawString(X_POS + 1 * cm, yy, f"{i}. {item}")
+
         c.setFont("Helvetica-Bold", 10)
         x_status = X_POS + 14 * cm
         c.drawString(x_status, yy, "ADA   /   TIDAK ADA")
+
         c.setLineWidth(1.5)
         y_strike = yy + 0.11 * cm
         if item in berkas_list:
             c.line(x_status + 1.4 * cm, y_strike, x_status + 3.5 * cm, y_strike)
         else:
             c.line(x_status - 0.1 * cm, y_strike, x_status + 0.8 * cm, y_strike)
+
         yy -= 0.7 * cm
 
     c.setLineWidth(1.5)
     c.line(X_POS + 0.15 * cm, Y_BASE + 3.0 * cm, X_POS + LEBAR_BOX - 0.15 * cm, Y_BASE + 3.0 * cm)
     c.line(TENGAH, Y_BASE + 0.15 * cm, TENGAH, Y_BASE + 3.0 * cm)
+
     c.setFont("Helvetica-Bold", 9)
     c.drawCentredString(X_POS + 5 * cm, Y_BASE + 2.5 * cm, "PENGANTAR BERKAS")
     c.drawCentredString(X_POS + 15 * cm, Y_BASE + 2.5 * cm, "PETUGAS PENERIMA")
+
     c.setFont("Helvetica-Bold", 11)
-    c.drawCentredString(X_POS + 5 * cm, Y_BASE + 0.6 * cm, f"( {str(data.get('Nama_Pengantar_Berkas', '')).upper()} )")
-    c.drawCentredString(X_POS + 15 * cm, Y_BASE + 0.6 * cm, f"( {str(data.get('Penerima_Berkas', '')).upper()} )")
+    c.drawCentredString(X_POS + 5 * cm, Y_BASE + 0.6 * cm,
+                        f"( {str(data.get('Nama_Pengantar_Berkas', '')).upper()} )")
+    c.drawCentredString(X_POS + 15 * cm, Y_BASE + 0.6 * cm,
+                        f"( {str(data.get('Penerima_Berkas', '')).upper()} )")
 
     c.showPage()
 
+    # ==========================================
+    # HALAMAN 2
+    # ==========================================
     gambar_garis_potong()
+
+    # Watermark
     c.saveState()
     c.setFillColorRGB(0.9, 0.9, 0.9)
     c.setFont("Helvetica-Bold", 35)
@@ -88,6 +106,7 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
     c.drawCentredString(0, 0, "UPTD PASAR KANDANGAN")
     c.restoreState()
 
+    # Border luar
     c.setLineWidth(1.5)
     c.rect(X_POS, Y_BASE, LEBAR_BOX, TINGGI_BOX)
     c.rect(X_POS + 0.15 * cm, Y_BASE + 0.15 * cm, LEBAR_BOX - 0.3 * cm, TINGGI_BOX - 0.3 * cm)
@@ -113,20 +132,20 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
         if current:
             lines.append(current)
 
-        # Batasi maksimal 2 baris agar layout tetap aman
         if len(lines) > max_lines:
             lines = lines[:max_lines]
-            while stringWidth(lines[-1] + "...", font_name, font_size) > max_width and len(lines[-1]) > 0:
+            while len(lines[-1]) > 0 and stringWidth(lines[-1] + "...", font_name, font_size) > max_width:
                 lines[-1] = lines[-1][:-1]
             lines[-1] += "..."
 
         return lines
 
     y_tab = Y_BASE + 10.35 * cm
-    TINGGI_B = 0.90 * cm
+    TINGGI_B = 0.95 * cm
+    FONT_SIZE = 10
     lebar_label = 6.5 * cm
     lebar_value = 13.2 * cm
-    max_val_width = 12.2 * cm  # dikurangi padding kiri-kanan
+    max_val_width = 12.2 * cm
 
     DETAIL_ROWS = [
         ("NOMOR URUT", data.get("No", "-")),
@@ -140,51 +159,63 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
     ]
 
     for label, val in DETAIL_ROWS:
-        # Khusus alamat → auto wrap
+        # Khusus alamat auto-wrap
         if label == "ALAMAT PEMILIK ASLI":
-            value_lines = wrap_text(val, max_val_width, font_name="Helvetica-Bold", font_size=10, max_lines=2)
-            row_height = max(TINGGI_B, 0.45 * cm * len(value_lines) + 0.25 * cm)
+            value_lines = wrap_text(val, max_val_width, "Helvetica-Bold", FONT_SIZE, 2)
+            row_height = max(TINGGI_B, 0.42 * cm * len(value_lines) + 0.30 * cm)
         else:
             value_lines = [str(val).upper()]
             row_height = TINGGI_B
 
-        # Gambar kotak row
+        # Kotak
         c.setLineWidth(1.5)
         c.rect(X_POS + 0.15 * cm, y_tab - row_height, lebar_label, row_height)
         c.rect(X_POS + 6.65 * cm, y_tab - row_height, lebar_value, row_height)
 
-        # Label kiri
-        c.setFont("Helvetica-Bold", 9)
-        label_y = y_tab - (row_height / 2) - 0.12 * cm
-        c.drawString(X_POS + 0.4 * cm, label_y, label)
+        # Label kiri: rapat kiri seperti dulu
+        c.setFont("Helvetica-Bold", FONT_SIZE)
+        c.drawString(X_POS + 0.4 * cm, y_tab - 0.60 * cm, label)
 
-        # Value kanan
-        c.setFont("Helvetica-Bold", 10)
-        start_y = y_tab - 0.38 * cm
-        for i, line in enumerate(value_lines):
-            c.drawString(X_POS + 7.0 * cm, start_y - (i * 0.42 * cm), line)
+        # Value kanan: rapat kiri tapi center vertikal
+        c.setFont("Helvetica-Bold", FONT_SIZE)
+        if len(value_lines) == 1:
+            val_y = y_tab - (row_height / 2) - 0.14 * cm
+            c.drawString(X_POS + 7.0 * cm, val_y, value_lines[0])
+        else:
+            total_text_height = len(value_lines) * 0.42 * cm
+            start_y = y_tab - ((row_height - total_text_height) / 2) - 0.08 * cm
+            for i, line in enumerate(value_lines):
+                c.drawString(X_POS + 7.0 * cm, start_y - (i * 0.42 * cm), line)
 
         y_tab -= row_height
 
-    # =========================
-    # BAGIAN PERHATIAN
-    # =========================
-    # Turunkan otomatis, tapi jangan sampai menyentuh garis tabel
-    y_notice_title = min(Y_BASE + 1.35 * cm, y_tab - 0.18 * cm)
-    y_notice_1 = y_notice_title - 0.42 * cm
-    y_notice_2 = y_notice_1 - 0.42 * cm
+    # ==========================================
+    # BAGIAN PERHATIAN (4 POIN)
+    # ==========================================
+    jarak_baris = 0.35 * cm
+    y_notice_title = min(Y_BASE + 1.70 * cm, y_tab - 0.15 * cm)
 
-    # Jaga supaya baris terakhir tidak menyentuh garis bawah box
-    if y_notice_2 < Y_BASE + 0.30 * cm:
-        y_notice_2 = Y_BASE + 0.30 * cm
-        y_notice_1 = y_notice_2 + 0.42 * cm
-        y_notice_title = y_notice_1 + 0.42 * cm
+    y_notice_1 = y_notice_title - jarak_baris
+    y_notice_2 = y_notice_1 - jarak_baris
+    y_notice_3 = y_notice_2 - jarak_baris
+    y_notice_4 = y_notice_3 - jarak_baris
+
+    # Jaga supaya tidak menyentuh garis bawah box
+    if y_notice_4 < Y_BASE + 0.20 * cm:
+        y_notice_4 = Y_BASE + 0.20 * cm
+        y_notice_3 = y_notice_4 + jarak_baris
+        y_notice_2 = y_notice_3 + jarak_baris
+        y_notice_1 = y_notice_2 + jarak_baris
+        y_notice_title = y_notice_1 + jarak_baris
 
     c.setFont("Helvetica-Bold", 10)
     c.drawString(X_POS + 0.6 * cm, y_notice_title, "PERHATIAN:")
+
     c.setFont("Helvetica", 9)
-    c.drawString(X_POS + 0.6 * cm, y_notice_1, "1. Simpan tanda terima ini sebagai syarat pengambilan SK asli.")
-    c.drawString(X_POS + 0.6 * cm, y_notice_2, "2. Pengambilan SK hanya dapat dilakukan di jam kerja UPTD.")
+    c.drawString(X_POS + 0.6 * cm, y_notice_1, "1. Mohon simpan dan bawa tanda terima ini sebagai syarat pengambilan SK Toko Anda.")
+    c.drawString(X_POS + 0.6 * cm, y_notice_2, "2. Pelayanan pengambilan SK dapat dilakukan pada saat jam kerja operasional UPTD.")
+    c.drawString(X_POS + 0.6 * cm, y_notice_3, "3. Jika tanda terima hilang, harap melampirkan fotokopi KTP Pemilik SK dan Pengantar.")
+    c.drawString(X_POS + 0.6 * cm, y_notice_4, "4. UPTD tidak bertanggung jawab atas berkas yang tidak diambil 30 hari setelah SK selesai.")
 
     c.save()
     buffer.seek(0)
@@ -192,7 +223,7 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
 
 
 # ==========================================
-# PDF PARKIR — FORMAT TIDAK DIUBAH
+# PDF PARKIR
 # ==========================================
 def cetak_tanda_terima_parkir(data) -> BytesIO:
     if isinstance(data, pd.Series):
@@ -249,7 +280,7 @@ def cetak_tanda_terima_parkir(data) -> BytesIO:
 
 
 # ==========================================
-# PDF OVERPRINT — FORMAT TIDAK DIUBAH
+# PDF OVERPRINT
 # ==========================================
 def cetak_overprint(tgl_ambil: str) -> BytesIO:
     buffer = BytesIO()
