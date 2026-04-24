@@ -162,7 +162,7 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
         # Khusus alamat auto-wrap
         if label == "ALAMAT PEMILIK ASLI":
             value_lines = wrap_text(val, max_val_width, "Helvetica-Bold", FONT_SIZE, 2)
-            row_height = max(TINGGI_B, 0.42 * cm * len(value_lines) + 0.30 * cm)
+            row_height = max(TINGGI_B, 0.50 * cm * len(value_lines) + 0.30 * cm)
         else:
             value_lines = [str(val).upper()]
             row_height = TINGGI_B
@@ -176,16 +176,21 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
         c.setFont("Helvetica-Bold", FONT_SIZE)
         c.drawString(X_POS + 0.4 * cm, y_tab - 0.60 * cm, label)
 
-        # Value kanan: rapat kiri tapi center vertikal
+        # Value kanan: rapat kiri, center vertikal
         c.setFont("Helvetica-Bold", FONT_SIZE)
         if len(value_lines) == 1:
+            # 1 baris: tepat tengah vertikal
             val_y = y_tab - (row_height / 2) - 0.14 * cm
             c.drawString(X_POS + 7.0 * cm, val_y, value_lines[0])
         else:
-            total_text_height = len(value_lines) * 0.42 * cm
-            start_y = y_tab - ((row_height - total_text_height) / 2) - 0.08 * cm
+            # 2 baris: kedua baris di-center vertikal dalam kotak
+            line_height = 0.42 * cm
+            total_text_height = len(value_lines) * line_height
+            # Titik awal = tengah kotak dikurangi setengah tinggi total teks
+            center_of_box = y_tab - (row_height / 2)
+            start_y = center_of_box + (total_text_height / 2) - 0.14 * cm
             for i, line in enumerate(value_lines):
-                c.drawString(X_POS + 7.0 * cm, start_y - (i * 0.42 * cm), line)
+                c.drawString(X_POS + 7.0 * cm, start_y - (i * line_height), line)
 
         y_tab -= row_height
 
@@ -208,7 +213,7 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
         y_notice_1 = y_notice_2 + jarak_baris
         y_notice_title = y_notice_1 + jarak_baris
 
-    c.setFont("Helvetica-Bold", 10)
+    c.setFont("Helvetica-Bold", FONT_SIZE)
     c.drawString(X_POS + 0.6 * cm, y_notice_title, "PERHATIAN:")
 
     c.setFont("Helvetica", 9)
@@ -223,7 +228,7 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
 
 
 # ==========================================
-# PDF PARKIR
+# PDF PARKIR — TIDAK DIUBAH
 # ==========================================
 def cetak_tanda_terima_parkir(data) -> BytesIO:
     if isinstance(data, pd.Series):
@@ -280,7 +285,7 @@ def cetak_tanda_terima_parkir(data) -> BytesIO:
 
 
 # ==========================================
-# PDF OVERPRINT
+# PDF OVERPRINT — TIDAK DIUBAH
 # ==========================================
 def cetak_overprint(tgl_ambil: str) -> BytesIO:
     buffer = BytesIO()
