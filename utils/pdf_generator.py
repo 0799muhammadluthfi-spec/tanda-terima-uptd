@@ -180,7 +180,7 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
     for label, val in DETAIL_ROWS:
         if label == "ALAMAT PEMILIK ASLI":
             value_lines = wrap_text(val, max_val_width, "Helvetica-Bold", FONT_SIZE, 2)
-            row_height = max(TINGGI_B, 0.50 * cm * len(value_lines) + 0.30 * cm)
+            row_height = 1.15 * cm if len(value_lines) > 1 else TINGGI_B
         else:
             value_lines = [str(val).upper()]
             row_height = TINGGI_B
@@ -193,23 +193,22 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
         c.drawString(X_POS + 0.4 * cm, y_tab - 0.60 * cm, label)
 
         c.setFont("Helvetica-Bold", FONT_SIZE)
-
-        # Hitung posisi tengah kolom value
-        val_col_center = X_POS + 6.65 * cm + (lebar_value / 2)
+        x_value = X_POS + 7.0 * cm
 
         if len(value_lines) == 1:
-            # 1 baris: center vertikal
+            # 1 baris → center vertikal
             val_y = y_tab - (row_height / 2) - 0.12 * cm
-            c.drawString(X_POS + 7.0 * cm, val_y, value_lines[0])
+            c.drawString(x_value, val_y, value_lines[0])
         else:
-            # 2 baris: center vertikal dalam kotak
+            # 2 baris → dua baris rata kiri dengan titik awal sama
             line_height = 0.40 * cm
-            total_text_height = len(value_lines) * line_height
             center_of_box = y_tab - (row_height / 2)
-            # Mulai dari atas tengah, turun per baris
-            start_y = center_of_box + ((total_text_height - line_height) / 2)
-            for i, line in enumerate(value_lines):
-                c.drawString(X_POS + 7.0 * cm, start_y - (i * line_height), line)
+
+            y_line1 = center_of_box + 0.10 * cm
+            y_line2 = center_of_box - 0.30 * cm
+
+            c.drawString(x_value, y_line1, value_lines[0])
+            c.drawString(x_value, y_line2, value_lines[1])
 
         y_tab -= row_height
 
