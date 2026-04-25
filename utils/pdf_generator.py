@@ -52,7 +52,7 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
         c.setFont("Helvetica-Bold", 12)
         c.drawCentredString(center_x, y_dalam + kotak_dalam - 1.5 * cm, "NO URUT")
 
-        c.setFont("Helvetica-Bold", 40)
+        c.setFont("Helvetica-Bold", 70)
         c.drawCentredString(center_x, y_dalam + 1.2 * cm, str(no_urut_val).upper())
 
     # ==========================================
