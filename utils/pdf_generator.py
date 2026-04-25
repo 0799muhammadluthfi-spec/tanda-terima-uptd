@@ -103,13 +103,10 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
 
     nama_pengantar = str(data.get('Nama_Pengantar_Berkas', '')).upper()
     no_hp = str(data.get('No_HP_Pengantar', '')).strip()
-    if no_hp and no_hp != "-":
-        label_pengantar = f"( {nama_pengantar} / {no_hp} )"
-    else:
-        label_pengantar = f"( {nama_pengantar} )"
 
+    # Halaman depan: nama saja tanpa no HP
     c.setFont("Helvetica-Bold", 11)
-    c.drawCentredString(X_POS + 5 * cm, Y_BASE + 0.6 * cm, label_pengantar)
+    c.drawCentredString(X_POS + 5 * cm, Y_BASE + 0.6 * cm, f"( {nama_pengantar} )")
     c.drawCentredString(X_POS + 15 * cm, Y_BASE + 0.6 * cm,
                         f"( {str(data.get('Penerima_Berkas', '')).upper()} )")
 
@@ -202,14 +199,14 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
 
         if len(value_lines) == 1:
             val_y = y_tab - (row_height / 2) - 0.14 * cm
-            c.drawCentredString(val_col_center, val_y, value_lines[0])
+            c.drawString(X_POS + 7.0 * cm, val_y, value_lines[0])
         else:
             line_height = 0.42 * cm
             total_text_height = len(value_lines) * line_height
             center_of_box = y_tab - (row_height / 2)
             start_y = center_of_box + (total_text_height / 2) - 0.14 * cm
             for i, line in enumerate(value_lines):
-                c.drawCentredString(val_col_center, start_y - (i * line_height), line)
+                c.drawString(X_POS + 7.0 * cm, start_y - (i * line_height), line)
 
         y_tab -= row_height
 
