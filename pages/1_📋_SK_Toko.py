@@ -214,7 +214,7 @@ with tab1:
         l = st.session_state["last_sk"]
         no_urut_pdf = str(l.get('No', '0')).strip()
         nama_pengantar_pdf = str(l.get('Nama_Pengantar_Berkas', 'SK')).strip().replace(" ", "_")
-        nama_file = f"{no_urut_pdf}_{nama_pengantar_pdf}_perpanjang_sk.pdf"
+        nama_file = f"{no_urut_pdf}_{nama_pengantar_pdf}_PERPANJANG_SK.pdf"
 
         st.download_button(
             "📥 DOWNLOAD PDF TANDA TERIMA",
