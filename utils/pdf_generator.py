@@ -198,13 +198,16 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
         val_col_center = X_POS + 6.65 * cm + (lebar_value / 2)
 
         if len(value_lines) == 1:
-            val_y = y_tab - (row_height / 2) - 0.14 * cm
+            # 1 baris: center vertikal
+            val_y = y_tab - (row_height / 2) - 0.12 * cm
             c.drawString(X_POS + 7.0 * cm, val_y, value_lines[0])
         else:
-            line_height = 0.42 * cm
+            # 2 baris: center vertikal dalam kotak
+            line_height = 0.40 * cm
             total_text_height = len(value_lines) * line_height
             center_of_box = y_tab - (row_height / 2)
-            start_y = center_of_box + (total_text_height / 2) - 0.14 * cm
+            # Mulai dari atas tengah, turun per baris
+            start_y = center_of_box + ((total_text_height - line_height) / 2)
             for i, line in enumerate(value_lines):
                 c.drawString(X_POS + 7.0 * cm, start_y - (i * line_height), line)
 
