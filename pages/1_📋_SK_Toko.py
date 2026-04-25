@@ -212,8 +212,10 @@ with tab1:
     if "last_sk" in st.session_state:
         st.divider()
         l = st.session_state["last_sk"]
-        nama_file = f"TANDA_{l['No']}_{l.get('Nama_Pemilik_Asli', 'SK')}.pdf"
-        nama_file = nama_file.replace(" ", "_")
+        no_urut_pdf = str(l.get('No', '0')).strip()
+        nama_pengantar_pdf = str(l.get('Nama_Pengantar_Berkas', 'SK')).strip().replace(" ", "_")
+        nama_file = f"{no_urut_pdf}_{nama_pengantar_pdf}_perpanjang_sk.pdf"
+
         st.download_button(
             "📥 DOWNLOAD PDF TANDA TERIMA",
             data=buat_pdf_full(l, st.session_state.get("last_berkas", [])),
