@@ -29,6 +29,32 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
         c.drawString(0.5 * cm, Y_POTONG + 0.15 * cm, "--- Batas potong (Tinggi 12 cm) ---")
         c.setDash()
 
+    def gambar_kotak_no_urut(no_urut_val):
+        kotak_luar = 6 * cm
+        kotak_dalam = 5 * cm
+        x_kanan = 21.5 * cm - M - kotak_luar
+        y_bawah = Y_POTONG - kotak_luar - 0.3 * cm
+
+        c.setLineWidth(1)
+        c.setDash(3, 3)
+        c.rect(x_kanan, y_bawah, kotak_luar, kotak_luar)
+        c.setDash()
+
+        offset = (kotak_luar - kotak_dalam) / 2
+        x_dalam = x_kanan + offset
+        y_dalam = y_bawah + offset
+
+        c.setLineWidth(1.5)
+        c.rect(x_dalam, y_dalam, kotak_dalam, kotak_dalam)
+
+        center_x = x_dalam + kotak_dalam / 2
+
+        c.setFont("Helvetica-Bold", 12)
+        c.drawCentredString(center_x, y_dalam + kotak_dalam - 1.5 * cm, "NO URUT")
+
+        c.setFont("Helvetica-Bold", 28)
+        c.drawCentredString(center_x, y_dalam + 1.2 * cm, str(no_urut_val).upper())
+
     # ==========================================
     # HALAMAN 1
     # ==========================================
@@ -75,7 +101,6 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
     c.drawCentredString(X_POS + 5 * cm, Y_BASE + 2.5 * cm, "PENGANTAR BERKAS")
     c.drawCentredString(X_POS + 15 * cm, Y_BASE + 2.5 * cm, "PETUGAS PENERIMA")
 
-    # Nama pengantar + no HP
     nama_pengantar = str(data.get('Nama_Pengantar_Berkas', '')).upper()
     no_hp = str(data.get('No_HP_Pengantar', '')).strip()
     if no_hp and no_hp != "-":
@@ -87,6 +112,8 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
     c.drawCentredString(X_POS + 5 * cm, Y_BASE + 0.6 * cm, label_pengantar)
     c.drawCentredString(X_POS + 15 * cm, Y_BASE + 0.6 * cm,
                         f"( {str(data.get('Penerima_Berkas', '')).upper()} )")
+
+    gambar_kotak_no_urut(data.get("No", "-"))
 
     c.showPage()
 
@@ -138,7 +165,6 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
     lebar_value = 13.2 * cm
     max_val_width = 12.2 * cm
 
-    # Nama pengantar + no HP untuk halaman 2
     pengantar_display = nama_pengantar
     if no_hp and no_hp != "-":
         pengantar_display = f"{nama_pengantar} / {no_hp}"
@@ -170,16 +196,20 @@ def buat_pdf_full(data: dict, berkas_list: list) -> BytesIO:
         c.drawString(X_POS + 0.4 * cm, y_tab - 0.60 * cm, label)
 
         c.setFont("Helvetica-Bold", FONT_SIZE)
+
+        # Hitung posisi tengah kolom value
+        val_col_center = X_POS + 6.65 * cm + (lebar_value / 2)
+
         if len(value_lines) == 1:
             val_y = y_tab - (row_height / 2) - 0.14 * cm
-            c.drawString(X_POS + 7.0 * cm, val_y, value_lines[0])
+            c.drawCentredString(val_col_center, val_y, value_lines[0])
         else:
             line_height = 0.42 * cm
             total_text_height = len(value_lines) * line_height
             center_of_box = y_tab - (row_height / 2)
             start_y = center_of_box + (total_text_height / 2) - 0.14 * cm
             for i, line in enumerate(value_lines):
-                c.drawString(X_POS + 7.0 * cm, start_y - (i * line_height), line)
+                c.drawCentredString(val_col_center, start_y - (i * line_height), line)
 
         y_tab -= row_height
 
