@@ -106,18 +106,32 @@ with tab1:
 
     no_urut = st.text_input("NOMOR URUT *", value=str(next_no), key=f"sk_{rc}_no")
 
-    # Tampilkan data lama kalau no sudah ada
+    # Cek apakah no sudah ada → isi otomatis ke session state
     data_lama = None
+    key_prefix = f"sk_{rc}"
+
     if not df_sk.empty and no_urut.strip():
         no_norm = normalisasi_no(no_urut)
         mask = df_sk["No"].apply(normalisasi_no) == no_norm
         if mask.any():
             data_lama = df_sk[mask].iloc[0]
-            st.info("📋 Data yang sudah ada untuk nomor ini:")
-            st.dataframe(
-                df_sk[mask][["No", "Nama_Toko", "No_Toko", "Nama_Pemilik_Asli", "Nama_Pengantar_Berkas"]],
-                use_container_width=True, hide_index=True
-            )
+            st.info("📋 Nomor ini sudah ada. Data lama dimuat ke form untuk diedit.")
+
+            # Set session state agar form terisi otomatis
+            def set_if_empty(key, val):
+                if key not in st.session_state or st.session_state.get(f"_loaded_{rc}") != no_norm:
+                    st.session_state[key] = str(val) if str(val) != "-" else ""
+
+            set_if_empty(f"{key_prefix}_toko", data_lama.get("Nama_Toko", ""))
+            set_if_empty(f"{key_prefix}_notoko", data_lama.get("No_Toko", ""))
+            set_if_empty(f"{key_prefix}_nik", data_lama.get("No_NIK", ""))
+            set_if_empty(f"{key_prefix}_pemilik", data_lama.get("Nama_Pemilik_Asli", ""))
+            set_if_empty(f"{key_prefix}_alamat", data_lama.get("Alamat", ""))
+            set_if_empty(f"{key_prefix}_pengantar", data_lama.get("Nama_Pengantar_Berkas", ""))
+            set_if_empty(f"{key_prefix}_hp", data_lama.get("No_HP_Pengantar", ""))
+            set_if_empty(f"{key_prefix}_penerima", data_lama.get("Penerima_Berkas", ""))
+
+            st.session_state[f"_loaded_{rc}"] = no_norm
 
     st.divider()
 
@@ -127,15 +141,15 @@ with tab1:
         col1, col2 = st.columns(2)
         with col1:
             tgl_terima = st.text_input("TANGGAL TERIMA *", value=datetime.now().strftime("%d-%m-%Y"), key=f"sk_{rc}_tgl")
-            nama_toko = st.text_input("NAMA TOKO *", value=str(data_lama["Nama_Toko"]) if data_lama is not None else "", key=f"sk_{rc}_toko").strip().upper()
-            no_toko = st.text_input("NOMOR TOKO *", value=str(data_lama["No_Toko"]) if data_lama is not None else "", key=f"sk_{rc}_notoko").strip().upper()
-            no_nik = st.text_input("NO NIK PEMILIK ASLI", value=str(data_lama.get("No_NIK", "")) if data_lama is not None else "", key=f"sk_{rc}_nik").strip()
+            nama_toko = st.text_input("NAMA TOKO *", key=f"sk_{rc}_toko").strip().upper()
+            no_toko = st.text_input("NOMOR TOKO *", key=f"sk_{rc}_notoko").strip().upper()
+            no_nik = st.text_input("NO NIK PEMILIK ASLI", key=f"sk_{rc}_nik").strip()
         with col2:
-            nama_pemilik = st.text_input("NAMA PEMILIK SK *", value=str(data_lama["Nama_Pemilik_Asli"]) if data_lama is not None else "", key=f"sk_{rc}_pemilik").strip().upper()
-            alamat = st.text_input("ALAMAT PEMILIK ASLI", value=str(data_lama.get("Alamat", "")) if data_lama is not None else "", key=f"sk_{rc}_alamat").strip().upper()
-            nama_pengantar = st.text_input("NAMA PENGANTAR *", value=str(data_lama.get("Nama_Pengantar_Berkas", "")) if data_lama is not None else "", key=f"sk_{rc}_pengantar").strip().upper()
-            no_hp = st.text_input("NO HP PENGANTAR", value=str(data_lama.get("No_HP_Pengantar", "")) if data_lama is not None else "", key=f"sk_{rc}_hp").strip()
-            nama_penerima = st.text_input("NAMA PENERIMA *", value=str(data_lama.get("Penerima_Berkas", "")) if data_lama is not None else "", key=f"sk_{rc}_penerima").strip().upper()
+            nama_pemilik = st.text_input("NAMA PEMILIK SK *", key=f"sk_{rc}_pemilik").strip().upper()
+            alamat = st.text_input("ALAMAT PEMILIK ASLI", key=f"sk_{rc}_alamat").strip().upper()
+            nama_pengantar = st.text_input("NAMA PENGANTAR *", key=f"sk_{rc}_pengantar").strip().upper()
+            no_hp = st.text_input("NO HP PENGANTAR", key=f"sk_{rc}_hp").strip()
+            nama_penerima = st.text_input("NAMA PENERIMA *", key=f"sk_{rc}_penerima").strip().upper()
 
         b1, b2 = st.columns(2)
         with b1:
