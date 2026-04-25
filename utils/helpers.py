@@ -52,15 +52,10 @@ KOLOM_PARKIR = [
 ]
 
 KOLOM_SK = [
-    "No",
-    "Tanggal_Pengantaran",
-    "Tanggal_Pengambilan",
-    "Nama_Toko",
-    "No_Toko",
-    "Nama_Pemilik_Asli",
-    "No_NIK",
-    "Alamat",
-    "Nama_Pengantar_Berkas",
+    "No", "Tanggal_Pengantaran", "Tanggal_Pengambilan",
+    "Nama_Toko", "No_Toko", "Nama_Pemilik_Asli",
+    "No_NIK", "Alamat",
+    "Nama_Pengantar_Berkas", "No_HP_Pengantar",
     "Penerima_Berkas"
 ]
 
