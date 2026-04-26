@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from io import BytesIO
 from datetime import datetime
 from streamlit_gsheets import GSheetsConnection
 
@@ -253,6 +254,33 @@ with tab2:
             st.warning(f"⚠️ {len(pegawai_rendah)} pegawai kehadiran di bawah 80%:")
             for _, row in pegawai_rendah.iterrows():
                 st.write(f"- **{row['Nama']}** ({row['Jabatan']}) — {row['Persen']}%")
+
+        # ── DOWNLOAD EXCEL ──
+        st.divider()
+
+        kolom_excel = [
+            "No_Absen", "Nama", "NIP", "Gol_Pangkat", "Jabatan",
+            "Hadir", "Sakit", "Izin", "Alpha", "Cuti",
+            "Hari_Kerja", "Persen"
+        ]
+        kolom_excel_ada = [k for k in kolom_excel if k in rekap.columns]
+
+        df_excel = rekap[kolom_excel_ada].copy()
+
+        buffer = BytesIO()
+        with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+            df_excel.to_excel(writer, index=False, sheet_name="Rekap Absen")
+        buffer.seek(0)
+
+        nama_file = f"Rekap_Absen_{bulan_pilih.replace('/', '-')}.xlsx"
+
+        st.download_button(
+            "📥 Download Rekap Excel",
+            data=buffer,
+            file_name=nama_file,
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            use_container_width=True
+        )
 
 # ==========================================
 # TAB 3 — MASTER PEGAWAI
