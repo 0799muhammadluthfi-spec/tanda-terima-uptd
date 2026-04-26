@@ -1,20 +1,14 @@
 import streamlit as st
 import pandas as pd
 import calendar
+from datetime import datetime
 from io import BytesIO
 from streamlit_gsheets import GSheetsConnection
 
 from utils.css_styles import inject_css
-from utils.helpers import (
-    load_data,
-    safe_update,
-    pastikan_kolom,
-    tombol_refresh,
-    today_wita
-)
 
 # ==========================================
-# KONFIGURASI
+# KONFIGURASI HALAMAN
 # ==========================================
 st.set_page_config(
     page_title="Absen | UPTD Pasar Kandangan",
@@ -25,10 +19,13 @@ st.set_page_config(
 
 inject_css()
 
+# ==========================================
+# KONEKSI
+# ==========================================
 conn_absen = st.connection("gsheets_absen", type=GSheetsConnection)
 
 # ==========================================
-# KONSTANTA LOKAL ABSEN
+# KONSTANTA
 # ==========================================
 WS_MASTER_ABSEN = "MASTER_ABSEN"
 WS_DATA_ABSEN = "DATA_ABSEN"
@@ -39,8 +36,7 @@ KOLOM_MASTER_ABSEN = [
 ]
 
 KOLOM_DATA_ABSEN = [
-    "Tanggal", "No_Absen", "Nama", "NIP",
-    "Gol_Pangkat", "Jabatan", "Keterangan"
+    "Tanggal", "No_Absen", "Nama", "NIP", "Gol_Pangkat", "Jabatan", "Keterangan"
 ]
 
 KOLOM_KALENDER_ABSEN = [
@@ -48,8 +44,72 @@ KOLOM_KALENDER_ABSEN = [
 ]
 
 # ==========================================
-# HELPER LOKAL ABSEN
+# HELPER LOKAL
 # ==========================================
+def today_wita():
+    # kalau tidak perlu timezone rumit, ini cukup stabil
+    return datetime.now().date()
+
+def tombol_refresh(key_btn):
+    if st.button("🔄 Refresh", key=key_btn, use_container_width=True):
+        st.rerun()
+
+def get_empty_df(worksheet: str) -> pd.DataFrame:
+    if worksheet == WS_MASTER_ABSEN:
+        return pd.DataFrame(columns=KOLOM_MASTER_ABSEN)
+    if worksheet == WS_DATA_ABSEN:
+        return pd.DataFrame(columns=KOLOM_DATA_ABSEN)
+    if worksheet == WS_KALENDER_ABSEN:
+        return pd.DataFrame(columns=KOLOM_KALENDER_ABSEN)
+    return pd.DataFrame()
+
+def pastikan_kolom(df: pd.DataFrame, kolom_list: list) -> pd.DataFrame:
+    for col in kolom_list:
+        if col not in df.columns:
+            df[col] = "-"
+    return df
+
+def load_data_local(conn_obj, worksheet: str) -> pd.DataFrame:
+    try:
+        df = conn_obj.read(worksheet=worksheet, ttl=0)
+        if df is None or df.empty:
+            return get_empty_df(worksheet)
+
+        df = df.astype(str).replace(r"\.0$", "", regex=True)
+        for col in df.columns:
+            df[col] = df[col].str.strip()
+
+        df = df.replace(["nan", "None", "", "null", "NaN", "<NA>"], "-")
+
+        if worksheet == WS_MASTER_ABSEN:
+            df = pastikan_kolom(df, KOLOM_MASTER_ABSEN)
+        elif worksheet == WS_DATA_ABSEN:
+            df = pastikan_kolom(df, KOLOM_DATA_ABSEN)
+        elif worksheet == WS_KALENDER_ABSEN:
+            df = pastikan_kolom(df, KOLOM_KALENDER_ABSEN)
+
+        return df
+    except Exception as e:
+        st.error(f"Gagal membaca data ({worksheet}): {e}")
+        return get_empty_df(worksheet)
+
+def safe_update_local(conn_obj, worksheet: str, data: pd.DataFrame) -> bool:
+    try:
+        conn_obj.update(worksheet=worksheet, data=data)
+        return True
+    except Exception as e:
+        st.error(f"Gagal menyimpan ({worksheet}): {e}")
+        return False
+
+def to_float(val):
+    try:
+        txt = str(val).strip().replace(",", "")
+        if txt in ["", "-", "nan", "None", "null", "<NA>"]:
+            return 0.0
+        return float(txt)
+    except:
+        return 0.0
+
 def get_master_absen(df_master, jabatan=None):
     try:
         if df_master.empty:
@@ -140,7 +200,6 @@ def hitung_rekap_absen_bulanan(df_absen, bulan_str, df_master=None, df_kalender=
             if not d_absen.empty:
                 d_absen["Ket_Upper"] = d_absen["Keterangan"].astype(str).str.strip().str.upper()
 
-        # Semua pegawai dari master
         semua_pegawai = df_master[df_master["No_Absen"] != "-"][
             ["No_Absen", "Nama", "NIP", "Gol_Pangkat", "Jabatan"]
         ].copy()
@@ -162,16 +221,17 @@ def hitung_rekap_absen_bulanan(df_absen, bulan_str, df_master=None, df_kalender=
                 data_pg = d_absen[d_absen["No_Absen"].astype(str).str.strip() == no]
                 if not data_pg.empty:
                     sakit = (data_pg["Ket_Upper"] == "SAKIT").sum()
-                    izin  = (data_pg["Ket_Upper"] == "IZIN").sum()
+                    izin = (data_pg["Ket_Upper"] == "IZIN").sum()
                     alpha = (data_pg["Ket_Upper"] == "ALPHA").sum()
-                    cuti  = (data_pg["Ket_Upper"] == "CUTI").sum()
+                    cuti = (data_pg["Ket_Upper"] == "CUTI").sum()
 
+            # Yang tidak ada catatan dianggap HADIR
             tidak_hadir = sakit + izin + alpha + cuti
             hadir = total_hari_kerja - tidak_hadir
             if hadir < 0:
                 hadir = 0
 
-            # Persen: Hadir / (Hadir + Alpha) x 100
+            # Persentase: HADIR / (HADIR + ALPHA)
             if (hadir + alpha) > 0:
                 persen = round(hadir / (hadir + alpha) * 100, 1)
             else:
@@ -236,25 +296,16 @@ with st.sidebar:
     st.page_link("pages/3_💰_Kas.py", label="💰  KAS UPTD", use_container_width=True)
     st.page_link("pages/4_📅_Absen.py", label="📅  ABSEN", use_container_width=True)
 
-    st.markdown("""
-    <div style="text-align:center; padding:24px 0 8px 0;
-                border-top:1px solid rgba(255,255,255,0.06); margin-top:40px;">
-        <p style="font-family:'Inter',sans-serif; font-size:0.56rem;
-                  color:#64748b !important; margin:0;">Developed by</p>
-        <p style="font-family:'Inter',sans-serif; font-size:0.68rem; font-weight:700;
-                  color:#94a3b8 !important; margin:2px 0 0 0;">M. Luthfi Renaldi</p>
-    </div>""", unsafe_allow_html=True)
-
 # ==========================================
 # LOAD DATA
 # ==========================================
-df_master = load_data(conn_absen, WS_MASTER_ABSEN)
+df_master = load_data_local(conn_absen, WS_MASTER_ABSEN)
 df_master = pastikan_kolom(df_master, KOLOM_MASTER_ABSEN)
 
-df_absen_data = load_data(conn_absen, WS_DATA_ABSEN)
+df_absen_data = load_data_local(conn_absen, WS_DATA_ABSEN)
 df_absen_data = pastikan_kolom(df_absen_data, KOLOM_DATA_ABSEN)
 
-df_kalender = load_data(conn_absen, WS_KALENDER_ABSEN)
+df_kalender = load_data_local(conn_absen, WS_KALENDER_ABSEN)
 df_kalender = pastikan_kolom(df_kalender, KOLOM_KALENDER_ABSEN)
 
 # ==========================================
@@ -278,6 +329,7 @@ with tab1:
     )
 
     daftar_jabatan = get_daftar_jabatan(df_master)
+
     jabatan_pilih = st.selectbox(
         "🏢 Pilih Jabatan",
         ["Semua"] + daftar_jabatan,
@@ -331,7 +383,6 @@ with tab1:
                 for _, row in df_t.iterrows():
                     no = str(row["No_Absen"])
                     kv = ket_dict.get(no, "HADIR")
-                    # Hanya simpan yang tidak hadir
                     if kv != "HADIR":
                         rows.append({
                             "Tanggal": tgl_absen,
@@ -345,7 +396,7 @@ with tab1:
 
                 if rows:
                     df_b = pd.concat([df_absen_data, pd.DataFrame(rows)], ignore_index=True)
-                    if safe_update(conn_absen, WS_DATA_ABSEN, df_b):
+                    if safe_update_local(conn_absen, WS_DATA_ABSEN, df_b):
                         st.success(f"✅ Disimpan! ({len(rows)} pegawai tidak hadir)")
                         st.rerun()
                 else:
@@ -393,7 +444,6 @@ with tab2:
         st.dataframe(rekap[ka], use_container_width=True, hide_index=True)
 
         st.divider()
-
         m1, m2, m3 = st.columns(3)
         m1.metric("📊 Rata-rata", f"{rekap['Persen'].mean():.1f}%")
         m2.metric("✅ Total Hadir", int(rekap["Hadir"].sum()))
@@ -452,7 +502,7 @@ with tab3:
 
         df_kal_baru = pd.concat([df_kal_sisa, df_gen], ignore_index=True)
 
-        if safe_update(conn_absen, WS_KALENDER_ABSEN, df_kal_baru):
+        if safe_update_local(conn_absen, WS_KALENDER_ABSEN, df_kal_baru):
             st.success(f"✅ Kalender {bulan_target} berhasil dibuat!")
             st.rerun()
 
@@ -508,13 +558,13 @@ with tab3:
                     if st.button("🔴", key=f"libur_{idx}", use_container_width=True):
                         if len(real_idx) > 0:
                             df_kalender.loc[real_idx[0], "Status"] = "LIBUR"
-                            safe_update(conn_absen, WS_KALENDER_ABSEN, df_kalender)
+                            safe_update_local(conn_absen, WS_KALENDER_ABSEN, df_kalender)
                             st.rerun()
                 else:
                     if st.button("✅", key=f"aktif_{idx}", use_container_width=True):
                         if len(real_idx) > 0:
                             df_kalender.loc[real_idx[0], "Status"] = "AKTIF"
-                            safe_update(conn_absen, WS_KALENDER_ABSEN, df_kalender)
+                            safe_update_local(conn_absen, WS_KALENDER_ABSEN, df_kalender)
                             st.rerun()
 
 # ==========================================
@@ -527,7 +577,6 @@ with tab4:
         tombol_refresh("ref_master")
 
     df_mv = df_master[df_master["No_Absen"] != "-"].copy()
-
     if not df_mv.empty:
         df_mv["_s"] = pd.to_numeric(df_mv["No_Absen"], errors="coerce")
         df_mv = df_mv.sort_values("_s", ascending=True).drop(columns="_s")
@@ -567,7 +616,7 @@ with tab4:
                     "Jabatan": jab_b
                 }
                 df_mb = pd.concat([df_master, pd.DataFrame([row])], ignore_index=True)
-                if safe_update(conn_absen, WS_MASTER_ABSEN, df_mb):
+                if safe_update_local(conn_absen, WS_MASTER_ABSEN, df_mb):
                     st.success(f"✅ '{nm_b}' ditambahkan!")
                     st.rerun()
 
@@ -581,6 +630,6 @@ with tab4:
         if st.button("🗑️ Hapus", key="btn_hapus", use_container_width=True):
             nh = hp.split(" - ")[0].strip()
             df_mb = df_master[df_master["No_Absen"] != nh].copy()
-            if safe_update(conn_absen, WS_MASTER_ABSEN, df_mb):
+            if safe_update_local(conn_absen, WS_MASTER_ABSEN, df_mb):
                 st.success(f"✅ '{hp}' dihapus!")
                 st.rerun()
