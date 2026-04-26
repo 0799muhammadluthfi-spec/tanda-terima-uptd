@@ -50,6 +50,7 @@ with st.sidebar:
     st.page_link("pages/1_📋_SK_Toko.py", label="📋  SK TOKO", use_container_width=True)
     st.page_link("pages/2_🅿️_Parkir.py", label="🅿️  PARKIR", use_container_width=True)
     st.page_link("pages/3_💰_Kas.py", label="💰  KAS UPTD", use_container_width=True)
+    st.page_link("pages/4_📅_Absen.py", label="📅  ABSEN", use_container_width=True)
 
     st.markdown("""
     <div style="text-align:center; padding:24px 0 8px 0; border-top:1px solid rgba(255,255,255,0.06); margin-top:40px;">
