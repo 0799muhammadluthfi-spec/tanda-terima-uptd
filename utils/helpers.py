@@ -12,6 +12,17 @@ from zoneinfo import ZoneInfo
 WS_SK = "DATA_PERPANJANGAN_SK"
 WS_PARKIR = "DATA_PARKIR"
 WS_KAS = "DATA_KAS"
+WS_MASTER_ABSEN = "MASTER_ABSEN"
+WS_DATA_ABSEN = "DATA_ABSEN"
+
+KOLOM_MASTER_ABSEN = [
+    "No_Absen", "Nama", "NIP", "Gol_Pangkat", "Jabatan"
+]
+
+KOLOM_DATA_ABSEN = [
+    "Tanggal", "No_Absen", "Nama", "NIP",
+    "Gol_Pangkat", "Jabatan", "Keterangan"
+]
 
 # ==========================================
 # TIMEZONE WITA
@@ -162,6 +173,17 @@ def get_empty_df(worksheet: str) -> pd.DataFrame:
         return pd.DataFrame(columns=KOLOM_SK)
     if worksheet == WS_KAS:
         return pd.DataFrame(columns=KOLOM_KAS)
+    if worksheet == WS_MASTER_ABSEN:
+        return pd.DataFrame(columns=KOLOM_MASTER_ABSEN)
+    if worksheet == WS_DATA_ABSEN:
+        return pd.DataFrame(columns=KOLOM_DATA_ABSEN)
+    return pd.DataFrame()
+    if worksheet == WS_PARKIR:
+        return pd.DataFrame(columns=KOLOM_PARKIR)
+    if worksheet == WS_SK:
+        return pd.DataFrame(columns=KOLOM_SK)
+    if worksheet == WS_KAS:
+        return pd.DataFrame(columns=KOLOM_KAS)
     return pd.DataFrame()
 
 
@@ -220,16 +242,14 @@ def load_data(conn_obj, worksheet: str) -> pd.DataFrame:
 
         if worksheet == WS_PARKIR:
             df = pastikan_kolom(df, KOLOM_PARKIR)
-            if "Status_Cetak" not in df.columns:
-                df["Status_Cetak"] = "BELUM"
-                conn_obj.update(worksheet=worksheet, data=df)
-                st.cache_data.clear()
-
         elif worksheet == WS_SK:
             df = pastikan_kolom(df, KOLOM_SK)
-
         elif worksheet == WS_KAS:
             df = pastikan_kolom(df, KOLOM_KAS)
+        elif worksheet == WS_MASTER_ABSEN:
+            df = pastikan_kolom(df, KOLOM_MASTER_ABSEN)
+        elif worksheet == WS_DATA_ABSEN:
+            df = pastikan_kolom(df, KOLOM_DATA_ABSEN)
 
         return df
 
@@ -493,39 +513,37 @@ def hitung_ringkasan_kas(df_kas: pd.DataFrame):
 # ==========================================
 # ABSEN
 # ==========================================
-WS_MASTER_ABSEN = "MASTER_ABSEN"
-WS_DATA_ABSEN = "DATA_ABSEN"
-
-KOLOM_MASTER_ABSEN = [
-    "No_Absen", "Nama", "NIP", "Gol_Pangkat", "Jabatan"
-]
-
-KOLOM_DATA_ABSEN = [
-    "Tanggal", "No_Absen", "Nama", "NIP",
-    "Gol_Pangkat", "Jabatan", "Keterangan"
-]
-
 def get_master_absen(df_master, jabatan=None):
     try:
         if df_master.empty:
             return pd.DataFrame(columns=KOLOM_MASTER_ABSEN)
+
         d = df_master[df_master["No_Absen"] != "-"].copy()
+
         if jabatan and jabatan != "Semua":
             d = d[d["Jabatan"].astype(str).str.strip().str.upper() == jabatan.strip().upper()]
+
         d["_sort"] = pd.to_numeric(d["No_Absen"], errors="coerce")
         d = d.sort_values("_sort", ascending=True).drop(columns="_sort")
         return d
     except:
         return pd.DataFrame(columns=KOLOM_MASTER_ABSEN)
 
+
 def get_daftar_jabatan(df_master):
     try:
         if df_master.empty:
             return []
-        jabatan = df_master[df_master["Jabatan"] != "-"]["Jabatan"].astype(str).str.strip().str.upper().unique().tolist()
+
+        jabatan = (
+            df_master[df_master["Jabatan"] != "-"]["Jabatan"]
+            .astype(str).str.strip().str.upper()
+            .unique().tolist()
+        )
         return sorted(jabatan)
     except:
         return []
+
 
 def hitung_rekap_absen_bulanan(df_absen, bulan_str):
     try:
@@ -535,8 +553,10 @@ def hitung_rekap_absen_bulanan(df_absen, bulan_str):
         d = df_absen[df_absen["Tanggal"] != "-"].copy()
         d["_tgl"] = d["Tanggal"].astype(str).str.strip().str.replace("-", "/", regex=False)
 
-        # Filter bulan
-        d["_bulan"] = d["_tgl"].apply(lambda x: "/".join(x.split("/")[1:]) if len(x.split("/")) == 3 else "")
+        # bulan_str format: MM/YYYY
+        d["_bulan"] = d["_tgl"].apply(
+            lambda x: "/".join(x.split("/")[1:]) if len(x.split("/")) == 3 else ""
+        )
         d = d[d["_bulan"] == bulan_str]
 
         if d.empty:
@@ -544,7 +564,9 @@ def hitung_rekap_absen_bulanan(df_absen, bulan_str):
 
         d["Ket_Upper"] = d["Keterangan"].astype(str).str.strip().str.upper()
 
-        rekap = d.groupby(["No_Absen", "Nama", "NIP", "Gol_Pangkat", "Jabatan"]).agg(
+        rekap = d.groupby(
+            ["No_Absen", "Nama", "NIP", "Gol_Pangkat", "Jabatan"]
+        ).agg(
             Hadir=("Ket_Upper", lambda x: (x == "H").sum()),
             Sakit=("Ket_Upper", lambda x: (x == "S").sum()),
             Izin=("Ket_Upper", lambda x: (x == "I").sum()),
@@ -553,7 +575,7 @@ def hitung_rekap_absen_bulanan(df_absen, bulan_str):
             Total=("Ket_Upper", "count")
         ).reset_index()
 
-        # Persentase: Hadir / (Hadir + Alpha) * 100
+        # Persentase: Hadir / (Hadir + Alpha) × 100
         rekap["Persen"] = rekap.apply(
             lambda r: round(r["Hadir"] / (r["Hadir"] + r["Alpha"]) * 100, 1)
             if (r["Hadir"] + r["Alpha"]) > 0 else 100.0,
