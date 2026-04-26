@@ -183,7 +183,7 @@ with tab2:
 
     bulan_pilih = st.selectbox("Pilih Bulan", bulan_options, key="rekap_bulan")
 
-        rekap = hitung_rekap_absen_bulanan(df_absen_data, bulan_pilih, df_master)
+    rekap = hitung_rekap_absen_bulanan(df_absen_data, bulan_pilih, df_master)
 
     if rekap.empty:
         st.info("Belum ada data absen untuk bulan ini.")
