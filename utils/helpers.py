@@ -478,11 +478,11 @@ def hitung_rekap_absen_bulanan(df_absen, bulan_str):
         rekap = d.groupby(
             ["No_Absen", "Nama", "NIP", "Gol_Pangkat", "Jabatan"]
         ).agg(
-            Hadir=("Ket_Upper", lambda x: (x == "H").sum()),
-            Sakit=("Ket_Upper", lambda x: (x == "S").sum()),
-            Izin=("Ket_Upper", lambda x: (x == "I").sum()),
-            Alpha=("Ket_Upper", lambda x: (x == "A").sum()),
-            Cuti=("Ket_Upper", lambda x: (x == "C").sum()),
+            Hadir=("Ket_Upper", lambda x: (x == "HADIR").sum()),
+            Sakit=("Ket_Upper", lambda x: (x == "SAKIT").sum()),
+            Izin=("Ket_Upper", lambda x: (x == "IZIN").sum()),
+            Alpha=("Ket_Upper", lambda x: (x == "ALPHA").sum()),
+            Cuti=("Ket_Upper", lambda x: (x == "CUTI").sum()),
             Total=("Ket_Upper", "count")
         ).reset_index()
 
