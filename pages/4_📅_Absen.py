@@ -5,11 +5,17 @@ from streamlit_gsheets import GSheetsConnection
 
 from utils.css_styles import inject_css
 from utils.helpers import (
-    load_data, safe_update, pastikan_kolom, tombol_refresh,
-    today_wita, get_bulan_ini_str,
-    WS_MASTER_ABSEN, WS_DATA_ABSEN,
-    KOLOM_MASTER_ABSEN, KOLOM_DATA_ABSEN,
-    get_master_absen, get_daftar_jabatan,
+    load_data,
+    safe_update,
+    pastikan_kolom,
+    tombol_refresh,
+    today_wita,
+    WS_MASTER_ABSEN,
+    WS_DATA_ABSEN,
+    KOLOM_MASTER_ABSEN,
+    KOLOM_DATA_ABSEN,
+    get_master_absen,
+    get_daftar_jabatan,
     hitung_rekap_absen_bulanan
 )
 
@@ -32,14 +38,25 @@ with st.sidebar:
             f'<div style="text-align:center; padding:18px 0 6px 0;">'
             f'<img src="data:image/png;base64,{logo_b64}" width="78" height="auto" '
             f'style="display:inline-block; filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4));">'
-            f'</div>', unsafe_allow_html=True)
+            f'</div>',
+            unsafe_allow_html=True
+        )
     else:
-        st.markdown('<div style="text-align:center; padding:18px 0 6px 0;"><div style="font-size:3rem;">🏛️</div></div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div style="text-align:center; padding:18px 0 6px 0;">'
+            '<div style="font-size:3rem;">🏛️</div></div>',
+            unsafe_allow_html=True
+        )
 
     st.markdown("""
-    <div style="text-align:center; padding:4px 0 14px 0; border-bottom:1px solid rgba(255,255,255,0.08); margin-bottom:14px;">
-        <p style="font-family:'Inter',sans-serif; font-size:1.05rem; font-weight:800; color:#f1f5f9 !important; margin:0 0 4px 0;">UPTD PASAR KANDANGAN</p>
-        <p style="font-family:'Inter',sans-serif; font-size:0.78rem; font-weight:600; color:#94a3b8 !important; margin:0;">KABUPATEN HULU SUNGAI SELATAN</p>
+    <div style="text-align:center; padding:4px 0 14px 0;
+                border-bottom:1px solid rgba(255,255,255,0.08); margin-bottom:14px;">
+        <p style="font-family:'Inter',sans-serif; font-size:1.05rem; font-weight:800;
+                  color:#f1f5f9 !important; margin:0 0 4px 0;">
+            UPTD PASAR KANDANGAN</p>
+        <p style="font-family:'Inter',sans-serif; font-size:0.78rem; font-weight:600;
+                  color:#94a3b8 !important; margin:0;">
+            KABUPATEN HULU SUNGAI SELATAN</p>
     </div>""", unsafe_allow_html=True)
 
     st.page_link("app_web.py", label="🏠  Beranda", use_container_width=True)
@@ -49,9 +66,12 @@ with st.sidebar:
     st.page_link("pages/4_📅_Absen.py", label="📅  ABSEN", use_container_width=True)
 
     st.markdown("""
-    <div style="text-align:center; padding:24px 0 8px 0; border-top:1px solid rgba(255,255,255,0.06); margin-top:40px;">
-        <p style="font-family:'Inter',sans-serif; font-size:0.56rem; color:#64748b !important; margin:0;">Developed by</p>
-        <p style="font-family:'Inter',sans-serif; font-size:0.68rem; font-weight:700; color:#94a3b8 !important; margin:2px 0 0 0;">M. Luthfi Renaldi</p>
+    <div style="text-align:center; padding:24px 0 8px 0;
+                border-top:1px solid rgba(255,255,255,0.06); margin-top:40px;">
+        <p style="font-family:'Inter',sans-serif; font-size:0.56rem;
+                  color:#64748b !important; margin:0;">Developed by</p>
+        <p style="font-family:'Inter',sans-serif; font-size:0.68rem; font-weight:700;
+                  color:#94a3b8 !important; margin:2px 0 0 0;">M. Luthfi Renaldi</p>
     </div>""", unsafe_allow_html=True)
 
 # ── LOAD DATA ──
@@ -73,35 +93,32 @@ with tab1:
     with c_b:
         tombol_refresh("ref_absen_input")
 
-    # Tanggal
     tgl_absen = st.text_input(
-        "Tanggal",
+        "📅 Tanggal",
         value=today_wita().strftime("%d/%m/%Y"),
         key="absen_tgl"
     )
 
-    # Jabatan filter
     daftar_jabatan = get_daftar_jabatan(df_master)
+
     jabatan_pilih = st.selectbox(
-        "Pilih Jabatan",
+        "🏢 Pilih Jabatan",
         ["Semua"] + daftar_jabatan,
         key="absen_jabatan"
     )
 
-    # Ambil pegawai sesuai jabatan
     df_filtered = get_master_absen(df_master, jabatan_pilih)
 
     if df_filtered.empty:
         st.warning("⚠️ Belum ada data pegawai. Tambahkan di tab Master Pegawai.")
     else:
-        # Pilih no absen
         no_list = df_filtered["No_Absen"].tolist()
         nama_list = df_filtered["Nama"].tolist()
 
         pilihan_display = [f"{no} - {nama}" for no, nama in zip(no_list, nama_list)]
 
         selected = st.multiselect(
-            "Pilih No Absen",
+            "🔢 Pilih No Absen",
             options=pilihan_display,
             default=pilihan_display,
             key="absen_pilih_no"
@@ -113,8 +130,8 @@ with tab1:
 
             st.divider()
             st.subheader("📋 Daftar Absen")
+            st.caption("Default: HADIR. Ubah jika tidak hadir.")
 
-            # Buat keterangan per orang
             keterangan_dict = {}
 
             for idx, row in df_terpilih.iterrows():
@@ -122,10 +139,11 @@ with tab1:
                 nama = str(row["Nama"])
                 jabatan = str(row["Jabatan"])
 
-                c1, c2, c3 = st.columns([2, 2, 1])
-                c1.write(f"**{no}** — {nama}")
-                c2.write(f"_{jabatan}_")
-                with c3:
+                col1, col2, col3, col4 = st.columns([1, 3, 2, 1])
+                col1.write(f"**{no}**")
+                col2.write(f"{nama}")
+                col3.write(f"_{jabatan}_")
+                with col4:
                     ket = st.selectbox(
                         "Ket",
                         ["HADIR", "SAKIT", "IZIN", "ALPHA", "CUTI"],
@@ -134,32 +152,46 @@ with tab1:
                         label_visibility="collapsed"
                     )
                 keterangan_dict[no] = ket
-                
+
             st.divider()
 
-            # Tombol simpan
-            if st.button("💾 SIMPAN ABSEN", type="primary", use_container_width=True, key="btn_simpan_absen"):
+            # Hanya simpan yang BUKAN hadir
+            if st.button(
+                "💾 SIMPAN ABSEN",
+                type="primary",
+                use_container_width=True,
+                key="btn_simpan_absen"
+            ):
                 rows_baru = []
                 for _, row in df_terpilih.iterrows():
                     no = str(row["No_Absen"])
-                    rows_baru.append({
-                        "Tanggal":    tgl_absen,
-                        "No_Absen":   no,
-                        "Nama":       str(row["Nama"]),
-                        "NIP":        str(row["NIP"]),
-                        "Gol_Pangkat":str(row["Gol_Pangkat"]),
-                        "Jabatan":    str(row["Jabatan"]),
-                        "Keterangan": keterangan_dict.get(no, "HADIR")
-                    })
+                    ket_val = keterangan_dict.get(no, "HADIR")
 
-df_baru = pd.concat(
-    [df_absen_data, pd.DataFrame(rows_baru)],
-    ignore_index=True
-)
+                    # Hanya simpan yang tidak hadir
+                    if ket_val != "HADIR":
+                        rows_baru.append({
+                            "Tanggal": tgl_absen,
+                            "No_Absen": no,
+                            "Nama": str(row["Nama"]),
+                            "NIP": str(row["NIP"]),
+                            "Gol_Pangkat": str(row["Gol_Pangkat"]),
+                            "Jabatan": str(row["Jabatan"]),
+                            "Keterangan": ket_val
+                        })
 
-                if safe_update(conn_absen, WS_DATA_ABSEN, df_baru):
-                    st.success(f"✅ Absen {tgl_absen} berhasil disimpan! ({len(rows_baru)} pegawai)")
-                    st.rerun()
+                if rows_baru:
+                    df_baru = pd.concat(
+                        [df_absen_data, pd.DataFrame(rows_baru)],
+                        ignore_index=True
+                    )
+                    if safe_update(conn_absen, WS_DATA_ABSEN, df_baru):
+                        st.success(
+                            f"✅ Absen {tgl_absen} disimpan! "
+                            f"({len(rows_baru)} pegawai tidak hadir tercatat)"
+                        )
+                        st.rerun()
+                else:
+                    st.success(f"✅ Semua pegawai HADIR pada {tgl_absen}. Tidak ada yang perlu disimpan.")
 
 # ==========================================
 # TAB 2 — REKAP ABSEN
@@ -170,7 +202,6 @@ with tab2:
     with c_b2:
         tombol_refresh("ref_absen_rekap")
 
-    # Pilih bulan
     bulan_ini = today_wita()
     bulan_options = []
     for i in range(12):
@@ -181,16 +212,15 @@ with tab2:
             y -= 1
         bulan_options.append(f"{m:02d}/{y}")
 
-    bulan_pilih = st.selectbox("Pilih Bulan", bulan_options, key="rekap_bulan")
+    bulan_pilih = st.selectbox("📅 Pilih Bulan", bulan_options, key="rekap_bulan")
 
-rekap = hitung_rekap_absen_bulanan(df_absen_data, bulan_pilih, df_master)
+    rekap = hitung_rekap_absen_bulanan(df_absen_data, bulan_pilih, df_master)
 
     if rekap.empty:
         st.info("Belum ada data absen untuk bulan ini.")
     else:
-        # Filter jabatan
         jabatan_rekap = st.selectbox(
-            "Filter Jabatan",
+            "🏢 Filter Jabatan",
             ["Semua"] + sorted(rekap["Jabatan"].unique().tolist()),
             key="rekap_jabatan"
         )
@@ -198,7 +228,6 @@ rekap = hitung_rekap_absen_bulanan(df_absen_data, bulan_pilih, df_master)
         if jabatan_rekap != "Semua":
             rekap = rekap[rekap["Jabatan"] == jabatan_rekap]
 
-        # Tampilkan
         kolom_tampil = [
             "No_Absen", "Nama", "Jabatan",
             "Hadir", "Sakit", "Izin", "Alpha", "Cuti",
@@ -208,22 +237,20 @@ rekap = hitung_rekap_absen_bulanan(df_absen_data, bulan_pilih, df_master)
 
         st.dataframe(rekap[kolom_ada], use_container_width=True, hide_index=True)
 
-        # Rata-rata
+        st.divider()
+
         avg_persen = rekap["Persen"].mean()
         total_hadir = rekap["Hadir"].sum()
         total_alpha = rekap["Alpha"].sum()
-
-        st.divider()
 
         m1, m2, m3 = st.columns(3)
         m1.metric("📊 Rata-rata Kehadiran", f"{avg_persen:.1f}%")
         m2.metric("✅ Total Hadir", int(total_hadir))
         m3.metric("❌ Total Alpha", int(total_alpha))
 
-        # Warning
         pegawai_rendah = rekap[rekap["Persen"] < 80]
         if not pegawai_rendah.empty:
-            st.warning(f"⚠️ Ada {len(pegawai_rendah)} pegawai dengan kehadiran di bawah 80%:")
+            st.warning(f"⚠️ {len(pegawai_rendah)} pegawai kehadiran di bawah 80%:")
             for _, row in pegawai_rendah.iterrows():
                 st.write(f"- **{row['Nama']}** ({row['Jabatan']}) — {row['Persen']}%")
 
@@ -236,8 +263,8 @@ with tab3:
     with c_b3:
         tombol_refresh("ref_absen_master")
 
-    # Tampilkan data master
     df_master_valid = df_master[df_master["No_Absen"] != "-"].copy()
+
     if not df_master_valid.empty:
         df_master_valid["_sort"] = pd.to_numeric(df_master_valid["No_Absen"], errors="coerce")
         df_master_valid = df_master_valid.sort_values("_sort", ascending=True).drop(columns="_sort")
@@ -247,14 +274,11 @@ with tab3:
             use_container_width=True,
             hide_index=True
         )
-
         st.metric("👥 Total Pegawai", len(df_master_valid))
     else:
         st.info("Belum ada data pegawai.")
 
     st.divider()
-
-    # Tambah pegawai
     st.subheader("➕ Tambah Pegawai")
 
     with st.form("form_tambah_pegawai", clear_on_submit=True):
@@ -269,11 +293,11 @@ with tab3:
 
         b1, b2 = st.columns(2)
         with b1:
-            simpan_pegawai = st.form_submit_button("💾 Simpan", type="primary", use_container_width=True)
+            simpan_pg = st.form_submit_button("💾 Simpan", type="primary", use_container_width=True)
         with b2:
             st.form_submit_button("🔄 Reset", use_container_width=True)
 
-        if simpan_pegawai:
+        if simpan_pg:
             if not no_absen_baru.strip() or not nama_baru or not jabatan_baru:
                 st.error("❌ No Absen, Nama, dan Jabatan wajib diisi!")
             else:
@@ -284,17 +308,14 @@ with tab3:
                     "Gol_Pangkat": gol_baru if gol_baru else "-",
                     "Jabatan": jabatan_baru
                 }
-
                 df_master_baru = pd.concat(
                     [df_master, pd.DataFrame([row_baru])],
                     ignore_index=True
                 )
-
                 if safe_update(conn_absen, WS_MASTER_ABSEN, df_master_baru):
-                    st.success(f"✅ Pegawai '{nama_baru}' berhasil ditambahkan!")
+                    st.success(f"✅ '{nama_baru}' berhasil ditambahkan!")
                     st.rerun()
 
-    # Hapus pegawai
     if not df_master_valid.empty:
         st.divider()
         st.subheader("🗑️ Hapus Pegawai")
@@ -307,5 +328,5 @@ with tab3:
             df_master_baru = df_master[df_master["No_Absen"] != no_hapus].copy()
 
             if safe_update(conn_absen, WS_MASTER_ABSEN, df_master_baru):
-                st.success(f"✅ Pegawai '{hapus_pilih}' berhasil dihapus!")
+                st.success(f"✅ '{hapus_pilih}' berhasil dihapus!")
                 st.rerun()
