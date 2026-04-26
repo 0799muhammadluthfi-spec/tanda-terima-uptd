@@ -58,8 +58,8 @@ with st.sidebar:
 df_master = load_data(conn_absen, WS_MASTER_ABSEN)
 df_master = pastikan_kolom(df_master, KOLOM_MASTER_ABSEN)
 
-df_absen = load_data(conn_absen, WS_DATA_ABSEN)
-df_absen = pastikan_kolom(df_absen, KOLOM_DATA_ABSEN)
+df_absen_data = load_data(conn_absen, WS_DATA_ABSEN)
+df_absen_data = pastikan_kolom(df_absen_data, KOLOM_DATA_ABSEN)
 
 # ── TABS ──
 tab1, tab2, tab3 = st.tabs(["📝 INPUT ABSEN", "📊 REKAP ABSEN", "👥 MASTER PEGAWAI"])
@@ -152,10 +152,10 @@ with tab1:
                         "Keterangan": keterangan_dict.get(no, "HADIR")
                     })
 
-                df_baru = pd.concat(
-                    [df_absen, pd.DataFrame(rows_baru)],
-                    ignore_index=True
-                )
+df_baru = pd.concat(
+    [df_absen_data, pd.DataFrame(rows_baru)],
+    ignore_index=True
+)
 
                 if safe_update(conn_absen, WS_DATA_ABSEN, df_baru):
                     st.success(f"✅ Absen {tgl_absen} berhasil disimpan! ({len(rows_baru)} pegawai)")
@@ -183,7 +183,7 @@ with tab2:
 
     bulan_pilih = st.selectbox("Pilih Bulan", bulan_options, key="rekap_bulan")
 
-    rekap = hitung_rekap_absen_bulanan(df_absen_data, bulan_pilih, df_master)
+rekap = hitung_rekap_absen_bulanan(df_absen_data, bulan_pilih, df_master)
 
     if rekap.empty:
         st.info("Belum ada data absen untuk bulan ini.")
