@@ -21,6 +21,11 @@ WS_PARKIR = "DATA_PARKIR"
 WS_KAS = "DATA_KAS"
 WS_MASTER_ABSEN = "MASTER_ABSEN"
 WS_DATA_ABSEN = "DATA_ABSEN"
+WS_KALENDER_ABSEN = "KALENDER_ABSEN"
+
+KOLOM_KALENDER_ABSEN = [
+    "Tanggal", "Status"
+]
 
 # ==========================================
 # KOLOM STANDAR
@@ -163,6 +168,8 @@ def get_empty_df(worksheet):
         return pd.DataFrame(columns=KOLOM_MASTER_ABSEN)
     if worksheet == WS_DATA_ABSEN:
         return pd.DataFrame(columns=KOLOM_DATA_ABSEN)
+    if worksheet == WS_KALENDER_ABSEN:
+        return pd.DataFrame(columns=KOLOM_KALENDER_ABSEN)
     return pd.DataFrame()
 
 def pastikan_kolom(df, kolom_list):
@@ -227,6 +234,8 @@ def load_data(conn_obj, worksheet):
             df = pastikan_kolom(df, KOLOM_MASTER_ABSEN)
         elif worksheet == WS_DATA_ABSEN:
             df = pastikan_kolom(df, KOLOM_DATA_ABSEN)
+        elif worksheet == WS_KALENDER_ABSEN:
+            df = pastikan_kolom(df, KOLOM_KALENDER_ABSEN)
 
         return df
     except Exception as e:
@@ -458,45 +467,94 @@ def get_daftar_jabatan(df_master):
     except:
         return []
 
-def hitung_rekap_absen_bulanan(df_absen, bulan_str, df_master=None):
+def hitung_rekap_absen_bulanan(df_absen, bulan_str, df_master=None, df_kalender=None):
     try:
-        if df_absen.empty:
+        if df_master is None or df_master.empty:
             return pd.DataFrame()
 
-        d = df_absen[df_absen["Tanggal"] != "-"].copy()
-        d["_tgl"] = d["Tanggal"].astype(str).str.strip().str.replace("-", "/", regex=False)
-        d["_bulan"] = d["_tgl"].apply(
-            lambda x: "/".join(x.split("/")[1:]) if len(x.split("/")) == 3 else ""
-        )
-        d = d[d["_bulan"] == bulan_str]
-
-        if d.empty:
-            return pd.DataFrame()
-
-        # Hari kerja = seluruh hari di bulan itu
-        try:
-            bulan_parts = bulan_str.split("/")
-            bln = int(bulan_parts[0])
-            thn = int(bulan_parts[1])
-            total_hari_kerja = calendar.monthrange(thn, bln)[1]
-        except:
-            total_hari_kerja = 30
-
-        if total_hari_kerja == 0:
-            return pd.DataFrame()
-
-        # Ambil semua pegawai dari master
-        if df_master is not None and not df_master.empty:
-            semua_pegawai = df_master[df_master["No_Absen"] != "-"][
-                ["No_Absen", "Nama", "NIP", "Gol_Pangkat", "Jabatan"]
-            ].copy()
+        # Hitung hari kerja dari kalender
+        if df_kalender is not None and not df_kalender.empty:
+            total_hari_kerja = get_hari_kerja_bulan(df_kalender, bulan_str)
         else:
-            semua_pegawai = d[
-                ["No_Absen", "Nama", "NIP", "Gol_Pangkat", "Jabatan"]
-            ].drop_duplicates().copy()
+            try:
+                parts = bulan_str.split("/")
+                total_hari_kerja = calendar.monthrange(int(parts[1]), int(parts[0]))[1]
+            except:
+                total_hari_kerja = 30
+
+        if total_hari_kerja <= 0:
+            return pd.DataFrame()
+
+        # Siapkan data absen bulan ini
+        d_absen = pd.DataFrame()
+        if not df_absen.empty:
+            d = df_absen[df_absen["Tanggal"] != "-"].copy()
+            d["_tgl"] = d["Tanggal"].astype(str).str.strip().str.replace("-", "/", regex=False)
+            d["_bulan"] = d["_tgl"].apply(
+                lambda x: "/".join(x.split("/")[1:]) if len(x.split("/")) == 3 else ""
+            )
+            d_absen = d[d["_bulan"] == bulan_str].copy()
+            if not d_absen.empty:
+                d_absen["Ket_Upper"] = d_absen["Keterangan"].astype(str).str.strip().str.upper()
+
+        # Ambil semua pegawai
+        semua_pegawai = df_master[df_master["No_Absen"] != "-"][
+            ["No_Absen", "Nama", "NIP", "Gol_Pangkat", "Jabatan"]
+        ].copy()
 
         if semua_pegawai.empty:
             return pd.DataFrame()
+
+        hasil_list = []
+
+        for _, pegawai in semua_pegawai.iterrows():
+            no = str(pegawai["No_Absen"])
+
+            sakit = 0
+            izin = 0
+            alpha = 0
+            cuti = 0
+
+            if not d_absen.empty:
+                data_pg = d_absen[d_absen["No_Absen"].astype(str).str.strip() == no]
+                if not data_pg.empty:
+                    sakit = (data_pg["Ket_Upper"] == "SAKIT").sum()
+                    izin = (data_pg["Ket_Upper"] == "IZIN").sum()
+                    alpha = (data_pg["Ket_Upper"] == "ALPHA").sum()
+                    cuti = (data_pg["Ket_Upper"] == "CUTI").sum()
+
+            tidak_hadir = sakit + izin + alpha + cuti
+            hadir = total_hari_kerja - tidak_hadir
+            if hadir < 0:
+                hadir = 0
+
+            if (hadir + alpha) > 0:
+                persen = round(hadir / (hadir + alpha) * 100, 1)
+            else:
+                persen = 100.0
+
+            hasil_list.append({
+                "No_Absen": no,
+                "Nama": str(pegawai["Nama"]),
+                "NIP": str(pegawai["NIP"]),
+                "Gol_Pangkat": str(pegawai["Gol_Pangkat"]),
+                "Jabatan": str(pegawai["Jabatan"]),
+                "Hadir": hadir,
+                "Sakit": sakit,
+                "Izin": izin,
+                "Alpha": alpha,
+                "Cuti": cuti,
+                "Hari_Kerja": total_hari_kerja,
+                "Persen": persen
+            })
+
+        rekap = pd.DataFrame(hasil_list)
+        rekap["_sort"] = pd.to_numeric(rekap["No_Absen"], errors="coerce")
+        rekap = rekap.sort_values("_sort", ascending=True).drop(columns="_sort")
+
+        return rekap
+    except:
+        return pd.DataFrame()
 
         d["Ket_Upper"] = d["Keterangan"].astype(str).str.strip().str.upper()
 
@@ -557,3 +615,54 @@ def hitung_rekap_absen_bulanan(df_absen, bulan_str, df_master=None):
         return rekap
     except:
         return pd.DataFrame()
+
+# ==========================================
+# KALENDER ABSEN
+# ==========================================
+def generate_kalender_bulan(tahun, bulan):
+    try:
+        jumlah_hari = calendar.monthrange(tahun, bulan)[1]
+        rows = []
+        for day in range(1, jumlah_hari + 1):
+            tgl = f"{day:02d}/{bulan:02d}/{tahun}"
+            rows.append({
+                "Tanggal": tgl,
+                "Status": "AKTIF"
+            })
+        return pd.DataFrame(rows)
+    except:
+        return pd.DataFrame(columns=KOLOM_KALENDER_ABSEN)
+
+def get_hari_kerja_bulan(df_kalender, bulan_str):
+    try:
+        if df_kalender.empty:
+            return 0
+
+        d = df_kalender[df_kalender["Tanggal"] != "-"].copy()
+        d["_tgl"] = d["Tanggal"].astype(str).str.strip().str.replace("-", "/", regex=False)
+        d["_bulan"] = d["_tgl"].apply(
+            lambda x: "/".join(x.split("/")[1:]) if len(x.split("/")) == 3 else ""
+        )
+        d = d[d["_bulan"] == bulan_str]
+        d_aktif = d[d["Status"].astype(str).str.strip().str.upper() == "AKTIF"]
+
+        return len(d_aktif)
+    except:
+        return 0
+
+def get_tanggal_aktif_bulan(df_kalender, bulan_str):
+    try:
+        if df_kalender.empty:
+            return []
+
+        d = df_kalender[df_kalender["Tanggal"] != "-"].copy()
+        d["_tgl"] = d["Tanggal"].astype(str).str.strip().str.replace("-", "/", regex=False)
+        d["_bulan"] = d["_tgl"].apply(
+            lambda x: "/".join(x.split("/")[1:]) if len(x.split("/")) == 3 else ""
+        )
+        d = d[d["_bulan"] == bulan_str]
+        d_aktif = d[d["Status"].astype(str).str.strip().str.upper() == "AKTIF"]
+
+        return d_aktif["_tgl"].tolist()
+    except:
+        return []
