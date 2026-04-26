@@ -1,341 +1,500 @@
-# ==========================================
-# pages/4_📅_Absen.py
-# ==========================================
 import streamlit as st
 import pandas as pd
+import calendar
 from datetime import datetime
-from streamlit_gsheets import GSheetsConnection
-
-from utils.css_styles import inject_css
-
-st.set_page_config(
-    page_title="Absen | UPTD Pasar Kandangan",
-    page_icon="📅",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
-
-inject_css()
-
-conn_absen = st.connection("gsheets_absen", type=GSheetsConnection)
-
-# ── SIDEBAR ──
-with st.sidebar:
-    logo_b64 = st.session_state.get("logo_b64")
-    if logo_b64:
-        st.markdown(
-            f'<div style="text-align:center; padding:18px 0 6px 0;">'
-            f'<img src="data:image/png;base64,{logo_b64}" width="78" height="auto" '
-            f'style="display:inline-block; filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4));">'
-            f'</div>',
-            unsafe_allow_html=True
-        )
-    else:
-        st.markdown(
-            '<div style="text-align:center; padding:18px 0 6px 0;">'
-            '<div style="font-size:3rem;">🏛️</div></div>',
-            unsafe_allow_html=True
-        )
-
-    st.markdown("""
-    <div style="text-align:center; padding:4px 0 14px 0;
-                border-bottom:1px solid rgba(255,255,255,0.08); margin-bottom:14px;">
-        <p style="font-family:'Inter',sans-serif; font-size:1.05rem; font-weight:800;
-                  color:#f1f5f9 !important; margin:0 0 4px 0;">
-            UPTD PASAR KANDANGAN</p>
-        <p style="font-family:'Inter',sans-serif; font-size:0.78rem; font-weight:600;
-                  color:#94a3b8 !important; margin:0;">
-            KABUPATEN HULU SUNGAI SELATAN</p>
-    </div>""", unsafe_allow_html=True)
-
-    st.page_link("app_web.py",              label="🏠  Beranda",  use_container_width=True)
-    st.page_link("pages/1_📋_SK_Toko.py",  label="📋  SK TOKO", use_container_width=True)
-    st.page_link("pages/2_🅿️_Parkir.py",   label="🅿️  PARKIR",  use_container_width=True)
-    st.page_link("pages/3_💰_Kas.py",       label="💰  KAS UPTD",use_container_width=True)
-    st.page_link("pages/4_📅_Absen.py",     label="📅  ABSEN",   use_container_width=True)
-
-    st.markdown("""
-    <div style="text-align:center; padding:24px 0 8px 0;
-                border-top:1px solid rgba(255,255,255,0.06); margin-top:40px;">
-        <p style="font-family:'Inter',sans-serif; font-size:0.56rem;
-                  color:#64748b !important; margin:0;">Developed by</p>
-        <p style="font-family:'Inter',sans-serif; font-size:0.68rem; font-weight:700;
-                  color:#94a3b8 !important; margin:2px 0 0 0;">M. Luthfi Renaldi</p>
-    </div>""", unsafe_allow_html=True)
-
-# ── LOAD DATA ──
-df_master = load_data(conn_absen, WS_MASTER_ABSEN)
-df_master = pastikan_kolom(df_master, KOLOM_MASTER_ABSEN)
-
-df_absen_data = load_data(conn_absen, WS_DATA_ABSEN)
-df_absen_data = pastikan_kolom(df_absen_data, KOLOM_DATA_ABSEN)
-
-# ── TABS ──
-tab1, tab2, tab3 = st.tabs(["📝 INPUT ABSEN", "📊 REKAP ABSEN", "👥 MASTER PEGAWAI"])
+from zoneinfo import ZoneInfo
 
 # ==========================================
-# TAB 1 — INPUT ABSEN
+# TIMEZONE
 # ==========================================
-with tab1:
-    c_h, c_b = st.columns([0.88, 0.12])
-    c_h.header("📝 Input Absen Harian")
-    with c_b:
-        tombol_refresh("ref_absen_input")
+def now_wita():
+    return datetime.now(ZoneInfo("Asia/Makassar"))
 
-    tgl_absen = st.text_input(
-        "📅 Tanggal",
-        value=today_wita().strftime("%d/%m/%Y"),
-        key="absen_tgl"
-    )
-
-    daftar_jabatan = get_daftar_jabatan(df_master)
-
-    jabatan_pilih = st.selectbox(
-        "🏢 Pilih Jabatan",
-        ["Semua"] + daftar_jabatan,
-        key="absen_jabatan"
-    )
-
-    df_filtered = get_master_absen(df_master, jabatan_pilih)
-
-    if df_filtered.empty:
-        st.warning("⚠️ Belum ada data pegawai. Tambahkan di tab Master Pegawai.")
-    else:
-        no_list   = df_filtered["No_Absen"].tolist()
-        nama_list = df_filtered["Nama"].tolist()
-
-        pilihan_display = [f"{no} - {nama}" for no, nama in zip(no_list, nama_list)]
-
-        selected = st.multiselect(
-            "🔢 Pilih No Absen",
-            options=pilihan_display,
-            default=pilihan_display,
-            key="absen_pilih_no"
-        )
-
-        if selected:
-            selected_no  = [s.split(" - ")[0].strip() for s in selected]
-            df_terpilih  = df_filtered[df_filtered["No_Absen"].isin(selected_no)].copy()
-
-            st.divider()
-            st.subheader("📋 Daftar Absen")
-            st.caption("Keterangan default: H (Hadir). Ubah jika tidak hadir.")
-
-            keterangan_dict = {}
-
-            for idx, row in df_terpilih.iterrows():
-                no      = str(row["No_Absen"])
-                nama    = str(row["Nama"])
-                jabatan = str(row["Jabatan"])
-                nip     = str(row["NIP"])
-                gol     = str(row["Gol_Pangkat"])
-
-                col1, col2, col3, col4 = st.columns([1, 3, 2, 1])
-                col1.write(f"**{no}**")
-                col2.write(f"{nama}")
-                col3.write(f"_{jabatan}_")
-                with col4:
-                    ket = st.selectbox(
-                        "Ket",
-                        ["H", "S", "I", "A", "C"],
-                        index=0,
-                        key=f"ket_{no}_{idx}",
-                        label_visibility="collapsed"
-                    )
-                keterangan_dict[no] = ket
-
-            st.divider()
-
-            if st.button(
-                "💾 SIMPAN ABSEN",
-                type="primary",
-                use_container_width=True,
-                key="btn_simpan_absen"
-            ):
-                rows_baru = []
-                for _, row in df_terpilih.iterrows():
-                    no = str(row["No_Absen"])
-                    rows_baru.append({
-                        "Tanggal":    tgl_absen,
-                        "No_Absen":   no,
-                        "Nama":       str(row["Nama"]),
-                        "NIP":        str(row["NIP"]),
-                        "Gol_Pangkat":str(row["Gol_Pangkat"]),
-                        "Jabatan":    str(row["Jabatan"]),
-                        "Keterangan": keterangan_dict.get(no, "H")
-                    })
-
-                df_baru = pd.concat(
-                    [df_absen_data, pd.DataFrame(rows_baru)],
-                    ignore_index=True
-                )
-
-                if safe_update(conn_absen, WS_DATA_ABSEN, df_baru):
-                    st.success(
-                        f"✅ Absen {tgl_absen} berhasil disimpan! "
-                        f"({len(rows_baru)} pegawai)"
-                    )
-                    st.rerun()
+def today_wita():
+    return now_wita().date()
 
 # ==========================================
-# TAB 2 — REKAP ABSEN
+# NAMA WORKSHEET
 # ==========================================
-with tab2:
-    c_h2, c_b2 = st.columns([0.88, 0.12])
-    c_h2.header("📊 Rekap Absen Bulanan")
-    with c_b2:
-        tombol_refresh("ref_absen_rekap")
-
-    bulan_ini = today_wita()
-    bulan_options = []
-    for i in range(12):
-        m = bulan_ini.month - i
-        y = bulan_ini.year
-        if m <= 0:
-            m += 12
-            y -= 1
-        bulan_options.append(f"{m:02d}/{y}")
-
-    bulan_pilih = st.selectbox(
-        "📅 Pilih Bulan",
-        bulan_options,
-        key="rekap_bulan"
-    )
-
-    rekap = hitung_rekap_absen_bulanan(df_absen_data, bulan_pilih)
-
-    if rekap.empty:
-        st.info("Belum ada data absen untuk bulan ini.")
-    else:
-        jabatan_rekap = st.selectbox(
-            "🏢 Filter Jabatan",
-            ["Semua"] + sorted(rekap["Jabatan"].unique().tolist()),
-            key="rekap_jabatan"
-        )
-
-        if jabatan_rekap != "Semua":
-            rekap = rekap[rekap["Jabatan"] == jabatan_rekap]
-
-        kolom_tampil = [
-            "No_Absen", "Nama", "Jabatan",
-            "Hadir", "Sakit", "Izin", "Alpha", "Cuti",
-            "Total", "Persen"
-        ]
-        kolom_ada = [k for k in kolom_tampil if k in rekap.columns]
-
-        st.dataframe(rekap[kolom_ada], use_container_width=True, hide_index=True)
-
-        st.divider()
-
-        avg_persen   = rekap["Persen"].mean()
-        total_hadir  = rekap["Hadir"].sum()
-        total_alpha  = rekap["Alpha"].sum()
-
-        m1, m2, m3 = st.columns(3)
-        m1.metric("📊 Rata-rata Kehadiran", f"{avg_persen:.1f}%")
-        m2.metric("✅ Total Hadir",          int(total_hadir))
-        m3.metric("❌ Total Alpha",           int(total_alpha))
-
-        pegawai_rendah = rekap[rekap["Persen"] < 80]
-        if not pegawai_rendah.empty:
-            st.warning(
-                f"⚠️ {len(pegawai_rendah)} pegawai kehadiran di bawah 80%:"
-            )
-            for _, row in pegawai_rendah.iterrows():
-                st.write(
-                    f"- **{row['Nama']}** ({row['Jabatan']}) "
-                    f"— {row['Persen']}%"
-                )
+WS_SK = "DATA_PERPANJANGAN_SK"
+WS_PARKIR = "DATA_PARKIR"
+WS_KAS = "DATA_KAS"
+WS_MASTER_ABSEN = "MASTER_ABSEN"
+WS_DATA_ABSEN = "DATA_ABSEN"
 
 # ==========================================
-# TAB 3 — MASTER PEGAWAI
+# KOLOM STANDAR
 # ==========================================
-with tab3:
-    c_h3, c_b3 = st.columns([0.88, 0.12])
-    c_h3.header("👥 Master Pegawai")
-    with c_b3:
-        tombol_refresh("ref_absen_master")
+KOLOM_PARKIR = [
+    "No", "Tanggal", "Nama_Petugas",
+    "Pengambilan_Karcis_R2", "Pengambilan_Karcis_R4",
+    "Khusus_Roda_R2", "Khusus_Roda_R4",
+    "MPP_Roda_R2", "MPP_Roda_R4",
+    "Total_Karcis_R2", "Total_Karcis_R4",
+    "Status_Khusus", "Status_MPP",
+    "Sisa_Stok_R2", "Sisa_Stok_R4",
+    "Status_Cetak"
+]
 
-    df_master_valid = df_master[df_master["No_Absen"] != "-"].copy()
+KOLOM_SK = [
+    "No", "Tanggal_Pengantaran", "Tanggal_Pengambilan",
+    "Nama_Toko", "No_Toko", "Nama_Pemilik_Asli",
+    "No_NIK", "Alamat",
+    "Nama_Pengantar_Berkas", "No_HP_Pengantar",
+    "Penerima_Berkas"
+]
 
-    if not df_master_valid.empty:
-        df_master_valid["_sort"] = pd.to_numeric(
-            df_master_valid["No_Absen"], errors="coerce"
+KOLOM_KAS = [
+    "No", "Tanggal", "Keterangan",
+    "Jenis_Transaksi", "Nominal",
+    "PAD_Aktif", "TAKTIS_Aktif",
+    "Potongan_PAD", "Potongan_TAKTIS",
+    "PPN", "PPH_21_22_23", "Biaya_Admin_Penyedia",
+    "Bersih", "Jenis_Keluar", "Nota",
+    "Sumber_Anggaran", "Tujuan_Anggaran",
+    "Sisa_Uang_Kas_Seluruh_Sebelumnya",
+    "Sisa_Uang_Kas_Sebelumnya",
+    "Sisa_Uang_Di_ATM", "Sisa_Uang_Di_Penyedia",
+    "Sisa_Uang_Kas_Seluruh", "Sisa_Uang_Kas_Auto",
+    "Sisa_Uang_Kas", "Selisih_Kurang"
+]
+
+KOLOM_MASTER_ABSEN = [
+    "No_Absen", "Nama", "NIP", "Gol_Pangkat", "Jabatan"
+]
+
+KOLOM_DATA_ABSEN = [
+    "Tanggal", "No_Absen", "Nama", "NIP",
+    "Gol_Pangkat", "Jabatan", "Keterangan"
+]
+
+# ==========================================
+# FORMAT & KONVERSI
+# ==========================================
+def to_float(val):
+    try:
+        txt = str(val).strip().replace(",", "")
+        if txt in ["", "-", "nan", "None", "null", "<NA>"]:
+            return 0.0
+        return float(txt)
+    except:
+        return 0.0
+
+def fmt_nominal(val):
+    try:
+        num = float(val)
+        if num == int(num):
+            return str(int(num))
+        return f"{num:.2f}".rstrip("0").rstrip(".")
+    except:
+        return "0"
+
+def rupiah(val):
+    try:
+        num = int(round(float(val)))
+        if num < 0:
+            return f"-Rp {abs(num):,}".replace(",", ".")
+        return f"Rp {num:,}".replace(",", ".")
+    except:
+        return "Rp 0"
+
+def format_tgl_hari_indo(tgl_str):
+    if not tgl_str or str(tgl_str).strip() in ["-", "nan", "NAN", "", "None"]:
+        return ""
+    try:
+        tgl_bersih = str(tgl_str).strip().replace("/", "-")
+        if len(tgl_bersih.split("-")[-1]) == 2:
+            dt = datetime.strptime(tgl_bersih, "%d-%m-%y")
+        else:
+            dt = datetime.strptime(tgl_bersih, "%d-%m-%Y")
+        hari = ["SENIN","SELASA","RABU","KAMIS","JUMAT","SABTU","MINGGU"][dt.weekday()]
+        return f"{hari}, {dt.strftime('%d - %m - %Y')}"
+    except:
+        return str(tgl_str).upper()
+
+def normalisasi_no(val):
+    try:
+        txt = str(val).replace("\u00a0", "").replace("'", "").strip()
+        try:
+            return str(int(float(txt)))
+        except:
+            return txt
+    except:
+        return ""
+
+def safe_int(val):
+    try:
+        s = str(val).strip()
+        if s in ["-", "nan", "", "None", "null"]:
+            return 0
+        return int(float(s))
+    except:
+        return 0
+
+def get_jumlah_hari_bulan_ini():
+    h = today_wita()
+    return calendar.monthrange(h.year, h.month)[1]
+
+def get_sisa_hari_bulan_ini():
+    h = today_wita()
+    total = calendar.monthrange(h.year, h.month)[1]
+    return total - h.day + 1
+
+def get_bulan_ini_str():
+    h = today_wita()
+    return f"{h.year}-{h.month:02d}"
+
+def get_jumlah_minggu_bulan_ini():
+    if get_jumlah_hari_bulan_ini() <= 28:
+        return 4
+    return 5
+
+# ==========================================
+# DATAFRAME
+# ==========================================
+def get_empty_df(worksheet):
+    if worksheet == WS_PARKIR:
+        return pd.DataFrame(columns=KOLOM_PARKIR)
+    if worksheet == WS_SK:
+        return pd.DataFrame(columns=KOLOM_SK)
+    if worksheet == WS_KAS:
+        return pd.DataFrame(columns=KOLOM_KAS)
+    if worksheet == WS_MASTER_ABSEN:
+        return pd.DataFrame(columns=KOLOM_MASTER_ABSEN)
+    if worksheet == WS_DATA_ABSEN:
+        return pd.DataFrame(columns=KOLOM_DATA_ABSEN)
+    return pd.DataFrame()
+
+def pastikan_kolom(df, kolom_list):
+    for col in kolom_list:
+        if col not in df.columns:
+            df[col] = "-"
+    return df
+
+def urutkan_no(df, ascending=False):
+    try:
+        if df.empty or "No" not in df.columns:
+            return df
+        d = df.copy()
+        d["_sort_no"] = pd.to_numeric(d["No"], errors="coerce")
+        d = d.sort_values(by="_sort_no", ascending=ascending, na_position="last").drop(columns="_sort_no")
+        return d
+    except:
+        return df
+
+def get_next_no(df, col="No"):
+    try:
+        if df.empty or col not in df.columns:
+            return 1
+        nums = pd.to_numeric(df[col], errors="coerce").dropna()
+        return int(nums.max()) + 1 if not nums.empty else 1
+    except:
+        return 1
+
+def tampilkan_n_terakhir(df, n=30):
+    try:
+        if df.empty:
+            return df
+        return urutkan_no(df, ascending=False).head(n)
+    except:
+        return df
+
+# ==========================================
+# LOAD & SAVE
+# ==========================================
+def load_data(conn_obj, worksheet):
+    try:
+        df = conn_obj.read(worksheet=worksheet, ttl=60)
+        if df is None or df.empty:
+            return get_empty_df(worksheet)
+
+        df = df.astype(str).replace(r"\.0$", "", regex=True)
+        for col in df.columns:
+            df[col] = df[col].str.strip()
+        df = df.replace(["nan", "None", "", "null", "NaN", "<NA>"], "-")
+
+        if worksheet == WS_PARKIR:
+            df = pastikan_kolom(df, KOLOM_PARKIR)
+            if "Status_Cetak" not in df.columns:
+                df["Status_Cetak"] = "BELUM"
+                conn_obj.update(worksheet=worksheet, data=df)
+                st.cache_data.clear()
+        elif worksheet == WS_SK:
+            df = pastikan_kolom(df, KOLOM_SK)
+        elif worksheet == WS_KAS:
+            df = pastikan_kolom(df, KOLOM_KAS)
+        elif worksheet == WS_MASTER_ABSEN:
+            df = pastikan_kolom(df, KOLOM_MASTER_ABSEN)
+        elif worksheet == WS_DATA_ABSEN:
+            df = pastikan_kolom(df, KOLOM_DATA_ABSEN)
+
+        return df
+    except Exception as e:
+        st.error(f"Gagal membaca ({worksheet}): {e}")
+        return get_empty_df(worksheet)
+
+def safe_update(conn_obj, worksheet, data):
+    try:
+        conn_obj.update(worksheet=worksheet, data=data)
+        st.cache_data.clear()
+        return True
+    except Exception as e:
+        st.error(f"Gagal menyimpan ({worksheet}): {e}")
+        return False
+
+def tombol_refresh(key_btn):
+    if st.button("🔄 Refresh", key=key_btn, use_container_width=True):
+        st.cache_data.clear()
+        st.rerun()
+
+# ==========================================
+# FUNGSI PARKIR
+# ==========================================
+def total_karcis_belum_diisi(r2, r4):
+    def kosong(v):
+        txt = str(v).strip().lower().replace("\xa0", "").replace("\t", "")
+        return txt in ["", "-", "nan", "none", "null", "<na>", "<n/a>"]
+    return kosong(r2) and kosong(r4)
+
+def cari_tanggal_belum_input_parkir(df_p):
+    try:
+        if df_p.empty or "Tanggal" not in df_p.columns:
+            return None, pd.DataFrame()
+        if "Total_Karcis_R2" not in df_p.columns or "Total_Karcis_R4" not in df_p.columns:
+            return None, pd.DataFrame()
+
+        df = df_p.copy()
+        df["Tgl_Bersih"] = df["Tanggal"].astype(str).str.strip().str.replace("/", "-", regex=False)
+        df["Tgl_Cek"] = pd.to_datetime(df["Tgl_Bersih"], dayfirst=True, errors="coerce").dt.date
+        hari_ini = today_wita()
+
+        def is_belum_input(v):
+            txt = str(v).strip().lower().replace("\xa0", "").replace("\t", "")
+            if txt in ["", "-", "nan", "none", "null", "<na>", "<n/a>"]:
+                return True
+            try:
+                float(txt)
+                return False
+            except:
+                return True
+
+        df["Belum_R2"] = df["Total_Karcis_R2"].apply(is_belum_input)
+        df["Belum_R4"] = df["Total_Karcis_R4"].apply(is_belum_input)
+
+        df_belum = df[
+            df["Tgl_Cek"].notna() &
+            (df["Tgl_Cek"] <= hari_ini) &
+            df["Belum_R2"] & df["Belum_R4"]
+        ].copy()
+
+        if df_belum.empty:
+            return None, pd.DataFrame()
+
+        tanggal_awal = df_belum.sort_values("Tgl_Cek").iloc[0]["Tgl_Cek"]
+        return tanggal_awal, df_belum
+    except:
+        return None, pd.DataFrame()
+
+def daftar_tanggal_kosong_bulan_ini(df_p):
+    try:
+        if df_p.empty or "Tanggal" not in df_p.columns:
+            return pd.DataFrame(columns=["Tanggal", "Nama_Petugas"])
+        if "Total_Karcis_R2" not in df_p.columns:
+            return pd.DataFrame(columns=["Tanggal", "Nama_Petugas"])
+
+        df = df_p.copy()
+        df["Tgl_Bersih"] = df["Tanggal"].astype(str).str.strip().str.replace("/", "-", regex=False)
+        df["Tgl_Cek"] = pd.to_datetime(df["Tgl_Bersih"], dayfirst=True, errors="coerce").dt.date
+        hari_ini = today_wita()
+        awal_bulan = hari_ini.replace(day=1)
+
+        def is_belum_input(v):
+            txt = str(v).strip().lower().replace("\xa0", "").replace("\t", "")
+            if txt in ["", "-", "nan", "none", "null", "<na>", "<n/a>"]:
+                return True
+            try:
+                float(txt)
+                return False
+            except:
+                return True
+
+        df["Belum_R2"] = df["Total_Karcis_R2"].apply(is_belum_input)
+        df["Belum_R4"] = df["Total_Karcis_R4"].apply(is_belum_input)
+
+        hasil = df[
+            df["Tgl_Cek"].notna() &
+            (df["Tgl_Cek"] >= awal_bulan) &
+            (df["Tgl_Cek"] <= hari_ini) &
+            df["Belum_R2"] & df["Belum_R4"]
+        ].copy()
+
+        if hasil.empty:
+            return pd.DataFrame(columns=["Tanggal", "Nama_Petugas"])
+        return hasil.sort_values("Tgl_Cek")[["Tanggal", "Nama_Petugas"]]
+    except:
+        return pd.DataFrame(columns=["Tanggal", "Nama_Petugas"])
+
+def daftar_tanggal_belum_konfirmasi_bulan_ini(df_p):
+    try:
+        if df_p.empty or "Tanggal" not in df_p.columns:
+            return pd.DataFrame(columns=["Tanggal", "Nama_Petugas", "Status_Khusus", "Status_MPP", "Status_Cetak"])
+
+        kolom_wajib = ["Total_Karcis_R2", "Total_Karcis_R4", "Status_Khusus", "Status_MPP", "Status_Cetak", "Nama_Petugas"]
+        for col in kolom_wajib:
+            if col not in df_p.columns:
+                return pd.DataFrame(columns=["Tanggal", "Nama_Petugas", "Status_Khusus", "Status_MPP", "Status_Cetak"])
+
+        df = df_p.copy()
+        df["Tgl_Bersih"] = df["Tanggal"].astype(str).str.strip().str.replace("/", "-", regex=False)
+        df["Tgl_Cek"] = pd.to_datetime(df["Tgl_Bersih"], dayfirst=True, errors="coerce").dt.date
+        hari_ini = today_wita()
+        awal_bulan = hari_ini.replace(day=1)
+
+        def is_sudah_input(v):
+            txt = str(v).strip().lower().replace("\xa0", "").replace("\t", "")
+            if txt in ["", "-", "nan", "none", "null", "<na>", "<n/a>"]:
+                return False
+            try:
+                float(txt)
+                return True
+            except:
+                return False
+
+        kondisi_sudah = df["Total_Karcis_R2"].apply(is_sudah_input) | df["Total_Karcis_R4"].apply(is_sudah_input)
+        kondisi_belum_selesai = (
+            (df["Status_Khusus"].astype(str).str.strip().str.upper() != "SUDAH") |
+            (df["Status_MPP"].astype(str).str.strip().str.upper() != "SUDAH") |
+            (df["Status_Cetak"].astype(str).str.strip().str.upper() != "SUDAH")
         )
-        df_master_valid = (
-            df_master_valid
-            .sort_values("_sort", ascending=True)
-            .drop(columns="_sort")
-        )
-        st.dataframe(
-            df_master_valid[KOLOM_MASTER_ABSEN],
-            use_container_width=True,
-            hide_index=True
-        )
-        st.metric("👥 Total Pegawai", len(df_master_valid))
-    else:
-        st.info("Belum ada data pegawai.")
 
-    st.divider()
-    st.subheader("➕ Tambah Pegawai")
+        hasil = df[
+            df["Tgl_Cek"].notna() &
+            (df["Tgl_Cek"] >= awal_bulan) &
+            (df["Tgl_Cek"] <= hari_ini) &
+            kondisi_sudah & kondisi_belum_selesai
+        ].copy()
 
-    with st.form("form_tambah_pegawai", clear_on_submit=True):
-        f1, f2 = st.columns(2)
-        with f1:
-            no_absen_baru = st.text_input("No Absen *")
-            nama_baru     = st.text_input("Nama *").strip().upper()
-            nip_baru      = st.text_input("NIP").strip()
-        with f2:
-            gol_baru     = st.text_input("Gol/Pangkat").strip().upper()
-            jabatan_baru = st.text_input("Jabatan *").strip().upper()
+        if hasil.empty:
+            return pd.DataFrame(columns=["Tanggal", "Nama_Petugas", "Status_Khusus", "Status_MPP", "Status_Cetak"])
+        return hasil.sort_values("Tgl_Cek")[["Tanggal", "Nama_Petugas", "Status_Khusus", "Status_MPP", "Status_Cetak"]]
+    except:
+        return pd.DataFrame(columns=["Tanggal", "Nama_Petugas", "Status_Khusus", "Status_MPP", "Status_Cetak"])
 
-        b1, b2 = st.columns(2)
-        with b1:
-            simpan_pg = st.form_submit_button(
-                "💾 Simpan", type="primary", use_container_width=True
-            )
-        with b2:
-            st.form_submit_button("🔄 Reset", use_container_width=True)
-
-        if simpan_pg:
-            if not no_absen_baru.strip() or not nama_baru or not jabatan_baru:
-                st.error("❌ No Absen, Nama, dan Jabatan wajib diisi!")
-            else:
-                row_baru = {
-                    "No_Absen":   no_absen_baru.strip(),
-                    "Nama":       nama_baru,
-                    "NIP":        nip_baru if nip_baru else "-",
-                    "Gol_Pangkat":gol_baru if gol_baru else "-",
-                    "Jabatan":    jabatan_baru
-                }
-                df_master_baru = pd.concat(
-                    [df_master, pd.DataFrame([row_baru])],
-                    ignore_index=True
-                )
-                if safe_update(conn_absen, WS_MASTER_ABSEN, df_master_baru):
-                    st.success(f"✅ '{nama_baru}' berhasil ditambahkan!")
-                    st.rerun()
-
-    if not df_master_valid.empty:
-        st.divider()
-        st.subheader("🗑️ Hapus Pegawai")
-
-        hapus_list = [
-            f"{r['No_Absen']} - {r['Nama']}"
-            for _, r in df_master_valid.iterrows()
-        ]
-        hapus_pilih = st.selectbox(
-            "Pilih pegawai",
-            hapus_list,
-            key="hapus_pegawai"
-        )
-
-        if st.button("🗑️ Hapus", key="btn_hapus_pegawai", use_container_width=True):
-            no_hapus = hapus_pilih.split(" - ")[0].strip()
-            df_master_baru = df_master[
-                df_master["No_Absen"] != no_hapus
+# ==========================================
+# FUNGSI KAS
+# ==========================================
+def get_last_kas_state(df_kas):
+    try:
+        if df_kas.empty:
+            return 0.0, 0.0, 0.0, 0.0
+        d = df_kas.copy()
+        if "No" not in d.columns:
+            return 0.0, 0.0, 0.0, 0.0
+        d = d[d["No"] != "-"].copy()
+        if "Jenis_Transaksi" in d.columns:
+            d = d[
+                (d["Jenis_Transaksi"].astype(str).str.strip() == "TRANSAKSI") |
+                (d["Jenis_Transaksi"].astype(str).str.strip() == "MASUK") |
+                (d["Jenis_Transaksi"].astype(str).str.strip() == "KELUAR") |
+                (d["Jenis_Transaksi"].astype(str).str.strip() == "TRANSFER") |
+                (d["Jenis_Transaksi"].astype(str).str.strip() == "-") |
+                (d["Jenis_Transaksi"].astype(str).str.strip() == "")
             ].copy()
+        if d.empty:
+            return 0.0, 0.0, 0.0, 0.0
+        d["_sort_no"] = pd.to_numeric(d["No"], errors="coerce")
+        d = d.sort_values("_sort_no", ascending=True)
+        last = d.iloc[-1]
+        last_seluruh = to_float(last.get("Sisa_Uang_Kas_Seluruh", 0))
+        last_kas = to_float(last.get("Sisa_Uang_Kas_Auto", to_float(last.get("Sisa_Uang_Kas", 0))))
+        last_atm = to_float(last.get("Sisa_Uang_Di_ATM", 0))
+        last_penyedia = to_float(last.get("Sisa_Uang_Di_Penyedia", 0))
+        return last_seluruh, last_kas, last_atm, last_penyedia
+    except:
+        return 0.0, 0.0, 0.0, 0.0
 
-            if safe_update(conn_absen, WS_MASTER_ABSEN, df_master_baru):
-                st.success(f"✅ '{hapus_pilih}' berhasil dihapus!")
-                st.rerun()
+def hitung_ringkasan_kas(df_kas):
+    try:
+        if df_kas.empty:
+            return 0.0, 0.0, 0.0, 0.0
+        df = df_kas[df_kas["No"] != "-"].copy()
+        if "Jenis_Transaksi" not in df.columns:
+            return 0.0, 0.0, 0.0, 0.0
+        df["_jenis"] = df["Jenis_Transaksi"].astype(str).str.strip().str.upper()
+        df["_nominal"] = df["Nominal"].apply(to_float)
+        total_masuk = df[df["_jenis"] == "MASUK"]["_nominal"].sum()
+        total_keluar = df[df["_jenis"] == "KELUAR"]["_nominal"].sum()
+        last_seluruh, last_kas, _, _ = get_last_kas_state(df_kas)
+        return total_masuk, total_keluar, last_seluruh, last_kas
+    except:
+        return 0.0, 0.0, 0.0, 0.0
+
+# ==========================================
+# FUNGSI ABSEN
+# ==========================================
+def get_master_absen(df_master, jabatan=None):
+    try:
+        if df_master.empty:
+            return pd.DataFrame(columns=KOLOM_MASTER_ABSEN)
+        d = df_master[df_master["No_Absen"] != "-"].copy()
+        if jabatan and jabatan != "Semua":
+            d = d[d["Jabatan"].astype(str).str.strip().str.upper() == jabatan.strip().upper()]
+        d["_sort"] = pd.to_numeric(d["No_Absen"], errors="coerce")
+        d = d.sort_values("_sort", ascending=True).drop(columns="_sort")
+        return d
+    except:
+        return pd.DataFrame(columns=KOLOM_MASTER_ABSEN)
+
+def get_daftar_jabatan(df_master):
+    try:
+        if df_master.empty:
+            return []
+        jabatan = (
+            df_master[df_master["Jabatan"] != "-"]["Jabatan"]
+            .astype(str).str.strip().str.upper()
+            .unique().tolist()
+        )
+        return sorted(jabatan)
+    except:
+        return []
+
+def hitung_rekap_absen_bulanan(df_absen, bulan_str):
+    try:
+        if df_absen.empty:
+            return pd.DataFrame()
+
+        d = df_absen[df_absen["Tanggal"] != "-"].copy()
+        d["_tgl"] = d["Tanggal"].astype(str).str.strip().str.replace("-", "/", regex=False)
+        d["_bulan"] = d["_tgl"].apply(
+            lambda x: "/".join(x.split("/")[1:]) if len(x.split("/")) == 3 else ""
+        )
+        d = d[d["_bulan"] == bulan_str]
+
+        if d.empty:
+            return pd.DataFrame()
+
+        d["Ket_Upper"] = d["Keterangan"].astype(str).str.strip().str.upper()
+
+        rekap = d.groupby(
+            ["No_Absen", "Nama", "NIP", "Gol_Pangkat", "Jabatan"]
+        ).agg(
+            Hadir=("Ket_Upper", lambda x: (x == "H").sum()),
+            Sakit=("Ket_Upper", lambda x: (x == "S").sum()),
+            Izin=("Ket_Upper", lambda x: (x == "I").sum()),
+            Alpha=("Ket_Upper", lambda x: (x == "A").sum()),
+            Cuti=("Ket_Upper", lambda x: (x == "C").sum()),
+            Total=("Ket_Upper", "count")
+        ).reset_index()
+
+        rekap["Persen"] = rekap.apply(
+            lambda r: round(r["Hadir"] / (r["Hadir"] + r["Alpha"]) * 100, 1)
+            if (r["Hadir"] + r["Alpha"]) > 0 else 100.0,
+            axis=1
+        )
+
+        rekap["_sort"] = pd.to_numeric(rekap["No_Absen"], errors="coerce")
+        rekap = rekap.sort_values("_sort", ascending=True).drop(columns="_sort")
+
+        return rekap
+    except:
+        return pd.DataFrame()
