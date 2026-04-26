@@ -5,3 +5,4 @@ gspread-dataframe>=3.3.0
 gspread>=5.10.0
 google-auth>=2.17.0
 st-gsheets-connection
+openpyxl
