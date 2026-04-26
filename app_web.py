@@ -153,11 +153,6 @@ with st.sidebar:
         "pages/3_💰_Kas.py",
         label="💰  KAS UPTD",
         use_container_width=True
-    )
-    st.page_link(
-        "pages/4_📅_Absen.py",
-        label="📅  ABSEN",
-        use_container_width=True)
 
     st.markdown(
         """
