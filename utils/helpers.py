@@ -489,3 +489,80 @@ def hitung_ringkasan_kas(df_kas: pd.DataFrame):
         return total_masuk_bersih, total_keluar, last_seluruh, last_kas
     except:
         return 0.0, 0.0, 0.0, 0.0
+
+# ==========================================
+# ABSEN
+# ==========================================
+WS_MASTER_ABSEN = "MASTER_ABSEN"
+WS_DATA_ABSEN = "DATA_ABSEN"
+
+KOLOM_MASTER_ABSEN = [
+    "No_Absen", "Nama", "NIP", "Gol_Pangkat", "Jabatan"
+]
+
+KOLOM_DATA_ABSEN = [
+    "Tanggal", "No_Absen", "Nama", "NIP",
+    "Gol_Pangkat", "Jabatan", "Keterangan"
+]
+
+def get_master_absen(df_master, jabatan=None):
+    try:
+        if df_master.empty:
+            return pd.DataFrame(columns=KOLOM_MASTER_ABSEN)
+        d = df_master[df_master["No_Absen"] != "-"].copy()
+        if jabatan and jabatan != "Semua":
+            d = d[d["Jabatan"].astype(str).str.strip().str.upper() == jabatan.strip().upper()]
+        d["_sort"] = pd.to_numeric(d["No_Absen"], errors="coerce")
+        d = d.sort_values("_sort", ascending=True).drop(columns="_sort")
+        return d
+    except:
+        return pd.DataFrame(columns=KOLOM_MASTER_ABSEN)
+
+def get_daftar_jabatan(df_master):
+    try:
+        if df_master.empty:
+            return []
+        jabatan = df_master[df_master["Jabatan"] != "-"]["Jabatan"].astype(str).str.strip().str.upper().unique().tolist()
+        return sorted(jabatan)
+    except:
+        return []
+
+def hitung_rekap_absen_bulanan(df_absen, bulan_str):
+    try:
+        if df_absen.empty:
+            return pd.DataFrame()
+
+        d = df_absen[df_absen["Tanggal"] != "-"].copy()
+        d["_tgl"] = d["Tanggal"].astype(str).str.strip().str.replace("-", "/", regex=False)
+
+        # Filter bulan
+        d["_bulan"] = d["_tgl"].apply(lambda x: "/".join(x.split("/")[1:]) if len(x.split("/")) == 3 else "")
+        d = d[d["_bulan"] == bulan_str]
+
+        if d.empty:
+            return pd.DataFrame()
+
+        d["Ket_Upper"] = d["Keterangan"].astype(str).str.strip().str.upper()
+
+        rekap = d.groupby(["No_Absen", "Nama", "NIP", "Gol_Pangkat", "Jabatan"]).agg(
+            Hadir=("Ket_Upper", lambda x: (x == "H").sum()),
+            Sakit=("Ket_Upper", lambda x: (x == "S").sum()),
+            Izin=("Ket_Upper", lambda x: (x == "I").sum()),
+            Alpha=("Ket_Upper", lambda x: (x == "A").sum()),
+            Cuti=("Ket_Upper", lambda x: (x == "C").sum()),
+            Total=("Ket_Upper", "count")
+        ).reset_index()
+
+        # Persentase: Hadir / (Hadir + Alpha) * 100
+        rekap["Persen"] = rekap.apply(
+            lambda r: round(r["Hadir"] / (r["Hadir"] + r["Alpha"]) * 100, 1)
+            if (r["Hadir"] + r["Alpha"]) > 0 else 100.0,
+            axis=1
+        )
+
+        rekap["_sort"] = pd.to_numeric(rekap["No_Absen"], errors="coerce")
+        rekap = rekap.sort_values("_sort", ascending=True).drop(columns="_sort")
+
+        return rekap
+    except:
+        return pd.DataFrame()
