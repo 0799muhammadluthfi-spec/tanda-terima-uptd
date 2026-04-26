@@ -473,9 +473,14 @@ def hitung_rekap_absen_bulanan(df_absen, bulan_str, df_master=None):
         if d.empty:
             return pd.DataFrame()
 
-        # Ambil semua tanggal unik di bulan ini
-        tanggal_unik = d["_tgl"].unique().tolist()
-        total_hari_kerja = len(tanggal_unik)
+        # Hari kerja = seluruh hari di bulan itu
+        try:
+            bulan_parts = bulan_str.split("/")
+            bln = int(bulan_parts[0])
+            thn = int(bulan_parts[1])
+            total_hari_kerja = calendar.monthrange(thn, bln)[1]
+        except:
+            total_hari_kerja = 30
 
         if total_hari_kerja == 0:
             return pd.DataFrame()
