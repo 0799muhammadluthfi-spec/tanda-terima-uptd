@@ -71,7 +71,7 @@ def pastikan_kolom(df: pd.DataFrame, kolom_list: list) -> pd.DataFrame:
 
 def load_data_local(conn_obj, worksheet: str) -> pd.DataFrame:
     try:
-        df = conn_obj.read(worksheet=worksheet, ttl=0)
+        df = conn_obj.read(worksheet=worksheet, ttl=120)
         if df is None or df.empty:
             return get_empty_df(worksheet)
 
