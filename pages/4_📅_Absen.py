@@ -128,13 +128,13 @@ with tab1:
                 with c3:
                     ket = st.selectbox(
                         "Ket",
-                        ["H", "S", "I", "A", "C"],
+                        ["HADIR", "SAKIT", "IZIN", "ALPHA", "CUTI"],
                         index=0,
                         key=f"ket_{no}_{idx}",
                         label_visibility="collapsed"
                     )
                 keterangan_dict[no] = ket
-
+                
             st.divider()
 
             # Tombol simpan
@@ -143,13 +143,13 @@ with tab1:
                 for _, row in df_terpilih.iterrows():
                     no = str(row["No_Absen"])
                     rows_baru.append({
-                        "Tanggal": tgl_absen,
-                        "No_Absen": no,
-                        "Nama": str(row["Nama"]),
-                        "NIP": str(row["NIP"]),
-                        "Gol_Pangkat": str(row["Gol_Pangkat"]),
-                        "Jabatan": str(row["Jabatan"]),
-                        "Keterangan": keterangan_dict.get(no, "H")
+                        "Tanggal":    tgl_absen,
+                        "No_Absen":   no,
+                        "Nama":       str(row["Nama"]),
+                        "NIP":        str(row["NIP"]),
+                        "Gol_Pangkat":str(row["Gol_Pangkat"]),
+                        "Jabatan":    str(row["Jabatan"]),
+                        "Keterangan": keterangan_dict.get(no, "HADIR")
                     })
 
                 df_baru = pd.concat(
