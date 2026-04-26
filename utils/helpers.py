@@ -458,7 +458,7 @@ def get_daftar_jabatan(df_master):
     except:
         return []
 
-def hitung_rekap_absen_bulanan(df_absen, bulan_str):
+def hitung_rekap_absen_bulanan(df_absen, bulan_str, df_master=None):
     try:
         if df_absen.empty:
             return pd.DataFrame()
@@ -473,24 +473,78 @@ def hitung_rekap_absen_bulanan(df_absen, bulan_str):
         if d.empty:
             return pd.DataFrame()
 
+        # Ambil semua tanggal unik di bulan ini
+        tanggal_unik = d["_tgl"].unique().tolist()
+        total_hari_kerja = len(tanggal_unik)
+
+        if total_hari_kerja == 0:
+            return pd.DataFrame()
+
+        # Ambil semua pegawai dari master
+        if df_master is not None and not df_master.empty:
+            semua_pegawai = df_master[df_master["No_Absen"] != "-"][
+                ["No_Absen", "Nama", "NIP", "Gol_Pangkat", "Jabatan"]
+            ].copy()
+        else:
+            semua_pegawai = d[
+                ["No_Absen", "Nama", "NIP", "Gol_Pangkat", "Jabatan"]
+            ].drop_duplicates().copy()
+
+        if semua_pegawai.empty:
+            return pd.DataFrame()
+
         d["Ket_Upper"] = d["Keterangan"].astype(str).str.strip().str.upper()
 
-        rekap = d.groupby(
-            ["No_Absen", "Nama", "NIP", "Gol_Pangkat", "Jabatan"]
-        ).agg(
-            Hadir=("Ket_Upper", lambda x: (x == "HADIR").sum()),
-            Sakit=("Ket_Upper", lambda x: (x == "SAKIT").sum()),
-            Izin=("Ket_Upper", lambda x: (x == "IZIN").sum()),
-            Alpha=("Ket_Upper", lambda x: (x == "ALPHA").sum()),
-            Cuti=("Ket_Upper", lambda x: (x == "CUTI").sum()),
-            Total=("Ket_Upper", "count")
-        ).reset_index()
+        # Hitung per pegawai
+        hasil_list = []
 
-        rekap["Persen"] = rekap.apply(
-            lambda r: round(r["Hadir"] / (r["Hadir"] + r["Alpha"]) * 100, 1)
-            if (r["Hadir"] + r["Alpha"]) > 0 else 100.0,
-            axis=1
-        )
+        for _, pegawai in semua_pegawai.iterrows():
+            no = str(pegawai["No_Absen"])
+
+            # Data absen pegawai ini di bulan ini
+            data_pg = d[d["No_Absen"].astype(str).str.strip() == no]
+
+            # Hitung keterangan
+            sakit = (data_pg["Ket_Upper"] == "SAKIT").sum()
+            izin = (data_pg["Ket_Upper"] == "IZIN").sum()
+            alpha = (data_pg["Ket_Upper"] == "ALPHA").sum()
+            cuti = (data_pg["Ket_Upper"] == "CUTI").sum()
+
+            # Tanggal yang tercatat tidak hadir
+            tidak_hadir = sakit + izin + alpha + cuti
+
+            # Hadir = total hari kerja - tidak hadir
+            hadir = total_hari_kerja - tidak_hadir
+
+            # Pastikan tidak minus
+            if hadir < 0:
+                hadir = 0
+
+            total = hadir + sakit + izin + alpha + cuti
+
+            # Persen: Hadir / (Hadir + Alpha) × 100
+            if (hadir + alpha) > 0:
+                persen = round(hadir / (hadir + alpha) * 100, 1)
+            else:
+                persen = 100.0
+
+            hasil_list.append({
+                "No_Absen": no,
+                "Nama": str(pegawai["Nama"]),
+                "NIP": str(pegawai["NIP"]),
+                "Gol_Pangkat": str(pegawai["Gol_Pangkat"]),
+                "Jabatan": str(pegawai["Jabatan"]),
+                "Hadir": hadir,
+                "Sakit": sakit,
+                "Izin": izin,
+                "Alpha": alpha,
+                "Cuti": cuti,
+                "Total": total,
+                "Hari_Kerja": total_hari_kerja,
+                "Persen": persen
+            })
+
+        rekap = pd.DataFrame(hasil_list)
 
         rekap["_sort"] = pd.to_numeric(rekap["No_Absen"], errors="coerce")
         rekap = rekap.sort_values("_sort", ascending=True).drop(columns="_sort")
