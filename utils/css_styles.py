@@ -590,27 +590,32 @@ CSS_WELCOME = """
         to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* HILANGKAN TOMBOL +/- NUMBER INPUT */
-    button[data-testid="stNumberInputStepUp"],
-    button[data-testid="stNumberInputStepDown"],
-    [data-testid="stNumberInput"] button,
-    [data-testid="stNumberInput"] [data-testid="stNumberInputStepUp"],
-    [data-testid="stNumberInput"] [data-testid="stNumberInputStepDown"] {
+    /* HILANGKAN TOMBOL +/- NUMBER INPUT - AGGRESSIVE */
+    div[data-testid="stNumberInput"] > div > div > button {
         display: none !important;
-        visibility: hidden !important;
-        width: 0 !important;
-        height: 0 !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        pointer-events: none !important;
     }
 
-    [data-testid="stNumberInput"] input {
+    div[data-testid="stNumberInput"] button {
+        display: none !important;
+    }
+
+    div[data-testid="stNumberInput"] > div {
+        display: flex !important;
+    }
+
+    div[data-testid="stNumberInput"] > div > div:has(button) {
+        display: none !important;
+    }
+
+    div[data-testid="stNumberInput"] input {
         width: 100% !important;
+        border-radius: 8px !important;
     }
 
-    [data-testid="stNumberInput"] > div {
-        gap: 0 !important;
+    /* Fallback: sembunyikan step buttons via attribute */
+    [data-baseweb="input"] ~ div,
+    [data-baseweb="input"] + div {
+        display: none !important;
     }
 
 </style>
