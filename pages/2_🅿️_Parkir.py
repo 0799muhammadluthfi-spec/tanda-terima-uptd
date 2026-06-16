@@ -130,14 +130,12 @@ def ambil_info_tanggal_parkir(df_p, tgl_input_user):
     idx = baris.index[0]
     nama_p = baris.iloc[0]["Nama_Petugas"]
 
-    # Cari sisa stok terakhir petugas berdasarkan tanggal terakhir sebelum dt_user
     df_petugas_sebelum = df[
         (df["Nama_Petugas"] == nama_p) &
         (df["Tgl_Temp"].notna()) &
         (df["Tgl_Temp"] < dt_user)
     ].copy()
 
-    # Ambil hanya baris yang benar-benar sudah punya sisa stok
     df_petugas_sebelum = df_petugas_sebelum[
         ~df_petugas_sebelum["Sisa_Stok_R2"].astype(str).str.strip().isin(["-", "nan", "", "None"])
     ]
@@ -442,71 +440,109 @@ with tab1:
             val_pk2 = 0
             val_pk4 = 0
 
-        # Form input / edit
+        st.divider()
+
+        # ==============================
+        # FORM INPUT / EDIT
+        # ==============================
         judul_form = "✏️ EDIT REKAP" if sudah_diisi else "📝 INPUT REKAP"
-        with st.form("form_rekap_harian", clear_on_submit=False):
-            st.subheader(judul_form)
+        st.subheader(judul_form)
 
-            st.markdown("**Rekap Karcis**")
-            fe1, fe2 = st.columns(2)
-            with fe1:
-                tr2 = st.number_input("TOTAL KARCIS R2", min_value=0, value=val_tr2)
-                mr2 = st.number_input("MPP RODA R2", min_value=0, value=val_mr2)
-            with fe2:
-                tr4 = st.number_input("TOTAL KARCIS R4", min_value=0, value=val_tr4)
-                mr4 = st.number_input("MPP RODA R4", min_value=0, value=val_mr4)
+        st.markdown("**Rekap Karcis**")
+        fe1, fe2 = st.columns(2)
+        with fe1:
+            tr2 = st.number_input("TOTAL KARCIS R2", min_value=0, value=val_tr2, key="nr_tr2")
+            mr2 = st.number_input("MPP RODA R2", min_value=0, value=val_mr2, key="nr_mr2")
+        with fe2:
+            tr4 = st.number_input("TOTAL KARCIS R4", min_value=0, value=val_tr4, key="nr_tr4")
+            mr4 = st.number_input("MPP RODA R4", min_value=0, value=val_mr4, key="nr_mr4")
+
+        st.divider()
+        st.markdown("**Pengambilan Karcis Baru**")
+        fs1, fs2 = st.columns(2)
+        with fs1:
+            pk2_input = st.number_input("PENGAMBILAN KARCIS R2", min_value=0, value=val_pk2, key="nr_pk2")
+        with fs2:
+            pk4_input = st.number_input("PENGAMBILAN KARCIS R4", min_value=0, value=val_pk4, key="nr_pk4")
+
+        st.divider()
+
+        # TOMBOL HITUNG
+        btn_hitung = st.button("🔢 HITUNG", use_container_width=True, key="btn_hitung_parkir")
+
+        if btn_hitung:
+            st.session_state["hasil_hitung"] = {
+                "tr2": tr2, "tr4": tr4,
+                "mr2": mr2, "mr4": mr4,
+                "kh2": tr2 - mr2, "kh4": tr4 - mr4,
+                "pk2": pk2_input, "pk4": pk4_input,
+                "sn2": (pk2_input + sisa_r2) - tr2,
+                "sn4": (pk4_input + sisa_r4) - tr4
+            }
+
+        # TAMPILKAN HASIL HITUNG
+        if "hasil_hitung" in st.session_state:
+            h = st.session_state["hasil_hitung"]
+
+            st.subheader("📋 Hasil Perhitungan")
+
+            rh1, rh2 = st.columns(2)
+            with rh1:
+                st.metric("🏍️ Khusus R2", h["kh2"])
+                st.metric("📦 Sisa Stok R2", h["sn2"])
+            with rh2:
+                st.metric("🚗 Khusus R4", h["kh4"])
+                st.metric("📦 Sisa Stok R4", h["sn4"])
+
+            if h["sn2"] < 0:
+                st.error(f"⚠️ Sisa Stok R2 MINUS: {h['sn2']}")
+            if h["sn4"] < 0:
+                st.error(f"⚠️ Sisa Stok R4 MINUS: {h['sn4']}")
 
             st.divider()
-            st.markdown("**Pengambilan Karcis Baru**")
-            fs1, fs2 = st.columns(2)
-            with fs1:
-                pk2_input = st.number_input("PENGAMBILAN KARCIS R2", min_value=0, value=val_pk2)
-            with fs2:
-                pk4_input = st.number_input("PENGAMBILAN KARCIS R4", min_value=0, value=val_pk4)
 
-            # Preview
-            kh2 = tr2 - mr2
-            kh4 = tr4 - mr4
-            st.divider()
-            st.subheader("📋 Preview")
-            pv1, pv2 = st.columns(2)
-            pv1.metric("🏍️ Khusus R2", kh2)
-            pv2.metric("🚗 Khusus R4", kh4)
-
-            b1, b2 = st.columns(2)
-            with b1:
+            bs1, bs2 = st.columns(2)
+            with bs1:
                 label_simpan = "💾 SIMPAN EDIT" if sudah_diisi else "💾 SIMPAN REKAP"
-                subm = st.form_submit_button(label_simpan, type="primary", use_container_width=True)
-            with b2:
-                reset = st.form_submit_button("🔄 RESET FORM", use_container_width=True)
+                btn_simpan = st.button(
+                    label_simpan,
+                    type="primary",
+                    use_container_width=True,
+                    key="btn_simpan_parkir"
+                )
+            with bs2:
+                btn_batal = st.button(
+                    "❌ BATAL",
+                    use_container_width=True,
+                    key="btn_batal_hitung"
+                )
 
-            if reset:
-                st.rerun()
-
-            if subm:
-                sn2 = (pk2_input + sisa_r2) - tr2
-                sn4 = (pk4_input + sisa_r4) - tr4
-
+            if btn_simpan:
                 df_u = df_p.copy()
                 df_u.loc[idx, ["Total_Karcis_R2", "MPP_Roda_R2", "Sisa_Stok_R2", "Khusus_Roda_R2"]] = [
-                    str(tr2), str(mr2), str(sn2), str(kh2)
+                    str(h["tr2"]), str(h["mr2"]), str(h["sn2"]), str(h["kh2"])
                 ]
                 df_u.loc[idx, ["Total_Karcis_R4", "MPP_Roda_R4", "Sisa_Stok_R4", "Khusus_Roda_R4"]] = [
-                    str(tr4), str(mr4), str(sn4), str(kh4)
+                    str(h["tr4"]), str(h["mr4"]), str(h["sn4"]), str(h["kh4"])
                 ]
                 df_u.loc[idx, ["Pengambilan_Karcis_R2", "Pengambilan_Karcis_R4"]] = [
-                    str(pk2_input), str(pk4_input)
+                    str(h["pk2"]), str(h["pk4"])
                 ]
                 df_u.loc[idx, ["Status_Khusus", "Status_MPP", "Status_Cetak"]] = [
                     "BELUM", "BELUM", "BELUM"
                 ]
 
                 if safe_update(conn_parkir, WS_PARKIR, df_u):
+                    del st.session_state["hasil_hitung"]
                     if sudah_diisi:
                         st.success("✅ Data berhasil diedit!")
                     else:
                         st.success("✅ Rekap berhasil disimpan!")
                     st.rerun()
+
+            if btn_batal:
+                del st.session_state["hasil_hitung"]
+                st.rerun()
 
     render_log_rekap(df_p, dt_user)
 
@@ -540,7 +576,9 @@ with tab3:
         if df_pen.empty:
             st.info("TIDAK ADA DATA KONFIRMASI.")
         else:
-            df_pen["Tgl_Temp"] = pd.to_datetime(df_pen["Tanggal"], dayfirst=True, errors="coerce").dt.date
+            df_pen["Tgl_Temp"] = pd.to_datetime(
+                df_pen["Tanggal"], dayfirst=True, errors="coerce"
+            ).dt.date
             df_fil = df_pen[
                 (df_pen["Status_Khusus"] != "SUDAH") |
                 (df_pen["Status_MPP"] != "SUDAH") |
@@ -576,7 +614,11 @@ with tab3:
                                 f"R4: {row.get('Total_Karcis_R4', '-')}"
                             )
                             if sk != "SUDAH":
-                                if st.button("TERIMA TOTAL", key=f"k_{i}", use_container_width=True):
+                                if st.button(
+                                    "TERIMA TOTAL",
+                                    key=f"k_{i}",
+                                    use_container_width=True
+                                ):
                                     df_u = df_p.copy()
                                     df_u.loc[i, "Status_Khusus"] = "SUDAH"
                                     if safe_update(conn_parkir, WS_PARKIR, df_u):
