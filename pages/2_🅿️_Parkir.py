@@ -460,17 +460,14 @@ with tab1:
                 st.info("✏️ Data sudah pernah diisi. Kamu bisa mengedit di bawah.")
 
                 with st.expander("📋 Data Yang Tersimpan Sekarang", expanded=True):
-                    st.metric("Total R2", val_tr2)
                     st.metric("MPP R2", val_mr2)
-                    st.metric("Khusus R2", val_tr2 - val_mr2)
-                    st.metric("Pengambilan Karcis R2", val_pk2)
-
-                    st.divider()
-
-                    st.metric("Total R4", val_tr4)
                     st.metric("MPP R4", val_mr4)
-                    st.metric("Khusus R4", val_tr4 - val_mr4)
+                    st.metric("Total R2", val_tr2)
+                    st.metric("Total R4", val_tr4)
+                    st.metric("Pengambilan Karcis R2", val_pk2)
                     st.metric("Pengambilan Karcis R4", val_pk4)
+                    st.metric("Khusus R2", val_tr2 - val_mr2)
+                    st.metric("Khusus R4", val_tr4 - val_mr4)
             else:
                 val_tr2 = 0
                 val_tr4 = 0
@@ -484,16 +481,14 @@ with tab1:
             judul_form = "✏️ EDIT REKAP" if sudah_diisi else "📝 INPUT REKAP"
             st.subheader(judul_form)
 
-            st.markdown("### R2")
-            tr2 = st.number_input("TOTAL KARCIS R2", min_value=0, value=val_tr2, key="nr_tr2")
+            # Urutan vertikal sesuai permintaan
             mr2 = st.number_input("MPP RODA R2", min_value=0, value=val_mr2, key="nr_mr2")
-            pk2_input = st.number_input("PENGAMBILAN KARCIS R2", min_value=0, value=val_pk2, key="nr_pk2")
-
-            st.divider()
-
-            st.markdown("### R4")
-            tr4 = st.number_input("TOTAL KARCIS R4", min_value=0, value=val_tr4, key="nr_tr4")
             mr4 = st.number_input("MPP RODA R4", min_value=0, value=val_mr4, key="nr_mr4")
+
+            tr2 = st.number_input("TOTAL KARCIS R2", min_value=0, value=val_tr2, key="nr_tr2")
+            tr4 = st.number_input("TOTAL KARCIS R4", min_value=0, value=val_tr4, key="nr_tr4")
+
+            pk2_input = st.number_input("PENGAMBILAN KARCIS R2", min_value=0, value=val_pk2, key="nr_pk2")
             pk4_input = st.number_input("PENGAMBILAN KARCIS R4", min_value=0, value=val_pk4, key="nr_pk4")
 
             st.divider()
@@ -506,10 +501,14 @@ with tab1:
 
             if btn_hitung:
                 st.session_state["hasil_hitung"] = {
-                    "tr2": tr2, "tr4": tr4,
-                    "mr2": mr2, "mr4": mr4,
-                    "kh2": tr2 - mr2, "kh4": tr4 - mr4,
-                    "pk2": pk2_input, "pk4": pk4_input,
+                    "tr2": tr2,
+                    "tr4": tr4,
+                    "mr2": mr2,
+                    "mr4": mr4,
+                    "kh2": tr2 - mr2,
+                    "kh4": tr4 - mr4,
+                    "pk2": pk2_input,
+                    "pk4": pk4_input,
                     "sn2": (pk2_input + sisa_r2) - tr2,
                     "sn4": (pk4_input + sisa_r4) - tr4
                 }
@@ -518,18 +517,14 @@ with tab1:
                 h = st.session_state["hasil_hitung"]
 
                 st.subheader("📋 Hasil Perhitungan")
-
-                st.markdown("### R2")
                 st.metric("Khusus R2", h["kh2"])
+                st.metric("Khusus R4", h["kh4"])
+
                 if h["sn2"] < 0:
                     st.error(f"Sisa Stok R2: **{h['sn2']}** ❌ MINUS")
                 else:
                     st.metric("Sisa Stok R2", h["sn2"])
 
-                st.divider()
-
-                st.markdown("### R4")
-                st.metric("Khusus R4", h["kh4"])
                 if h["sn4"] < 0:
                     st.error(f"Sisa Stok R4: **{h['sn4']}** ❌ MINUS")
                 else:
@@ -537,21 +532,19 @@ with tab1:
 
                 st.divider()
 
-                bs1, bs2 = st.columns(2)
-                with bs1:
-                    label_simpan = "💾 SIMPAN EDIT" if sudah_diisi else "💾 SIMPAN REKAP"
-                    btn_simpan = st.button(
-                        label_simpan,
-                        type="primary",
-                        use_container_width=True,
-                        key="btn_simpan_parkir"
-                    )
-                with bs2:
-                    btn_batal = st.button(
-                        "❌ BATAL",
-                        use_container_width=True,
-                        key="btn_batal_hitung"
-                    )
+                label_simpan = "💾 SIMPAN EDIT" if sudah_diisi else "💾 SIMPAN REKAP"
+                btn_simpan = st.button(
+                    label_simpan,
+                    type="primary",
+                    use_container_width=True,
+                    key="btn_simpan_parkir"
+                )
+
+                btn_batal = st.button(
+                    "❌ BATAL",
+                    use_container_width=True,
+                    key="btn_batal_hitung"
+                )
 
                 if btn_simpan:
                     df_u = df_p.copy()
