@@ -119,45 +119,39 @@ def ambil_info_tanggal_parkir(df_p, tgl_input_user):
     if dt_user is None or df_p.empty or "Tanggal" not in df_p.columns:
         return None, pd.DataFrame(), None, "-", 0, 0
 
-df = df_p.copy()
-df["Tgl_Temp"] = pd.to_datetime(df["Tanggal"], dayfirst=True, errors="coerce").dt.date
-baris = df[df["Tgl_Temp"] == dt_user]
+    df = df_p.copy()
+    df["Tgl_Temp"] = pd.to_datetime(df["Tanggal"], dayfirst=True, errors="coerce").dt.date
+    baris = df[df["Tgl_Temp"] == dt_user]
 
-if baris.empty:
-    return dt_user, pd.DataFrame(), None, "-", 0, 0
+    if baris.empty:
+        return dt_user, pd.DataFrame(), None, "-", 0, 0
 
-idx = baris.index[0]
-nama_p = baris.iloc[0]["Nama_Petugas"]
+    idx = baris.index[0]
+    nama_p = baris.iloc[0]["Nama_Petugas"]
 
-# Cari sisa stok terakhir petugas berdasarkan tanggal terakhir sebelum dt_user
-df_petugas_sebelum = df[
-    (df["Nama_Petugas"] == nama_p) &
-    (df["Tgl_Temp"].notna()) &
-    (df["Tgl_Temp"] < dt_user)
-].copy()
+    df_petugas_sebelum = df[
+        (df["Nama_Petugas"] == nama_p) &
+        (df["Tgl_Temp"].notna()) &
+        (df["Tgl_Temp"] < dt_user)
+    ].copy()
 
-# Ambil hanya baris yang benar-benar sudah punya sisa stok
-df_petugas_sebelum = df_petugas_sebelum[
-    df_petugas_sebelum["Sisa_Stok_R2"].astype(str).str.strip().isin(["-", "nan", "", "None"]) == False
-]
+    df_petugas_sebelum = df_petugas_sebelum[
+        ~df_petugas_sebelum["Sisa_Stok_R2"].astype(str).str.strip().isin(["-", "nan", "", "None"])
+    ]
 
-if not df_petugas_sebelum.empty:
-    df_petugas_sebelum = df_petugas_sebelum.sort_values(
-        by=["Tgl_Temp"],
-        ascending=False
-    )
-    baris_terakhir = df_petugas_sebelum.iloc[0]
+    if not df_petugas_sebelum.empty:
+        df_petugas_sebelum = df_petugas_sebelum.sort_values(by="Tgl_Temp", ascending=False)
+        baris_terakhir = df_petugas_sebelum.iloc[0]
+        sisa_r2 = pd.to_numeric(baris_terakhir.get("Sisa_Stok_R2", 0), errors="coerce")
+        sisa_r4 = pd.to_numeric(baris_terakhir.get("Sisa_Stok_R4", 0), errors="coerce")
+    else:
+        sisa_r2 = 0
+        sisa_r4 = 0
 
-    sisa_r2 = pd.to_numeric(baris_terakhir.get("Sisa_Stok_R2", 0), errors="coerce")
-    sisa_r4 = pd.to_numeric(baris_terakhir.get("Sisa_Stok_R4", 0), errors="coerce")
-else:
-    sisa_r2 = 0
-    sisa_r4 = 0
+    sisa_r2 = 0 if pd.isna(sisa_r2) else int(sisa_r2)
+    sisa_r4 = 0 if pd.isna(sisa_r4) else int(sisa_r4)
 
-sisa_r2 = 0 if pd.isna(sisa_r2) else int(sisa_r2)
-sisa_r4 = 0 if pd.isna(sisa_r4) else int(sisa_r4)
-
-return dt_user, baris, idx, nama_p, sisa_r2, sisa_r4
+    return dt_user, baris, idx, nama_p, sisa_r2, sisa_r4
 
 def render_log_rekap(df_p, dt_user):
     with st.expander("📊 LOG INPUT & STATUS BULAN INI", expanded=False):
