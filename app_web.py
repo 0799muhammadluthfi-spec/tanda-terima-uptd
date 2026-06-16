@@ -51,17 +51,6 @@ if "logo_b64" not in st.session_state:
 # INJECT CSS
 # ==========================================
 inject_css()
-# Hilangkan tombol +/- pada number input
-st.markdown("""
-<script>
-    const observer = new MutationObserver(() => {
-        document.querySelectorAll('[data-testid="stNumberInput"] button').forEach(btn => {
-            btn.style.display = 'none';
-        });
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-</script>
-""", unsafe_allow_html=True)
 inject_welcome_css()
 
 # ==========================================
