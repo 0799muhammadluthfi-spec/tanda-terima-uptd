@@ -2,6 +2,12 @@
 # app_web.py
 # ==========================================
 import streamlit as st
+import pandas as pd
+from datetime import datetime, date
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import cm
+from io import BytesIO
+from streamlit_gsheets import GSheetsConnection
 import os
 import base64
 import urllib.request
