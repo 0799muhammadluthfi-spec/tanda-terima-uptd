@@ -266,14 +266,24 @@ def cari_tanggal_belum_input_parkir(df_p):
             except:
                 return True
 
+        def is_libur(v):
+            return str(v).strip().upper() == "LIBUR"
+
         df["Belum_R2"] = df["Total_Karcis_R2"].apply(is_belum_input)
         df["Belum_R4"] = df["Total_Karcis_R4"].apply(is_belum_input)
+
+        # Cek kolom Status_Libur
+        if "Status_Libur" in df.columns:
+            df["Is_Libur"] = df["Status_Libur"].apply(is_libur)
+        else:
+            df["Is_Libur"] = False
 
         df_belum = df[
             df["Tgl_Cek"].notna() &
             (df["Tgl_Cek"] <= hari_ini) &
             (df["Belum_R2"]) &
-            (df["Belum_R4"])
+            (df["Belum_R4"]) &
+            (~df["Is_Libur"])
         ].copy()
 
         if df_belum.empty:
@@ -283,6 +293,7 @@ def cari_tanggal_belum_input_parkir(df_p):
         return tanggal_awal, df_belum
     except:
         return None, pd.DataFrame()
+
 
 def daftar_tanggal_kosong_bulan_ini(df_p):
     try:
@@ -307,15 +318,24 @@ def daftar_tanggal_kosong_bulan_ini(df_p):
             except:
                 return True
 
+        def is_libur(v):
+            return str(v).strip().upper() == "LIBUR"
+
         df["Belum_R2"] = df["Total_Karcis_R2"].apply(is_belum_input)
         df["Belum_R4"] = df["Total_Karcis_R4"].apply(is_belum_input)
+
+        if "Status_Libur" in df.columns:
+            df["Is_Libur"] = df["Status_Libur"].apply(is_libur)
+        else:
+            df["Is_Libur"] = False
 
         hasil = df[
             df["Tgl_Cek"].notna() &
             (df["Tgl_Cek"] >= awal_bulan) &
             (df["Tgl_Cek"] <= hari_ini) &
             (df["Belum_R2"]) &
-            (df["Belum_R4"])
+            (df["Belum_R4"]) &
+            (~df["Is_Libur"])
         ].copy()
 
         if hasil.empty:
@@ -324,6 +344,7 @@ def daftar_tanggal_kosong_bulan_ini(df_p):
         return hasil.sort_values("Tgl_Cek")[["Tanggal", "Nama_Petugas"]]
     except:
         return pd.DataFrame(columns=["Tanggal", "Nama_Petugas"])
+
 
 def daftar_tanggal_belum_konfirmasi_bulan_ini(df_p):
     try:
@@ -351,6 +372,9 @@ def daftar_tanggal_belum_konfirmasi_bulan_ini(df_p):
             except:
                 return False
 
+        def is_libur(v):
+            return str(v).strip().upper() == "LIBUR"
+
         kondisi_sudah = df["Total_Karcis_R2"].apply(is_sudah_input) | df["Total_Karcis_R4"].apply(is_sudah_input)
         kondisi_belum_selesai = (
             (df["Status_Khusus"].astype(str).str.strip().str.upper() != "SUDAH") |
@@ -358,12 +382,18 @@ def daftar_tanggal_belum_konfirmasi_bulan_ini(df_p):
             (df["Status_Cetak"].astype(str).str.strip().str.upper() != "SUDAH")
         )
 
+        if "Status_Libur" in df.columns:
+            kondisi_libur = ~df["Status_Libur"].apply(is_libur)
+        else:
+            kondisi_libur = True
+
         hasil = df[
             df["Tgl_Cek"].notna() &
             (df["Tgl_Cek"] >= awal_bulan) &
             (df["Tgl_Cek"] <= hari_ini) &
             kondisi_sudah &
-            kondisi_belum_selesai
+            kondisi_belum_selesai &
+            kondisi_libur
         ].copy()
 
         if hasil.empty:
@@ -372,7 +402,6 @@ def daftar_tanggal_belum_konfirmasi_bulan_ini(df_p):
         return hasil.sort_values("Tgl_Cek")[["Tanggal", "Nama_Petugas", "Status_Khusus", "Status_MPP", "Status_Cetak"]]
     except:
         return pd.DataFrame(columns=["Tanggal", "Nama_Petugas", "Status_Khusus", "Status_MPP", "Status_Cetak"])
-
 # ==========================================
 # KAS UPTD
 # ==========================================
