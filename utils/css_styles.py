@@ -590,12 +590,20 @@ CSS_WELCOME = """
         to   { opacity: 1; transform: translateY(0); }
     }
 
-        @keyframes smoothDivider {
-        from { opacity: 0; transform: scaleX(0); }
-        to { opacity: 1; transform: scaleX(1); }
+    /* HILANGKAN TOMBOL +/- PADA NUMBER INPUT */
+    .main .stNumberInput button {
+        display: none !important;
     }
 
-    <<<< TARUH DI SINI >>>>
+    .main .stNumberInput [data-testid="stNumberInputStepUp"],
+    .main .stNumberInput [data-testid="stNumberInputStepDown"] {
+        display: none !important;
+    }
+
+    /* Lebarkan input supaya tidak ada ruang kosong bekas tombol */
+    .main .stNumberInput input {
+        width: 100% !important;
+    }
 
 </style>
 """, unsafe_allow_html=True)
