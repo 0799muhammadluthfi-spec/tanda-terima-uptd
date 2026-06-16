@@ -600,15 +600,12 @@ CSS_WELCOME = """
         display: none !important;
     }
 
-    /* Lebarkan input supaya tidak ada ruang kosong bekas tombol */
     .main .stNumberInput input {
         width: 100% !important;
     }
 
 </style>
 """, unsafe_allow_html=True)
-</style>
-"""
 
 
 def inject_css():
