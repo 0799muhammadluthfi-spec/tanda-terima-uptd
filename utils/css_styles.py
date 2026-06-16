@@ -233,6 +233,24 @@ CSS_GLOBAL = """
         color: #9ca3af !important;
     }
 
+    /* ============ HILANGKAN TOMBOL +/- NUMBER INPUT ============ */
+    button[data-testid="stNumberInputStepDown"],
+    button[data-testid="stNumberInputStepUp"] {
+        display: none !important;
+        visibility: hidden !important;
+        width: 0 !important;
+        min-width: 0 !important;
+        height: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: none !important;
+        pointer-events: none !important;
+    }
+
+    [data-testid="stNumberInput"] > div {
+        gap: 0 !important;
+    }
+
     /* ============ METRIC ============ */
     [data-testid="stMetric"] {
         background: #ffffff !important;
@@ -409,14 +427,8 @@ CSS_GLOBAL = """
     }
 
     @keyframes pageEnter {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: translateY(0); }
     }
 
     @media (max-width: 768px) {
@@ -428,9 +440,6 @@ CSS_GLOBAL = """
     }
 
     /* ============ ANIMASI KONTEN ============ */
-    /* Hanya elemen penting yang dianimasikan
-       agar tidak berat */
-
     [data-testid="stMetric"] {
         animation: fadeUp 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
         will-change: opacity, transform;
@@ -588,34 +597,6 @@ CSS_WELCOME = """
     @keyframes textUp {
         from { opacity: 0; transform: translateY(14px); }
         to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* HILANGKAN TOMBOL +/- NUMBER INPUT - AGGRESSIVE */
-    div[data-testid="stNumberInput"] > div > div > button {
-        display: none !important;
-    }
-
-    div[data-testid="stNumberInput"] button {
-        display: none !important;
-    }
-
-    div[data-testid="stNumberInput"] > div {
-        display: flex !important;
-    }
-
-    div[data-testid="stNumberInput"] > div > div:has(button) {
-        display: none !important;
-    }
-
-    div[data-testid="stNumberInput"] input {
-        width: 100% !important;
-        border-radius: 8px !important;
-    }
-
-    /* Fallback: sembunyikan step buttons via attribute */
-    [data-baseweb="input"] ~ div,
-    [data-baseweb="input"] + div {
-        display: none !important;
     }
 
 </style>
