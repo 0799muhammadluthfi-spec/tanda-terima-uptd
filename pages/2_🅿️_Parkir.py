@@ -285,25 +285,25 @@ def render_log_stok(df_p, pakai_expander=True):
                 c1, c2 = st.columns(2)
 
                 if sisa_r2 < 0:
-                    c1.error(f"🏍️ Sisa Karcis R2: **{sisa_r2}** ❌ MINUS")
+                    c1.error(f"Sisa Karcis R2: **{sisa_r2}** ❌ MINUS")
                 elif sisa_r2 == 0:
-                    c1.warning(f"🏍️ Sisa Karcis R2: **{sisa_r2}** ⚠️ HABIS")
+                    c1.warning(f"Sisa Karcis R2: **{sisa_r2}** ⚠️ HABIS")
                 else:
-                    c1.metric("🏍️ Sisa Karcis R2", sisa_r2)
+                    c1.metric("Sisa Karcis R2", sisa_r2)
 
                 if sisa_r4 < 0:
-                    c2.error(f"🚗 Sisa Karcis R4: **{sisa_r4}** ❌ MINUS")
+                    c2.error(f"Sisa Karcis R4: **{sisa_r4}** ❌ MINUS")
                 elif sisa_r4 == 0:
-                    c2.warning(f"🚗 Sisa Karcis R4: **{sisa_r4}** ⚠️ HABIS")
+                    c2.warning(f"Sisa Karcis R4: **{sisa_r4}** ⚠️ HABIS")
                 else:
-                    c2.metric("🚗 Sisa Karcis R4", sisa_r4)
+                    c2.metric("Sisa Karcis R4", sisa_r4)
 
             else:
                 st.markdown(f"### 👤 {petugas}")
                 st.caption("Belum ada data stok")
                 c1, c2 = st.columns(2)
-                c1.metric("🏍️ Sisa Karcis R2", 0)
-                c2.metric("🚗 Sisa Karcis R4", 0)
+                c1.metric("Sisa Karcis R2", 0)
+                c2.metric("Sisa Karcis R4", 0)
 
             st.divider()
             ada_data = True
@@ -436,9 +436,7 @@ with tab1:
         if is_libur:
             st.info("📋 Tanggal ini LIBUR. Tidak perlu input rekap. Sisa stok tetap terbawa ke hari berikutnya.")
         else:
-            st.metric("Stok Awal R2", int(sisa_r2))
-            st.metric("Stok Awal R4", int(sisa_r4))
-
+            # Langsung cek apakah sudah diisi (tanpa tampilan stok awal)
             karcis_skrg = str(df_p.loc[idx, "Total_Karcis_R2"]).strip()
             sudah_diisi = karcis_skrg not in ["-", "nan", ""]
 
@@ -481,7 +479,6 @@ with tab1:
             judul_form = "✏️ EDIT REKAP" if sudah_diisi else "📝 INPUT REKAP"
             st.subheader(judul_form)
 
-            # Urutan vertikal sesuai permintaan
             mr2 = st.number_input("MPP RODA R2", min_value=0, value=val_mr2, key="nr_mr2")
             mr4 = st.number_input("MPP RODA R4", min_value=0, value=val_mr4, key="nr_mr4")
 
