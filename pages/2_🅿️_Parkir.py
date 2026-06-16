@@ -439,12 +439,9 @@ with tab1:
         if is_libur:
             st.info("📋 Tanggal ini LIBUR. Tidak perlu input rekap. Sisa stok tetap terbawa ke hari berikutnya.")
         else:
-        cs1, cs2 = st.columns(2)
-        cs1.metric("Stok Awal R2", int(sisa_r2))
-        cs2.metric("Stok Awal R4", int(sisa_r4))
-
-            karcis_skrg = str(df_p.loc[idx, "Total_Karcis_R2"]).strip()
-            sudah_diisi = karcis_skrg not in ["-", "nan", ""]
+            cs1, cs2 = st.columns(2)
+            cs1.metric("Stok Awal R2", int(sisa_r2))
+            cs2.metric("Stok Awal R4", int(sisa_r4))
 
             if sudah_diisi:
                 val_tr2 = pd.to_numeric(df_p.loc[idx, "Total_Karcis_R2"], errors="coerce")
