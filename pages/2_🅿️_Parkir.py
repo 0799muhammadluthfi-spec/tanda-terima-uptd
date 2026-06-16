@@ -190,7 +190,6 @@ def render_log_rekap(df_p, dt_user):
             (df["Total_Karcis_R2"].apply(is_kosong) & df["Total_Karcis_R4"].apply(is_kosong))
         ].copy()
 
-        # Filter tanggal libur dari df_kosong
         if "Status_Libur" in df_kosong.columns:
             df_kosong = df_kosong[
                 df_kosong["Status_Libur"].astype(str).str.strip().str.upper() != "LIBUR"
@@ -408,7 +407,6 @@ with tab1:
     if baris.empty or idx is None:
         st.warning("⚠️ Tanggal belum ada di jadwal Sheet.")
     else:
-        # Cek status libur
         status_libur_skrg = ""
         if "Status_Libur" in df_p.columns:
             status_libur_skrg = str(df_p.loc[idx, "Status_Libur"]).strip().upper()
@@ -417,7 +415,6 @@ with tab1:
 
         st.success(f"👤 PETUGAS: **{nama_p}** | 📅 **{format_tgl_hari_indo(tgl_input_user)}**")
 
-        # Tombol Tandai Libur / Batal Libur
         lib1, lib2 = st.columns(2)
         with lib1:
             if is_libur:
@@ -439,11 +436,9 @@ with tab1:
         if is_libur:
             st.info("📋 Tanggal ini LIBUR. Tidak perlu input rekap. Sisa stok tetap terbawa ke hari berikutnya.")
         else:
-            cs1, cs2 = st.columns(2)
-            cs1.metric("Stok Awal R2", int(sisa_r2))
-            cs2.metric("Stok Awal R4", int(sisa_r4))
+            st.metric("Stok Awal R2", int(sisa_r2))
+            st.metric("Stok Awal R4", int(sisa_r4))
 
-            # Cek apakah sudah pernah diisi
             karcis_skrg = str(df_p.loc[idx, "Total_Karcis_R2"]).strip()
             sudah_diisi = karcis_skrg not in ["-", "nan", ""]
 
@@ -465,21 +460,17 @@ with tab1:
                 st.info("✏️ Data sudah pernah diisi. Kamu bisa mengedit di bawah.")
 
                 with st.expander("📋 Data Yang Tersimpan Sekarang", expanded=True):
-                    ex1, ex2 = st.columns(2)
-                    ex1.metric("Total R2", val_tr2)
-                    ex2.metric("Total R4", val_tr4)
+                    st.metric("Total R2", val_tr2)
+                    st.metric("MPP R2", val_mr2)
+                    st.metric("Khusus R2", val_tr2 - val_mr2)
+                    st.metric("Pengambilan Karcis R2", val_pk2)
 
-                    ex3, ex4 = st.columns(2)
-                    ex3.metric("MPP R2", val_mr2)
-                    ex4.metric("MPP R4", val_mr4)
+                    st.divider()
 
-                    ex5, ex6 = st.columns(2)
-                    ex5.metric("Khusus R2", val_tr2 - val_mr2)
-                    ex6.metric("Khusus R4", val_tr4 - val_mr4)
-
-                    ex7, ex8 = st.columns(2)
-                    ex7.metric("Pengambilan Karcis R2", val_pk2)
-                    ex8.metric("Pengambilan Karcis R4", val_pk4)
+                    st.metric("Total R4", val_tr4)
+                    st.metric("MPP R4", val_mr4)
+                    st.metric("Khusus R4", val_tr4 - val_mr4)
+                    st.metric("Pengambilan Karcis R4", val_pk4)
             else:
                 val_tr2 = 0
                 val_tr4 = 0
@@ -493,34 +484,20 @@ with tab1:
             judul_form = "✏️ EDIT REKAP" if sudah_diisi else "📝 INPUT REKAP"
             st.subheader(judul_form)
 
-            # Baris 1: Total R2 | Total R4
-            t1, t2 = st.columns(2)
-            with t1:
-                tr2 = st.number_input("TOTAL KARCIS R2", min_value=0, value=val_tr2, key="nr_tr2")
-            with t2:
-                tr4 = st.number_input("TOTAL KARCIS R4", min_value=0, value=val_tr4, key="nr_tr4")
-
-            # Baris 2: MPP R2 | MPP R4
-            m1, m2 = st.columns(2)
-            with m1:
-                mr2 = st.number_input("MPP RODA R2", min_value=0, value=val_mr2, key="nr_mr2")
-            with m2:
-                mr4 = st.number_input("MPP RODA R4", min_value=0, value=val_mr4, key="nr_mr4")
-
-            # Baris 3: Pengambilan R2 | Pengambilan R4
-            p1, p2 = st.columns(2)
-            with p1:
-                pk2_input = st.number_input(
-                    "PENGAMBILAN KARCIS R2", min_value=0, value=val_pk2, key="nr_pk2"
-                )
-            with p2:
-                pk4_input = st.number_input(
-                    "PENGAMBILAN KARCIS R4", min_value=0, value=val_pk4, key="nr_pk4"
-                )
+            st.markdown("### R2")
+            tr2 = st.number_input("TOTAL KARCIS R2", min_value=0, value=val_tr2, key="nr_tr2")
+            mr2 = st.number_input("MPP RODA R2", min_value=0, value=val_mr2, key="nr_mr2")
+            pk2_input = st.number_input("PENGAMBILAN KARCIS R2", min_value=0, value=val_pk2, key="nr_pk2")
 
             st.divider()
 
-            # TOMBOL HITUNG
+            st.markdown("### R4")
+            tr4 = st.number_input("TOTAL KARCIS R4", min_value=0, value=val_tr4, key="nr_tr4")
+            mr4 = st.number_input("MPP RODA R4", min_value=0, value=val_mr4, key="nr_mr4")
+            pk4_input = st.number_input("PENGAMBILAN KARCIS R4", min_value=0, value=val_pk4, key="nr_pk4")
+
+            st.divider()
+
             btn_hitung = st.button(
                 "🔢 HITUNG",
                 use_container_width=True,
@@ -537,31 +514,26 @@ with tab1:
                     "sn4": (pk4_input + sisa_r4) - tr4
                 }
 
-            # TAMPILKAN HASIL HITUNG
             if "hasil_hitung" in st.session_state:
                 h = st.session_state["hasil_hitung"]
 
                 st.subheader("📋 Hasil Perhitungan")
 
-                # Baris Khusus R2 | Khusus R4
-                k1, k2 = st.columns(2)
-                with k1:
-                    st.metric("🏍️ Khusus R2", h["kh2"])
-                with k2:
-                    st.metric("🚗 Khusus R4", h["kh4"])
+                st.markdown("### R2")
+                st.metric("Khusus R2", h["kh2"])
+                if h["sn2"] < 0:
+                    st.error(f"Sisa Stok R2: **{h['sn2']}** ❌ MINUS")
+                else:
+                    st.metric("Sisa Stok R2", h["sn2"])
 
-                # Baris Sisa Stok R2 | Sisa Stok R4
-                s1, s2 = st.columns(2)
-                with s1:
-                    if h["sn2"] < 0:
-                        st.error(f"📦 Sisa Stok R2: **{h['sn2']}** ❌ MINUS")
-                    else:
-                        st.metric("📦 Sisa Stok R2", h["sn2"])
-                with s2:
-                    if h["sn4"] < 0:
-                        st.error(f"📦 Sisa Stok R4: **{h['sn4']}** ❌ MINUS")
-                    else:
-                        st.metric("📦 Sisa Stok R4", h["sn4"])
+                st.divider()
+
+                st.markdown("### R4")
+                st.metric("Khusus R4", h["kh4"])
+                if h["sn4"] < 0:
+                    st.error(f"Sisa Stok R4: **{h['sn4']}** ❌ MINUS")
+                else:
+                    st.metric("Sisa Stok R4", h["sn4"])
 
                 st.divider()
 
