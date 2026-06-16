@@ -443,6 +443,10 @@ with tab1:
             cs1.metric("Stok Awal R2", int(sisa_r2))
             cs2.metric("Stok Awal R4", int(sisa_r4))
 
+            # Cek apakah sudah pernah diisi
+            karcis_skrg = str(df_p.loc[idx, "Total_Karcis_R2"]).strip()
+            sudah_diisi = karcis_skrg not in ["-", "nan", ""]
+
             if sudah_diisi:
                 val_tr2 = pd.to_numeric(df_p.loc[idx, "Total_Karcis_R2"], errors="coerce")
                 val_tr4 = pd.to_numeric(df_p.loc[idx, "Total_Karcis_R4"], errors="coerce")
