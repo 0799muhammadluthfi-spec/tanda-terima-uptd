@@ -1,13 +1,8 @@
-# ==========================================
-# utils/css_styles.py
-# ==========================================
-
-CSS_GLOBAL = """
+st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-    /* ============ BASE ============ */
     .stApp,
     [data-testid="stAppViewContainer"],
     [data-testid="stMainBlockContainer"],
@@ -16,7 +11,6 @@ CSS_GLOBAL = """
         color-scheme: light !important;
     }
 
-    /* ============ HIDE ELEMENTS ============ */
     #MainMenu { display: none !important; }
     footer { display: none !important; }
     .stAppDeployButton { display: none !important; }
@@ -24,14 +18,8 @@ CSS_GLOBAL = """
     [data-testid="stStatusWidget"] { display: none !important; }
     button[title="View fullscreen"] { display: none !important; }
 
-    /* ============ SIDEBAR ============ */
     [data-testid="stSidebar"] {
-        background: linear-gradient(
-            180deg,
-            #0f172a 0%,
-            #1e293b 50%,
-            #0f172a 100%
-        ) !important;
+        background: linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #0f172a 100%) !important;
         border-right: 1px solid rgba(255,255,255,0.05) !important;
     }
 
@@ -50,13 +38,17 @@ CSS_GLOBAL = """
         color: #e2e8f0 !important;
     }
 
-    /* ============ SIDEBAR COLLAPSE BUTTON ============ */
     [data-testid="stSidebar"] button[kind="header"],
     [data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] {
         color: #ffffff !important;
         background: rgba(255,255,255,0.16) !important;
         border: 1.5px solid rgba(255,255,255,0.35) !important;
         border-radius: 8px !important;
+    }
+
+    [data-testid="stSidebar"] button[kind="header"] svg * {
+        fill: #ffffff !important;
+        stroke: #ffffff !important;
     }
 
     [data-testid="collapsedControl"],
@@ -76,12 +68,6 @@ CSS_GLOBAL = """
         stroke: #111827 !important;
     }
 
-    [data-testid="stSidebar"] button[kind="header"] svg * {
-        fill: #ffffff !important;
-        stroke: #ffffff !important;
-    }
-
-    /* ============ SIDEBAR BUTTONS ============ */
     [data-testid="stSidebar"] .stButton {
         margin-bottom: 0 !important;
         margin-top: 0 !important;
@@ -100,8 +86,7 @@ CSS_GLOBAL = """
         white-space: nowrap !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
-        transition: background 0.2s ease, color 0.2s ease,
-                    transform 0.18s ease !important;
+        transition: background 0.2s ease, color 0.2s ease, transform 0.18s ease !important;
         will-change: transform !important;
     }
 
@@ -130,7 +115,6 @@ CSS_GLOBAL = """
         transform: translateX(3px) !important;
     }
 
-    /* ============ SUBMENU ANIMASI ============ */
     .submenu-container {
         overflow: hidden;
         animation: submenuSlide 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -139,19 +123,10 @@ CSS_GLOBAL = """
     }
 
     @keyframes submenuSlide {
-        from {
-            max-height: 0;
-            opacity: 0;
-            transform: translateY(-6px) scaleY(0.96);
-        }
-        to {
-            max-height: 320px;
-            opacity: 1;
-            transform: translateY(0) scaleY(1);
-        }
+        from { max-height: 0; opacity: 0; transform: translateY(-6px) scaleY(0.96); }
+        to   { max-height: 320px; opacity: 1; transform: translateY(0) scaleY(1); }
     }
 
-    /* ============ MAIN TYPOGRAPHY ============ */
     .main h1, .main h2, .main h3,
     .main p, .main label, .main input,
     .main [data-testid="stMarkdownContainer"] p,
@@ -200,7 +175,6 @@ CSS_GLOBAL = """
         color: #1e293b !important;
     }
 
-    /* ============ INPUT FIELDS ============ */
     .main .stTextInput label,
     .main .stNumberInput label,
     .main .stSelectbox label,
@@ -233,7 +207,17 @@ CSS_GLOBAL = """
         color: #9ca3af !important;
     }
 
-    /* ============ METRIC ============ */
+    /* HILANGKAN TOMBOL +/- NUMBER INPUT */
+    .main .stNumberInput button,
+    .main .stNumberInput [data-testid="stNumberInputStepUp"],
+    .main .stNumberInput [data-testid="stNumberInputStepDown"] {
+        display: none !important;
+    }
+
+    .main .stNumberInput input {
+        width: 100% !important;
+    }
+
     [data-testid="stMetric"] {
         background: #ffffff !important;
         border: 1px solid #e5e7eb !important;
@@ -264,7 +248,6 @@ CSS_GLOBAL = """
         color: #111827 !important;
     }
 
-    /* ============ BUTTONS ============ */
     .main .stButton > button {
         font-size: 0.82rem !important;
         font-weight: 600 !important;
@@ -272,8 +255,7 @@ CSS_GLOBAL = """
         color: #374151 !important;
         border: 1.5px solid #d1d5db !important;
         background: #ffffff !important;
-        transition: background 0.2s ease, box-shadow 0.2s ease,
-                    transform 0.18s ease !important;
+        transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.18s ease !important;
         will-change: transform !important;
     }
 
@@ -301,7 +283,6 @@ CSS_GLOBAL = """
         transform: translateY(-1px) !important;
     }
 
-    /* ============ DOWNLOAD BUTTON ============ */
     .main .stDownloadButton > button {
         font-size: 0.82rem !important;
         font-weight: 600 !important;
@@ -311,8 +292,7 @@ CSS_GLOBAL = """
         border: none !important;
         padding: 8px 16px !important;
         min-height: 40px !important;
-        transition: background 0.2s ease, box-shadow 0.2s ease,
-                    transform 0.18s ease !important;
+        transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.18s ease !important;
         will-change: transform !important;
     }
 
@@ -328,7 +308,6 @@ CSS_GLOBAL = """
         font-size: 0.82rem !important;
     }
 
-    /* ============ FORM ============ */
     [data-testid="stForm"] {
         background: #ffffff !important;
         border: 1px solid #e5e7eb !important;
@@ -336,7 +315,6 @@ CSS_GLOBAL = """
         padding: 20px !important;
     }
 
-    /* ============ EXPANDER ============ */
     [data-testid="stExpander"] {
         border: 1px solid #e5e7eb !important;
         border-radius: 10px !important;
@@ -356,7 +334,6 @@ CSS_GLOBAL = """
         color: #1e293b !important;
     }
 
-    /* ============ DATAFRAME ============ */
     [data-testid="stDataFrame"] {
         border-radius: 10px !important;
         border: 1px solid #e5e7eb !important;
@@ -377,29 +354,20 @@ CSS_GLOBAL = """
         color: #374151 !important;
     }
 
-    /* ============ ALERT ============ */
     .main [data-testid="stAlert"] p {
         font-size: 0.84rem !important;
         font-weight: 500 !important;
     }
 
-    /* ============ DIVIDER ============ */
     .main hr {
         border: none !important;
         border-top: 1px solid #e5e7eb !important;
     }
 
-    /* ============ SCROLLBAR ============ */
     ::-webkit-scrollbar { width: 5px; height: 5px; }
-    ::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 3px;
-    }
-    ::-webkit-scrollbar-track {
-        background: transparent;
-    }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
 
-    /* ============ BLOCK CONTAINER ============ */
     .main .block-container {
         max-width: 82%;
         margin: 0 auto;
@@ -409,14 +377,8 @@ CSS_GLOBAL = """
     }
 
     @keyframes pageEnter {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: translateY(0); }
     }
 
     @media (max-width: 768px) {
@@ -427,33 +389,24 @@ CSS_GLOBAL = """
         }
     }
 
-    /* ============ ANIMASI KONTEN ============ */
-    /* Hanya elemen penting yang dianimasikan
-       agar tidak berat */
-
     [data-testid="stMetric"] {
         animation: fadeUp 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
-        will-change: opacity, transform;
     }
 
     [data-testid="stForm"] {
         animation: fadeUp 0.38s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both;
-        will-change: opacity, transform;
     }
 
     [data-testid="stAlert"] {
         animation: fadeDown 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
-        will-change: opacity, transform;
     }
 
     [data-testid="stExpander"] {
         animation: fadeLeft 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
-        will-change: opacity, transform;
     }
 
     [data-testid="stDataFrame"] {
         animation: fadeUp 0.36s cubic-bezier(0.22, 1, 0.36, 1) 0.04s both;
-        will-change: opacity, transform;
     }
 
     @keyframes fadeUp {
@@ -472,149 +425,4 @@ CSS_GLOBAL = """
     }
 
 </style>
-"""
-
-CSS_WELCOME = """
-<style>
-    .welcome-wrapper {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 70vh;
-        text-align: center;
-        padding: 20px;
-    }
-
-    .welcome-logo {
-        animation: logoEntry 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
-                   logoPulse 3.5s ease-in-out 1.5s infinite;
-        opacity: 0;
-        filter: drop-shadow(0 8px 20px rgba(0,0,0,0.12));
-        will-change: transform, opacity;
-    }
-
-    @keyframes logoEntry {
-        0%   { opacity: 0; transform: scale(0.4) translateY(20px); }
-        60%  { opacity: 1; }
-        80%  { transform: scale(1.05) translateY(-3px); }
-        100% { opacity: 1; transform: scale(1) translateY(0); }
-    }
-
-    @keyframes logoPulse {
-        0%, 100% { transform: scale(1); }
-        50%       { transform: scale(1.03); }
-    }
-
-    .welcome-title {
-        animation: textUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
-        opacity: 0;
-        font-family: 'Inter', sans-serif;
-        font-size: 2.2rem;
-        font-weight: 800;
-        color: #0f172a;
-        letter-spacing: -0.03em;
-        margin: 24px 0 0 0;
-        line-height: 1.2;
-        will-change: transform, opacity;
-    }
-
-    .welcome-subtitle {
-        animation: textUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.45s forwards;
-        opacity: 0;
-        font-family: 'Inter', sans-serif;
-        font-size: 1.05rem;
-        font-weight: 500;
-        color: #64748b;
-        margin: 8px 0 0 0;
-        will-change: transform, opacity;
-    }
-
-    .welcome-line {
-        animation: lineExpand 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.6s forwards;
-        opacity: 0;
-        width: 0;
-        height: 3px;
-        background: linear-gradient(90deg, #3b82f6, #60a5fa, #93c5fd);
-        margin: 20px auto;
-        border-radius: 2px;
-        will-change: width, opacity;
-    }
-
-    @keyframes lineExpand {
-        from { opacity: 0; width: 0; }
-        to   { opacity: 1; width: 100px; }
-    }
-
-    .welcome-hint {
-        animation: textUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.75s forwards;
-        opacity: 0;
-        font-family: 'Inter', sans-serif;
-        font-size: 0.88rem;
-        font-weight: 400;
-        color: #94a3b8;
-        margin: 8px 0 0 0;
-        will-change: transform, opacity;
-    }
-
-    .welcome-credit {
-        animation: textUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.9s forwards;
-        opacity: 0;
-        margin-top: 60px;
-        padding-top: 20px;
-        border-top: 1px solid #e5e7eb;
-        will-change: transform, opacity;
-    }
-
-    .welcome-credit-label {
-        font-family: 'Inter', sans-serif;
-        font-size: 0.65rem;
-        font-weight: 400;
-        color: #94a3b8;
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
-        margin: 0 0 4px 0;
-    }
-
-    .welcome-credit-name {
-        font-family: 'Inter', sans-serif;
-        font-size: 0.9rem;
-        font-weight: 700;
-        color: #475569;
-        letter-spacing: 0.01em;
-        margin: 0;
-    }
-
-    @keyframes textUp {
-        from { opacity: 0; transform: translateY(14px); }
-        to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* HILANGKAN TOMBOL +/- PADA NUMBER INPUT */
-    .main .stNumberInput button {
-        display: none !important;
-    }
-
-    .main .stNumberInput [data-testid="stNumberInputStepUp"],
-    .main .stNumberInput [data-testid="stNumberInputStepDown"] {
-        display: none !important;
-    }
-
-    .main .stNumberInput input {
-        width: 100% !important;
-    }
-
-</style>
 """, unsafe_allow_html=True)
-
-
-def inject_css():
-    """Inject CSS global ke semua halaman"""
-    import streamlit as st
-    st.markdown(CSS_GLOBAL, unsafe_allow_html=True)
-
-
-def inject_welcome_css():
-    """Inject CSS khusus halaman welcome"""
-    import streamlit as st
-    st.markdown(CSS_WELCOME, unsafe_allow_html=True)
