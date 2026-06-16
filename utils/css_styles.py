@@ -590,14 +590,29 @@ CSS_WELCOME = """
         to   { opacity: 1; transform: translateY(0); }
     }
 
-        /* HILANGKAN TOMBOL +/- NUMBER INPUT */
-    .main .stNumberInput button {
+    /* HILANGKAN TOMBOL +/- NUMBER INPUT */
+    button[data-testid="stNumberInputStepUp"],
+    button[data-testid="stNumberInputStepDown"],
+    [data-testid="stNumberInput"] button,
+    [data-testid="stNumberInput"] [data-testid="stNumberInputStepUp"],
+    [data-testid="stNumberInput"] [data-testid="stNumberInputStepDown"] {
         display: none !important;
+        visibility: hidden !important;
+        width: 0 !important;
+        height: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        pointer-events: none !important;
     }
 
-    .main .stNumberInput input {
+    [data-testid="stNumberInput"] input {
         width: 100% !important;
     }
+
+    [data-testid="stNumberInput"] > div {
+        gap: 0 !important;
+    }
+
 </style>
 """
 
