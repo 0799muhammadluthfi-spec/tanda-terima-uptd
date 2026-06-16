@@ -589,6 +589,15 @@ CSS_WELCOME = """
         from { opacity: 0; transform: translateY(14px); }
         to   { opacity: 1; transform: translateY(0); }
     }
+
+        /* HILANGKAN TOMBOL +/- NUMBER INPUT */
+    .main .stNumberInput button {
+        display: none !important;
+    }
+
+    .main .stNumberInput input {
+        width: 100% !important;
+    }
 </style>
 """
 
