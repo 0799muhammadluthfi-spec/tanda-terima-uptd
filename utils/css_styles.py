@@ -543,6 +543,59 @@ label[data-testid="stWidgetLabel"] p {
     margin-bottom: 8px !important;
 }
 
+/* ============ CHECKBOX JADI TOMBOL PILL ============ */
+.main .stCheckbox {
+    margin-bottom: 8px !important;
+}
+
+.main .stCheckbox > label {
+    background: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 10px !important;
+    padding: 10px 16px !important;
+    width: 100% !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
+}
+
+.main .stCheckbox > label:hover {
+    border-color: #94a3b8 !important;
+    background: #f8fafc !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08) !important;
+}
+
+/* Sembunyikan kotak centang bawaan */
+.main .stCheckbox > label > div:first-child {
+    display: none !important;
+}
+
+/* Text checkbox */
+.main .stCheckbox > label > div:last-child p,
+.main .stCheckbox > label p {
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    color: #475569 !important;
+    margin: 0 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.02em !important;
+}
+
+/* AKTIF — kalau dicentang */
+.main .stCheckbox > label:has(input:checked) {
+    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+    border-color: #2563eb !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.30) !important;
+    transform: translateY(-1px) !important;
+}
+
+.main .stCheckbox > label:has(input:checked) p {
+    color: #ffffff !important;
+}
+
 /* ============ TOMBOL HIDE SIDEBAR ============ */
 [data-testid="stSidebar"] button[kind="header"] {
     background: rgba(255,255,255,0.25) !important;
@@ -574,7 +627,6 @@ label[data-testid="stWidgetLabel"] p {
 }
 </style>
 """
-
 
 CSS_WELCOME = """
 <style>
