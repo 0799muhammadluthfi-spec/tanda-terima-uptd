@@ -39,6 +39,7 @@ if "sk_rc" not in st.session_state:
 
 def reset_form_sk():
     st.session_state["sk_rc"] += 1
+    st.session_state["berkas_aktif"] = set()
 
 # ==========================================
 # SIDEBAR
@@ -172,6 +173,35 @@ with tab1:
 
     next_no = get_next_no(df_sk)
     no_urut = st.text_input("NOMOR URUT *", value=str(next_no), key=f"sk_{rc}_no")
+
+    data_lama = None
+    key_prefix = f"sk_{rc}"
+
+    if not df_sk.empty and no_urut.strip():
+        no_norm = normalisasi_no(no_urut)
+        mask = df_sk["No"].apply(normalisasi_no) == no_norm
+        if mask.any():
+            data_lama = df_sk[mask].iloc[0]
+            st.info("Nomor ini sudah ada. Data lama dimuat ke form untuk diedit.")
+
+            def set_if_empty(key, val):
+                if key not in st.session_state or st.session_state.get(f"_loaded_{rc}") != no_norm:
+                    st.session_state[key] = str(val) if str(val) != "-" else ""
+
+            set_if_empty(f"{key_prefix}_toko", data_lama.get("Nama_Toko", ""))
+            set_if_empty(f"{key_prefix}_notoko", data_lama.get("No_Toko", ""))
+            set_if_empty(f"{key_prefix}_nik", data_lama.get("No_NIK", ""))
+            set_if_empty(f"{key_prefix}_pemilik", data_lama.get("Nama_Pemilik_Asli", ""))
+            set_if_empty(f"{key_prefix}_alamat", data_lama.get("Alamat", ""))
+            set_if_empty(f"{key_prefix}_pengantar", data_lama.get("Nama_Pengantar_Berkas", ""))
+            set_if_empty(f"{key_prefix}_hp", data_lama.get("No_HP_Pengantar", ""))
+            set_if_empty(f"{key_prefix}_penerima", data_lama.get("Penerima_Berkas", ""))
+
+            st.session_state[f"_loaded_{rc}"] = no_norm
+
+    st.divider()
+
+    with st.form("form_pengantaran", clear_on_submit=False):
         st.subheader("Data Pengantaran")
         col1, col2 = st.columns(2)
         with col1:
