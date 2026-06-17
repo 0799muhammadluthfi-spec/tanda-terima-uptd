@@ -522,8 +522,53 @@ button[data-testid="stNumberInputStepUp"] {
     display: none !important;
 }
 
-/* ============ 
+/* ============ SELECTBOX ============ */
+.main [data-testid="stSelectbox"] [data-baseweb="select"] > div {
+    background: #ffffff !important;
+    border: 2px solid #64748b !important;
+    border-radius: 10px !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.10) !important;
+}
 
+/* ============ TEXT AREA ============ */
+.main .stTextArea textarea {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 2px solid #64748b !important;
+    border-radius: 10px !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.10) !important;
+    font-size: 0.92rem !important;
+    font-weight: 600 !important;
+    padding: 10px 14px !important;
+}
+
+/* ============ TOMBOL HIDE SIDEBAR ============ */
+[data-testid="stSidebar"] button[kind="header"] {
+    background: rgba(255,255,255,0.25) !important;
+    border: 2px solid rgba(255,255,255,0.50) !important;
+    border-radius: 8px !important;
+    opacity: 1 !important;
+}
+
+[data-testid="stSidebar"] button[kind="header"] svg * {
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
+}
+
+[data-testid="collapsedControl"] {
+    background: #ffffff !important;
+    border: 2px solid #475569 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    opacity: 1 !important;
+}
+
+[data-testid="collapsedControl"] svg * {
+    fill: #0f172a !important;
+    stroke: #0f172a !important;
+}
+</style>
+"""
 
 CSS_WELCOME = """
 <style>
