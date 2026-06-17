@@ -35,8 +35,23 @@ st.set_page_config(
 )
 
 inject_css()
-wajib_login()
 
+st.markdown("""
+<style>
+[data-baseweb="input"], [data-baseweb="base-input"] {
+    background: #ffffff !important;
+    border: 3px solid #000000 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.3) !important;
+}
+
+[data-baseweb="input"] input,
+[data-baseweb="base-input"] input {
+    background: #ffffff !important;
+    color: #000000 !important;
+}
+</style>
+""", unsafe_allow_html=True)
 # ==========================================
 # KONEKSI
 # ==========================================
