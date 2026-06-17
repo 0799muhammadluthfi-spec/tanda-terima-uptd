@@ -130,77 +130,48 @@ with tab1:
     col_stat2.metric("Sudah Diambil", sudah_ambil)
     col_stat3.metric("Belum Diambil", total - sudah_ambil)
 
-SEMUA_BERKAS = [
-    "SK ASLI MENEMPATI",
-    "PAS FOTO 3X4 (2 LBR)",
-    "MATERAI 10.000 (2 LBR)",
-    "FC KTP PEMILIK",
-    "FC KARTU SEWA",
-    "SURAT KUASA",
-    "SURAT KEHILANGAN"
-]
+    SEMUA_BERKAS = [
+        "SK ASLI MENEMPATI",
+        "PAS FOTO 3X4 (2 LBR)",
+        "MATERAI 10.000 (2 LBR)",
+        "FC KTP PEMILIK",
+        "FC KARTU SEWA",
+        "SURAT KUASA",
+        "SURAT KEHILANGAN"
+    ]
 
-rc = st.session_state["sk_rc"]
+    rc = st.session_state["sk_rc"]
 
-# Inisialisasi state berkas
-if "berkas_aktif" not in st.session_state:
-    st.session_state["berkas_aktif"] = set()
+    # Inisialisasi state berkas
+    if "berkas_aktif" not in st.session_state:
+        st.session_state["berkas_aktif"] = set()
 
-st.subheader("Kelengkapan Berkas")
+    st.subheader("Kelengkapan Berkas")
 
-cols_berkas = st.columns(3)
-for i, item in enumerate(SEMUA_BERKAS):
-    with cols_berkas[i % 3]:
-        is_aktif = item in st.session_state["berkas_aktif"]
-        btn_type = "primary" if is_aktif else "secondary"
+    cols_berkas = st.columns(3)
+    for i, item in enumerate(SEMUA_BERKAS):
+        with cols_berkas[i % 3]:
+            is_aktif = item in st.session_state["berkas_aktif"]
+            btn_type = "primary" if is_aktif else "secondary"
 
-        if st.button(
-            item,
-            key=f"btn_berkas_{rc}_{item}",
-            use_container_width=True,
-            type=btn_type
-        ):
-            if is_aktif:
-                st.session_state["berkas_aktif"].discard(item)
-            else:
-                st.session_state["berkas_aktif"].add(item)
-            st.rerun()
+            if st.button(
+                item,
+                key=f"btn_berkas_{rc}_{item}",
+                use_container_width=True,
+                type=btn_type
+            ):
+                if is_aktif:
+                    st.session_state["berkas_aktif"].discard(item)
+                else:
+                    st.session_state["berkas_aktif"].add(item)
+                st.rerun()
 
-sel_berkas = list(st.session_state["berkas_aktif"])
+    sel_berkas = list(st.session_state["berkas_aktif"])
 
     st.divider()
 
     next_no = get_next_no(df_sk)
     no_urut = st.text_input("NOMOR URUT *", value=str(next_no), key=f"sk_{rc}_no")
-
-    data_lama = None
-    key_prefix = f"sk_{rc}"
-
-    if not df_sk.empty and no_urut.strip():
-        no_norm = normalisasi_no(no_urut)
-        mask = df_sk["No"].apply(normalisasi_no) == no_norm
-        if mask.any():
-            data_lama = df_sk[mask].iloc[0]
-            st.info("Nomor ini sudah ada. Data lama dimuat ke form untuk diedit.")
-
-            def set_if_empty(key, val):
-                if key not in st.session_state or st.session_state.get(f"_loaded_{rc}") != no_norm:
-                    st.session_state[key] = str(val) if str(val) != "-" else ""
-
-            set_if_empty(f"{key_prefix}_toko", data_lama.get("Nama_Toko", ""))
-            set_if_empty(f"{key_prefix}_notoko", data_lama.get("No_Toko", ""))
-            set_if_empty(f"{key_prefix}_nik", data_lama.get("No_NIK", ""))
-            set_if_empty(f"{key_prefix}_pemilik", data_lama.get("Nama_Pemilik_Asli", ""))
-            set_if_empty(f"{key_prefix}_alamat", data_lama.get("Alamat", ""))
-            set_if_empty(f"{key_prefix}_pengantar", data_lama.get("Nama_Pengantar_Berkas", ""))
-            set_if_empty(f"{key_prefix}_hp", data_lama.get("No_HP_Pengantar", ""))
-            set_if_empty(f"{key_prefix}_penerima", data_lama.get("Penerima_Berkas", ""))
-
-            st.session_state[f"_loaded_{rc}"] = no_norm
-
-    st.divider()
-
-    with st.form("form_pengantaran", clear_on_submit=False):
         st.subheader("Data Pengantaran")
         col1, col2 = st.columns(2)
         with col1:
