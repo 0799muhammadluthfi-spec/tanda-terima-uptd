@@ -544,38 +544,44 @@ label[data-testid="stWidgetLabel"] p {
 }
 
 /* ============ CHECKBOX JADI TOMBOL PILL ============ */
-.main .stCheckbox {
+[data-testid="stCheckbox"] {
     margin-bottom: 8px !important;
 }
 
-.main .stCheckbox > label {
+[data-testid="stCheckbox"] > label {
     background: #ffffff !important;
     border: 1.5px solid #cbd5e1 !important;
     border-radius: 10px !important;
-    padding: 10px 16px !important;
+    padding: 12px 18px !important;
     width: 100% !important;
     cursor: pointer !important;
     transition: all 0.2s ease !important;
     display: flex !important;
     align-items: center !important;
+    justify-content: flex-start !important;
     box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
 }
 
-.main .stCheckbox > label:hover {
-    border-color: #94a3b8 !important;
-    background: #f8fafc !important;
+[data-testid="stCheckbox"] > label:hover {
+    border-color: #2563eb !important;
+    background: #eff6ff !important;
     transform: translateY(-1px) !important;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08) !important;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.12) !important;
 }
 
 /* Sembunyikan kotak centang bawaan */
-.main .stCheckbox > label > div:first-child {
+[data-testid="stCheckbox"] > label > div:first-child,
+[data-testid="stCheckbox"] svg,
+[data-testid="stCheckbox"] [data-baseweb="checkbox"] > span:first-child {
     display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
 }
 
-/* Text checkbox */
-.main .stCheckbox > label > div:last-child p,
-.main .stCheckbox > label p {
+/* Text */
+[data-testid="stCheckbox"] > label p,
+[data-testid="stCheckbox"] label span {
     font-size: 0.85rem !important;
     font-weight: 600 !important;
     color: #475569 !important;
@@ -584,18 +590,21 @@ label[data-testid="stWidgetLabel"] p {
     letter-spacing: 0.02em !important;
 }
 
-/* AKTIF — kalau dicentang */
-.main .stCheckbox > label:has(input:checked) {
+/* AKTIF — saat dicentang */
+[data-testid="stCheckbox"]:has(input:checked) > label,
+[data-testid="stCheckbox"] > label:has(input:checked) {
     background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
     border-color: #2563eb !important;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.30) !important;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35) !important;
     transform: translateY(-1px) !important;
 }
 
-.main .stCheckbox > label:has(input:checked) p {
+[data-testid="stCheckbox"]:has(input:checked) > label p,
+[data-testid="stCheckbox"] > label:has(input:checked) p,
+[data-testid="stCheckbox"]:has(input:checked) label span,
+[data-testid="stCheckbox"] > label:has(input:checked) span {
     color: #ffffff !important;
 }
-
 /* ============ TOMBOL HIDE SIDEBAR ============ */
 [data-testid="stSidebar"] button[kind="header"] {
     background: rgba(255,255,255,0.25) !important;
