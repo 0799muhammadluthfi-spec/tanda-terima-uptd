@@ -546,22 +546,22 @@ label[data-testid="stWidgetLabel"] p {
 /* ============ CHECKBOX JADI TOMBOL PILL ============ */
 [data-testid="stCheckbox"] {
     margin-bottom: 8px !important;
-    width: auto !important;
+    width: 100% !important;
 }
 
 [data-testid="stCheckbox"] > label {
     background: #ffffff !important;
     border: 1.5px solid #cbd5e1 !important;
     border-radius: 10px !important;
-    padding: 10px 20px !important;
+    padding: 12px 18px !important;
     cursor: pointer !important;
     transition: all 0.2s ease !important;
-    display: inline-flex !important;
+    display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
-    width: auto !important;
-    min-width: fit-content !important;
+    width: 100% !important;
+    text-align: center !important;
 }
 
 [data-testid="stCheckbox"] > label:hover {
@@ -581,7 +581,7 @@ label[data-testid="stWidgetLabel"] p {
     height: 0 !important;
 }
 
-/* Text — DEFAULT abu */
+/* Text */
 [data-testid="stCheckbox"] > label p,
 [data-testid="stCheckbox"] label span {
     font-size: 0.85rem !important;
@@ -590,9 +590,10 @@ label[data-testid="stWidgetLabel"] p {
     margin: 0 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.02em !important;
+    text-align: center !important;
 }
 
-/* AKTIF — saat dicentang */
+/* AKTIF */
 [data-testid="stCheckbox"]:has(input:checked) > label,
 [data-testid="stCheckbox"] > label:has(input:checked) {
     background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
@@ -601,7 +602,7 @@ label[data-testid="stWidgetLabel"] p {
     transform: translateY(-1px) !important;
 }
 
-/* Text saat aktif — PUTIH */
+/* Text PUTIH saat aktif */
 [data-testid="stCheckbox"]:has(input:checked) > label p,
 [data-testid="stCheckbox"] > label:has(input:checked) p,
 [data-testid="stCheckbox"]:has(input:checked) label span,
