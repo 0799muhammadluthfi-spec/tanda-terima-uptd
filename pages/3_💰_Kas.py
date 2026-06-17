@@ -22,6 +22,7 @@ from utils.helpers import (
     get_last_kas_state,
     hitung_ringkasan_kas
 )
+from utils.auth import wajib_login
 
 # ==========================================
 # KONFIGURASI
@@ -34,6 +35,7 @@ st.set_page_config(
 )
 
 inject_css()
+wajib_login()
 
 # ==========================================
 # KONEKSI
@@ -80,25 +82,21 @@ with st.sidebar:
             unsafe_allow_html=True
         )
 
-    st.markdown(
-        """
-        <div style="text-align:center; padding:4px 0 14px 0;
-                    border-bottom:1px solid rgba(255,255,255,0.08);
-                    margin-bottom:14px;">
-            <p style="font-family:'Inter',sans-serif; font-size:1.05rem; font-weight:800;
-                      color:#f1f5f9 !important; letter-spacing:-0.02em;
-                      margin:0 0 4px 0; line-height:1.3;">
-                UPTD PASAR KANDANGAN</p>
-            <p style="font-family:'Inter',sans-serif; font-size:0.78rem; font-weight:600;
-                      color:#94a3b8 !important; letter-spacing:0.04em;
-                      margin:0; line-height:1.4;">
-                KABUPATEN HULU SUNGAI SELATAN</p>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    st.markdown("""
+    <div style="text-align:center; padding:4px 0 14px 0;
+                border-bottom:1px solid rgba(255,255,255,0.08);
+                margin-bottom:14px;">
+        <p style="font-family:'Inter',sans-serif; font-size:1.05rem; font-weight:800;
+                  color:#f1f5f9 !important; margin:0 0 4px 0;">
+            UPTD PASAR KANDANGAN</p>
+        <p style="font-family:'Inter',sans-serif; font-size:0.78rem; font-weight:600;
+                  color:#94a3b8 !important; margin:0;">
+            KABUPATEN HULU SUNGAI SELATAN</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-    st.page_link("app_web.py", label="🏠  Beranda", use_container_width=True)
+    st.page_link("Home.py", label="🏠  Beranda", use_container_width=True)
+
     st.markdown(
         '<div style="padding: 8px 4px 4px 4px;">'
         '<p style="font-family:\'Inter\',sans-serif; font-size:0.7rem; font-weight:600;'
@@ -106,21 +104,30 @@ with st.sidebar:
         'margin:0 0 6px 0;">MODUL</p></div>',
         unsafe_allow_html=True
     )
+
     st.page_link("pages/1_📋_SK_Toko.py", label="📋  SK TOKO", use_container_width=True)
     st.page_link("pages/2_🅿️_Parkir.py", label="🅿️  PARKIR", use_container_width=True)
     st.page_link("pages/3_💰_Kas.py", label="💰  KAS UPTD", use_container_width=True)
+
     st.markdown(
-        """
-        <div style="text-align:center; padding:24px 0 8px 0;
-                    border-top:1px solid rgba(255,255,255,0.06); margin-top:40px;">
-            <p style="font-family:'Inter',sans-serif; font-size:0.56rem;
-                      color:#64748b !important; margin:0; line-height:1.7;">Developed by</p>
-            <p style="font-family:'Inter',sans-serif; font-size:0.68rem; font-weight:700;
-                      color:#94a3b8 !important; margin:2px 0 0 0;">M. Luthfi Renaldi</p>
-        </div>
-        """,
+        '<div style="padding: 16px 4px 4px 4px;">'
+        '<p style="font-family:\'Inter\',sans-serif; font-size:0.7rem; font-weight:600;'
+        'color:#64748b !important; text-transform:uppercase; letter-spacing:0.06em;'
+        'margin:0 0 6px 0;">SISTEM</p></div>',
         unsafe_allow_html=True
     )
+
+    st.page_link("pages/4_⚙️_Pengaturan.py", label="⚙️  PENGATURAN", use_container_width=True)
+
+    st.markdown("""
+    <div style="text-align:center; padding:24px 0 8px 0;
+                border-top:1px solid rgba(255,255,255,0.06); margin-top:40px;">
+        <p style="font-family:'Inter',sans-serif; font-size:0.56rem;
+                  color:#64748b !important; margin:0;">Developed by</p>
+        <p style="font-family:'Inter',sans-serif; font-size:0.68rem; font-weight:700;
+                  color:#94a3b8 !important; margin:2px 0 0 0;">M. Luthfi Renaldi</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 # ==========================================
 # LOAD DATA
@@ -135,7 +142,7 @@ for col in KOLOM_TAMBAHAN_KAS:
 # ==========================================
 # HEADER RINGKASAN
 # ==========================================
-st.title("💰 KAS UPTD")
+st.title("KAS UPTD")
 
 c_head, c_btn = st.columns([0.88, 0.12])
 c_head.subheader("Ringkasan Kas")
@@ -145,16 +152,15 @@ with c_btn:
 total_masuk_bersih, total_keluar, saldo_seluruh, saldo_kas = hitung_ringkasan_kas(df_kas)
 last_seluruh, last_kas, last_atm, last_penyedia = get_last_kas_state(df_kas)
 
-# 2 baris x 3 kolom
 r1c1, r1c2, r1c3 = st.columns(3)
-r1c1.metric("📥 Total Masuk Bersih", rupiah(total_masuk_bersih))
-r1c2.metric("📤 Total Keluar", rupiah(total_keluar))
-r1c3.metric("🏦 Saldo Kas Seluruh", rupiah(last_seluruh))
+r1c1.metric("Total Masuk Bersih", rupiah(total_masuk_bersih))
+r1c2.metric("Total Keluar", rupiah(total_keluar))
+r1c3.metric("Saldo Kas Seluruh", rupiah(last_seluruh))
 
 r2c1, r2c2, r2c3 = st.columns(3)
-r2c1.metric("💵 Kas di Tangan", rupiah(last_kas))
-r2c2.metric("🏧 ATM", rupiah(last_atm))
-r2c3.metric("🏢 Penyedia", rupiah(last_penyedia))
+r2c1.metric("Kas di Tangan", rupiah(last_kas))
+r2c2.metric("ATM", rupiah(last_atm))
+r2c3.metric("Penyedia", rupiah(last_penyedia))
 
 st.divider()
 
@@ -179,13 +185,13 @@ if not df_cek.empty:
         if status_aktif == "YA" and abs(nilai_selisih) > 0.5:
             if nilai_selisih > 0:
                 st.error(
-                    f"❌ **PERINGATAN SELISIH AKTIF**  \n"
+                    f"**PERINGATAN SELISIH AKTIF**  \n"
                     f"Pengecekan terakhir pada **{tgl_cek}** menunjukkan "
                     f"**KURANG {rupiah(nilai_selisih)}**."
                 )
             else:
                 st.success(
-                    f"✅ **PERINGATAN SELISIH AKTIF**  \n"
+                    f"**PERINGATAN SELISIH AKTIF**  \n"
                     f"Pengecekan terakhir pada **{tgl_cek}** menunjukkan "
                     f"**LEBIH {rupiah(abs(nilai_selisih))}**."
                 )
@@ -195,7 +201,7 @@ if not df_cek.empty:
 # ==========================================
 # PENGECEKAN SELISIH
 # ==========================================
-st.subheader("🔎 Pengecekan Selisih Kas")
+st.subheader("Pengecekan Selisih Kas")
 aktif_cek = st.toggle(
     "Aktifkan pengecekan selisih",
     value=False,
@@ -204,11 +210,11 @@ aktif_cek = st.toggle(
 
 if aktif_cek:
     st.info(
-        "Bagian ini **hanya untuk pengecekan**. "
+        "Bagian ini hanya untuk pengecekan. "
         "Tidak mengubah transaksi kas, hanya menyimpan hasil audit selisih."
     )
 
-    st.metric("💵 Kas di Tangan (Hitungan Sistem)", rupiah(last_kas))
+    st.metric("Kas di Tangan (Hitungan Sistem)", rupiah(last_kas))
 
     kas_fisik = st.number_input(
         "INPUT KAS DI TANGAN FISIK",
@@ -222,19 +228,19 @@ if aktif_cek:
 
     if selisih_cek > 0.5:
         st.warning(
-            f"⚠️ **HASIL CEK: KURANG {rupiah(selisih_cek)}**  \n"
+            f"**HASIL CEK: KURANG {rupiah(selisih_cek)}**  \n"
             f"Uang fisik di tangan lebih sedikit dari hitungan sistem."
         )
     elif selisih_cek < -0.5:
         st.success(
-            f"✅ **HASIL CEK: LEBIH {rupiah(abs(selisih_cek))}**  \n"
+            f"**HASIL CEK: LEBIH {rupiah(abs(selisih_cek))}**  \n"
             f"Uang fisik di tangan lebih banyak dari hitungan sistem."
         )
     else:
-        st.success("✅ **HASIL CEK: PAS / Rp 0**")
+        st.success("**HASIL CEK: PAS / Rp 0**")
 
     if st.button(
-        "💾 SIMPAN HASIL PENGECEKAN",
+        "SIMPAN HASIL PENGECEKAN",
         use_container_width=True,
         type="primary",
         key="btn_simpan_pengecekan"
@@ -277,7 +283,7 @@ if aktif_cek:
 
         df_baru = pd.concat([df_kas, pd.DataFrame([row_cek])], ignore_index=True)
         if safe_update(conn_kas, WS_KAS, df_baru):
-            st.success("✅ Hasil pengecekan berhasil disimpan!")
+            st.success("Hasil pengecekan berhasil disimpan!")
             st.rerun()
 
 st.divider()
@@ -285,18 +291,17 @@ st.divider()
 # ==========================================
 # TAB
 # ==========================================
-tab1, tab2, tab3 = st.tabs(["📝 INPUT KAS", "📊 DATA KAS", "🔁 KOREKSI REIMBURSE"])
+tab1, tab2, tab3 = st.tabs(["INPUT KAS", "DATA KAS", "KOREKSI REIMBURSE"])
 
 # ==========================================
 # TAB 1 - INPUT KAS
 # ==========================================
 with tab1:
-    st.subheader("📝 FORM INPUT KAS")
+    st.subheader("FORM INPUT KAS")
 
     rc = st.session_state["kas_reset_counter"]
     next_no = get_next_no(df_kas)
 
-    # FIELD DASAR
     c1, c2 = st.columns(2)
     with c1:
         tanggal_kas = st.text_input(
@@ -324,7 +329,7 @@ with tab1:
         )
 
         if nominal > 0:
-            st.caption(f"💰 {rupiah(nominal)}")
+            st.caption(f"{rupiah(nominal)}")
 
     pad_aktif = False
     taktis_aktif = False
@@ -341,7 +346,7 @@ with tab1:
 
     if jenis_transaksi == "MASUK":
         st.divider()
-        st.subheader("📥 DETAIL UANG MASUK")
+        st.subheader("DETAIL UANG MASUK")
 
         a1, a2 = st.columns(2)
         with a1:
@@ -360,10 +365,10 @@ with tab1:
         p1, p2, p3 = st.columns(3)
         p1.metric("Potongan PAD (10%)", rupiah(pot_pad))
         p2.metric("Potongan TAKTIS (5%)", rupiah(pot_taktis))
-        p3.metric("💰 BERSIH", rupiah(bersih))
+        p3.metric("BERSIH", rupiah(bersih))
 
         st.divider()
-        st.subheader("🎯 TUJUAN ANGGARAN MASUK")
+        st.subheader("TUJUAN ANGGARAN MASUK")
         tujuan_anggaran = st.selectbox(
             "UANG MASUK DIARAHKAN KE MANA? *",
             ["SALDO KAS (DI TANGAN)", "UANG DI ATM", "UANG DI PENYEDIA"],
@@ -372,7 +377,7 @@ with tab1:
 
     else:
         st.divider()
-        st.subheader("📤 DETAIL UANG KELUAR")
+        st.subheader("DETAIL UANG KELUAR")
 
         b1, b2 = st.columns(2)
         with b1:
@@ -389,7 +394,7 @@ with tab1:
             )
 
         st.divider()
-        st.subheader("💳 SUMBER ANGGARAN")
+        st.subheader("SUMBER ANGGARAN")
         sumber_anggaran = st.selectbox(
             "UANG KELUAR DARI MANA? *",
             ["UANG KAS (DI TANGAN)", "UANG DI ATM", "UANG DI PENYEDIA"],
@@ -397,17 +402,17 @@ with tab1:
         )
 
         if sumber_anggaran == "UANG KAS (DI TANGAN)":
-            st.info(f"💵 Sisa Uang Kas saat ini: **{rupiah(last_kas)}**")
+            st.info(f"Sisa Uang Kas saat ini: **{rupiah(last_kas)}**")
             if nominal > last_kas and nominal > 0:
-                st.warning(f"⚠️ Melebihi sisa kas ({rupiah(last_kas)})")
+                st.warning(f"Melebihi sisa kas ({rupiah(last_kas)})")
         elif sumber_anggaran == "UANG DI ATM":
-            st.info(f"🏧 Sisa Uang ATM saat ini: **{rupiah(last_atm)}**")
+            st.info(f"Sisa Uang ATM saat ini: **{rupiah(last_atm)}**")
             if nominal > last_atm and nominal > 0:
-                st.warning(f"⚠️ Melebihi sisa ATM ({rupiah(last_atm)})")
+                st.warning(f"Melebihi sisa ATM ({rupiah(last_atm)})")
         elif sumber_anggaran == "UANG DI PENYEDIA":
-            st.info(f"🏢 Sisa Uang Penyedia saat ini: **{rupiah(last_penyedia)}**")
+            st.info(f"Sisa Uang Penyedia saat ini: **{rupiah(last_penyedia)}**")
             if nominal > last_penyedia and nominal > 0:
-                st.warning(f"⚠️ Melebihi sisa Penyedia ({rupiah(last_penyedia)})")
+                st.warning(f"Melebihi sisa Penyedia ({rupiah(last_penyedia)})")
 
     # HITUNG SALDO OTOMATIS TRANSAKSI
     if jenis_transaksi == "MASUK":
@@ -448,25 +453,25 @@ with tab1:
     total_auto = new_kas + new_atm + new_penyedia
 
     st.divider()
-    st.subheader("🏦 HASIL SALDO OTOMATIS TRANSAKSI")
+    st.subheader("HASIL SALDO OTOMATIS TRANSAKSI")
     h1, h2, h3, h4 = st.columns(4)
-    h1.metric("💵 Kas di Tangan", rupiah(new_kas))
-    h2.metric("🏧 ATM", rupiah(new_atm))
-    h3.metric("🏢 Penyedia", rupiah(new_penyedia))
-    h4.metric("🏦 Total Kas Seluruh", rupiah(total_auto))
+    h1.metric("Kas di Tangan", rupiah(new_kas))
+    h2.metric("ATM", rupiah(new_atm))
+    h3.metric("Penyedia", rupiah(new_penyedia))
+    h4.metric("Total Kas Seluruh", rupiah(total_auto))
 
     st.divider()
     cb1, cb2 = st.columns(2)
     with cb1:
         simpan_kas = st.button(
-            "💾 SIMPAN DATA KAS",
+            "SIMPAN DATA KAS",
             type="primary",
             use_container_width=True,
             key="btn_simpan_kas"
         )
     with cb2:
         st.button(
-            "🔄 RESET",
+            "RESET",
             use_container_width=True,
             key="btn_reset_kas",
             on_click=reset_form_kas
@@ -475,11 +480,11 @@ with tab1:
     if simpan_kas:
         keterangan = keterangan_raw.strip().upper()
         if not keterangan:
-            st.error("❌ Keterangan wajib diisi.")
+            st.error("Keterangan wajib diisi.")
         elif nominal <= 0:
-            st.error("❌ Nominal harus lebih dari 0.")
+            st.error("Nominal harus lebih dari 0.")
         elif jenis_transaksi == "MASUK" and bersih < 0:
-            st.error("❌ Hasil bersih tidak boleh negatif.")
+            st.error("Hasil bersih tidak boleh negatif.")
         else:
             new_row = {
                 "No": str(next_no),
@@ -516,7 +521,7 @@ with tab1:
 
             df_baru = pd.concat([df_kas, pd.DataFrame([new_row])], ignore_index=True)
             if safe_update(conn_kas, WS_KAS, df_baru):
-                st.success("✅ Data kas berhasil disimpan!")
+                st.success("Data kas berhasil disimpan!")
                 reset_form_kas()
                 st.rerun()
 
@@ -525,7 +530,7 @@ with tab1:
 # ==========================================
 with tab2:
     c_head2, c_btn2 = st.columns([0.88, 0.12])
-    c_head2.subheader("📊 DATA KAS UPTD")
+    c_head2.subheader("DATA KAS UPTD")
     with c_btn2:
         tombol_refresh("ref_kas_data")
 
@@ -563,7 +568,7 @@ with tab2:
 # ==========================================
 with tab3:
     c_head3, c_btn3 = st.columns([0.88, 0.12])
-    c_head3.subheader("🔁 KOREKSI REIMBURSE → DISBURSEMENT")
+    c_head3.subheader("KOREKSI REIMBURSE → DISBURSEMENT")
     with c_btn3:
         tombol_refresh("ref_kas_koreksi")
 
@@ -578,7 +583,7 @@ with tab3:
         ].copy()
 
         if df_reimburse.empty:
-            st.success("✅ Tidak ada transaksi Reimburse yang perlu dikoreksi.")
+            st.success("Tidak ada transaksi Reimburse yang perlu dikoreksi.")
         else:
             st.info(f"Ditemukan **{len(df_reimburse)}** transaksi Reimburse yang bisa dikoreksi.")
 
@@ -589,7 +594,7 @@ with tab3:
                 sumber = row.get("Sumber_Anggaran", "-")
 
                 with st.expander(
-                    f"📋 No.{row.get('No','-')} | {tgl} | {ket} | {rupiah(to_float(nom))}",
+                    f"No.{row.get('No','-')} | {tgl} | {ket} | {rupiah(to_float(nom))}",
                     expanded=False
                 ):
                     st.write(f"**Tanggal:** {tgl}")
@@ -601,21 +606,18 @@ with tab3:
                     st.divider()
 
                     if st.button(
-                        "🔁 KOREKSI → Kembalikan ke Kas",
+                        "KOREKSI → Kembalikan ke Kas",
                         key=f"koreksi_{idx}",
                         type="primary",
                         use_container_width=True
                     ):
                         df_update = df_kas.copy()
 
-                        # tandai transaksi lama
                         df_update.loc[idx, "Keterangan"] = f"{ket} [SUDAH DIKOREKSI]"
                         df_update.loc[idx, "Jenis_Keluar"] = "DISBURSEMENT"
 
-                        # ambil saldo terakhir terbaru
                         ls, lk, la, lp = get_last_kas_state(df_update)
 
-                        # buat transaksi masuk koreksi
                         next_no_koreksi = get_next_no(df_update)
                         koreksi_row = {
                             "No": str(next_no_koreksi),
@@ -654,7 +656,7 @@ with tab3:
 
                         if safe_update(conn_kas, WS_KAS, df_update):
                             st.success(
-                                f"✅ Transaksi Reimburse **{ket}** berhasil dikoreksi!\n\n"
+                                f"Transaksi Reimburse **{ket}** berhasil dikoreksi!\n\n"
                                 f"Uang **{rupiah(to_float(nom))}** dikembalikan ke kas."
                             )
                             st.rerun()
