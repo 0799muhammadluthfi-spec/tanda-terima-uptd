@@ -100,8 +100,7 @@ CSS_GLOBAL = """
         white-space: nowrap !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
-        transition: background 0.2s ease, color 0.2s ease,
-                    transform 0.18s ease !important;
+        transition: background 0.2s ease, color 0.2s ease, transform 0.18s ease !important;
         will-change: transform !important;
     }
 
@@ -200,46 +199,57 @@ CSS_GLOBAL = """
         color: #1e293b !important;
     }
 
-    /* ============ INPUT LABELS ============ */
+    /* ============ LABEL INPUT ============ */
     .main .stTextInput label,
     .main .stNumberInput label,
     .main .stSelectbox label,
-    .main .stCheckbox label {
+    .main .stCheckbox label,
+    .main .stTextArea label {
         font-size: 0.78rem !important;
         font-weight: 600 !important;
         color: #374151 !important;
     }
 
-    /* ============ INPUT BOX LUAR - LEBIH TIMBUL ============ */
+    /* ============ BOX INPUT LUAR - PUTIH & TIMBUL ============ */
     .main .stTextInput [data-baseweb="input"],
-    .main .stNumberInput [data-baseweb="input"] {
+    .main .stNumberInput [data-baseweb="input"],
+    .main .stTextArea textarea,
+    .main [data-testid="stTextInput"] [data-baseweb="base-input"],
+    .main [data-testid="stNumberInput"] [data-baseweb="base-input"] {
         background: #ffffff !important;
-        border: 2px solid #64748b !important;
-        border-radius: 10px !important;
+        border: 2px solid #cbd5e1 !important;
+        border-radius: 12px !important;
         box-shadow:
-            0 3px 10px rgba(15, 23, 42, 0.10),
-            inset 0 1px 2px rgba(255,255,255,0.65) !important;
+            0 4px 14px rgba(15, 23, 42, 0.10),
+            inset 0 1px 0 rgba(255,255,255,0.9) !important;
         transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease !important;
     }
 
     .main .stTextInput [data-baseweb="input"]:hover,
-    .main .stNumberInput [data-baseweb="input"]:hover {
-        border-color: #475569 !important;
+    .main .stNumberInput [data-baseweb="input"]:hover,
+    .main .stTextArea textarea:hover,
+    .main [data-testid="stTextInput"] [data-baseweb="base-input"]:hover,
+    .main [data-testid="stNumberInput"] [data-baseweb="base-input"]:hover {
+        border-color: #94a3b8 !important;
         box-shadow:
-            0 4px 14px rgba(15, 23, 42, 0.12),
-            inset 0 1px 2px rgba(255,255,255,0.7) !important;
+            0 6px 18px rgba(15, 23, 42, 0.13),
+            inset 0 1px 0 rgba(255,255,255,0.95) !important;
     }
 
     .main .stTextInput [data-baseweb="input"]:focus-within,
-    .main .stNumberInput [data-baseweb="input"]:focus-within {
-        border-color: #2563eb !important;
+    .main .stNumberInput [data-baseweb="input"]:focus-within,
+    .main .stTextArea textarea:focus,
+    .main [data-testid="stTextInput"] [data-baseweb="base-input"]:focus-within,
+    .main [data-testid="stNumberInput"] [data-baseweb="base-input"]:focus-within {
+        background: #ffffff !important;
+        border-color: #3b82f6 !important;
         box-shadow:
-            0 0 0 4px rgba(37, 99, 235, 0.15),
-            0 4px 14px rgba(37, 99, 235, 0.10) !important;
+            0 0 0 4px rgba(59,130,246,0.14),
+            0 6px 18px rgba(15, 23, 42, 0.13) !important;
         transform: translateY(-1px) !important;
     }
 
-    /* ============ INPUT DALAMNYA ============ */
+    /* ============ ELEMEN INPUT DALAM ============ */
     .main .stTextInput input,
     .main .stNumberInput input {
         font-size: 0.88rem !important;
@@ -251,15 +261,29 @@ CSS_GLOBAL = """
         padding: 10px 14px !important;
     }
 
+    .main .stTextArea textarea {
+        font-size: 0.88rem !important;
+        font-weight: 500 !important;
+        color: #111827 !important;
+        background: #ffffff !important;
+        border: 2px solid #cbd5e1 !important;
+        border-radius: 12px !important;
+        box-shadow:
+            0 4px 14px rgba(15, 23, 42, 0.10),
+            inset 0 1px 0 rgba(255,255,255,0.9) !important;
+        padding: 10px 14px !important;
+    }
+
     .main .stTextInput input:focus,
-    .main .stNumberInput input:focus {
+    .main .stNumberInput input:focus,
+    .main .stTextArea textarea:focus {
         outline: none !important;
-        border: none !important;
         box-shadow: none !important;
     }
 
     .main .stTextInput input::placeholder,
-    .main .stNumberInput input::placeholder {
+    .main .stNumberInput input::placeholder,
+    .main .stTextArea textarea::placeholder {
         color: #94a3b8 !important;
     }
 
@@ -639,12 +663,10 @@ CSS_WELCOME = """
 
 
 def inject_css():
-    """Inject CSS global ke semua halaman"""
     import streamlit as st
     st.markdown(CSS_GLOBAL, unsafe_allow_html=True)
 
 
 def inject_welcome_css():
-    """Inject CSS khusus halaman welcome"""
     import streamlit as st
     st.markdown(CSS_WELCOME, unsafe_allow_html=True)
