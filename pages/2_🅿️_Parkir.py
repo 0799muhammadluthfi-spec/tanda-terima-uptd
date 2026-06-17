@@ -115,6 +115,16 @@ def parse_tanggal_input(tgl_input_user: str):
         return None
 
 
+def to_int_input(val, default=0):
+    try:
+        txt = str(val).strip().replace(",", ".")
+        if txt == "":
+            return default
+        return int(float(txt))
+    except:
+        return default
+
+
 def ambil_info_tanggal_parkir(df_p, tgl_input_user):
     dt_user = parse_tanggal_input(tgl_input_user)
     if dt_user is None or df_p.empty or "Tanggal" not in df_p.columns:
@@ -436,7 +446,6 @@ with tab1:
         if is_libur:
             st.info("📋 Tanggal ini LIBUR. Tidak perlu input rekap. Sisa stok tetap terbawa ke hari berikutnya.")
         else:
-            # Langsung cek apakah sudah diisi (tanpa tampilan stok awal)
             karcis_skrg = str(df_p.loc[idx, "Total_Karcis_R2"]).strip()
             sudah_diisi = karcis_skrg not in ["-", "nan", ""]
 
@@ -454,18 +463,6 @@ with tab1:
                 val_mr4 = 0 if pd.isna(val_mr4) else int(val_mr4)
                 val_pk2 = 0 if pd.isna(val_pk2) else int(val_pk2)
                 val_pk4 = 0 if pd.isna(val_pk4) else int(val_pk4)
-
-                st.info("✏️ Data sudah pernah diisi. Kamu bisa mengedit di bawah.")
-
-                with st.expander("📋 Data Yang Tersimpan Sekarang", expanded=True):
-                    st.metric("MPP R2", val_mr2)
-                    st.metric("MPP R4", val_mr4)
-                    st.metric("Total R2", val_tr2)
-                    st.metric("Total R4", val_tr4)
-                    st.metric("Pengambilan Karcis R2", val_pk2)
-                    st.metric("Pengambilan Karcis R4", val_pk4)
-                    st.metric("Khusus R2", val_tr2 - val_mr2)
-                    st.metric("Khusus R4", val_tr4 - val_mr4)
             else:
                 val_tr2 = 0
                 val_tr4 = 0
@@ -479,20 +476,15 @@ with tab1:
             judul_form = "✏️ EDIT REKAP" if sudah_diisi else "📝 INPUT REKAP"
             st.subheader(judul_form)
 
-            def to_int(val, default=0):
-                try:
-                    return int(val)
-                except:
-                    return default
+            # INPUT ANGKA DIGANTI JADI TEXT INPUT
+            mr2 = to_int_input(st.text_input("MPP RODA R2", value=str(val_mr2), key="txt_mr2"))
+            mr4 = to_int_input(st.text_input("MPP RODA R4", value=str(val_mr4), key="txt_mr4"))
 
-            mr2 = to_int(st.text_input("MPP RODA R2", value=str(val_mr2), key="nr_mr2"))
-            mr4 = to_int(st.text_input("MPP RODA R4", value=str(val_mr4), key="nr_mr4"))
+            tr2 = to_int_input(st.text_input("TOTAL KARCIS R2", value=str(val_tr2), key="txt_tr2"))
+            tr4 = to_int_input(st.text_input("TOTAL KARCIS R4", value=str(val_tr4), key="txt_tr4"))
 
-            tr2 = to_int(st.text_input("TOTAL KARCIS R2", value=str(val_tr2), key="nr_tr2"))
-            tr4 = to_int(st.text_input("TOTAL KARCIS R4", value=str(val_tr4), key="nr_tr4"))
-
-            pk2_input = to_int(st.text_input("PENGAMBILAN KARCIS R2", value=str(val_pk2), key="nr_pk2"))
-            pk4_input = to_int(st.text_input("PENGAMBILAN KARCIS R4", value=str(val_pk4), key="nr_pk4")))
+            pk2_input = to_int_input(st.text_input("PENGAMBILAN KARCIS R2", value=str(val_pk2), key="txt_pk2"))
+            pk4_input = to_int_input(st.text_input("PENGAMBILAN KARCIS R4", value=str(val_pk4), key="txt_pk4"))
 
             st.divider()
 
