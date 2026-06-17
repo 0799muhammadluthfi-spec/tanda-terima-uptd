@@ -130,25 +130,43 @@ with tab1:
     col_stat2.metric("Sudah Diambil", sudah_ambil)
     col_stat3.metric("Belum Diambil", total - sudah_ambil)
 
-    SEMUA_BERKAS = [
-        "SK ASLI MENEMPATI",
-        "PAS FOTO 3X4 (2 LBR)",
-        "MATERAI 10.000 (2 LBR)",
-        "FC KTP PEMILIK",
-        "FC KARTU SEWA",
-        "SURAT KUASA",
-        "SURAT KEHILANGAN"
-    ]
+SEMUA_BERKAS = [
+    "SK ASLI MENEMPATI",
+    "PAS FOTO 3X4 (2 LBR)",
+    "MATERAI 10.000 (2 LBR)",
+    "FC KTP PEMILIK",
+    "FC KARTU SEWA",
+    "SURAT KUASA",
+    "SURAT KEHILANGAN"
+]
 
-    rc = st.session_state["sk_rc"]
+rc = st.session_state["sk_rc"]
 
-    st.subheader("Kelengkapan Berkas")
-    cols_berkas = st.columns(3)
-    sel_berkas = []
-    for i, item in enumerate(SEMUA_BERKAS):
-        with cols_berkas[i % 3]:
-            if st.checkbox(item, key=f"cb_{rc}_{item}"):
-                sel_berkas.append(item)
+# Inisialisasi state berkas
+if "berkas_aktif" not in st.session_state:
+    st.session_state["berkas_aktif"] = set()
+
+st.subheader("Kelengkapan Berkas")
+
+cols_berkas = st.columns(3)
+for i, item in enumerate(SEMUA_BERKAS):
+    with cols_berkas[i % 3]:
+        is_aktif = item in st.session_state["berkas_aktif"]
+        btn_type = "primary" if is_aktif else "secondary"
+
+        if st.button(
+            item,
+            key=f"btn_berkas_{rc}_{item}",
+            use_container_width=True,
+            type=btn_type
+        ):
+            if is_aktif:
+                st.session_state["berkas_aktif"].discard(item)
+            else:
+                st.session_state["berkas_aktif"].add(item)
+            st.rerun()
+
+sel_berkas = list(st.session_state["berkas_aktif"])
 
     st.divider()
 
