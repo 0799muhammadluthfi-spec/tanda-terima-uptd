@@ -24,51 +24,6 @@ CSS_GLOBAL = """
     [data-testid="stStatusWidget"] { display: none !important; }
     button[title="View fullscreen"] { display: none !important; }
 
-    /* ============ TOMBOL HIDE SIDEBAR — SELALU TERLIHAT ============ */
-    [data-testid="stSidebar"] button[kind="header"],
-    [data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"],
-    [data-testid="stSidebar"] [data-testid="stSidebarCollapsedControl"] {
-        color: #ffffff !important;
-        background: rgba(255,255,255,0.20) !important;
-        border: 2px solid rgba(255,255,255,0.40) !important;
-        border-radius: 8px !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-    }
-
-    [data-testid="stSidebar"] button[kind="header"]:hover,
-    [data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"]:hover {
-        background: rgba(255,255,255,0.30) !important;
-    }
-
-    [data-testid="stSidebar"] button[kind="header"] svg *,
-    [data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] svg * {
-        fill: #ffffff !important;
-        stroke: #ffffff !important;
-        color: #ffffff !important;
-    }
-
-    /* Saat sidebar tertutup, tombol buka sidebar */
-    [data-testid="collapsedControl"],
-    [data-testid="collapsedControl"] > button,
-    [data-testid="stSidebarCollapsedControl"],
-    [data-testid="stSidebarCollapsedControl"] > button {
-        color: #0f172a !important;
-        background: #ffffff !important;
-        border: 2px solid #475569 !important;
-        border-radius: 8px !important;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-    }
-
-    [data-testid="collapsedControl"] svg *,
-    [data-testid="stSidebarCollapsedControl"] svg * {
-        fill: #0f172a !important;
-        stroke: #0f172a !important;
-        color: #0f172a !important;
-    }
-
     /* ============ SIDEBAR ============ */
     [data-testid="stSidebar"] {
         background: linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #0f172a 100%) !important;
@@ -186,17 +141,7 @@ CSS_GLOBAL = """
         color: #1e293b !important;
     }
 
-    /* =====================================================
-       INPUT PUTIH BERSIH & TIMBUL TEGAS
-       ===================================================== */
-
-    .main [data-testid="stTextInput"],
-    .main [data-testid="stNumberInput"],
-    .main [data-testid="stSelectbox"] {
-        margin-bottom: 12px !important;
-    }
-
-    /* Label */
+    /* ============ LABEL INPUT ============ */
     .main [data-testid="stTextInput"] label,
     .main [data-testid="stNumberInput"] label,
     .main .stSelectbox label,
@@ -206,121 +151,6 @@ CSS_GLOBAL = """
         font-weight: 700 !important;
         color: #1e293b !important;
         margin-bottom: 6px !important;
-    }
-
-    /* KOTAK INPUT — PUTIH BERSIH & TIMBUL */
-    .main [data-testid="stTextInput"] [data-baseweb="input"],
-    .main [data-testid="stNumberInput"] [data-baseweb="input"],
-    .main [data-testid="stTextInput"] [data-baseweb="base-input"],
-    .main [data-testid="stNumberInput"] [data-baseweb="base-input"] {
-        background: #ffffff !important;
-        background-color: #ffffff !important;
-        border: 2px solid #64748b !important;
-        border-radius: 10px !important;
-        box-shadow:
-            0 4px 12px rgba(15, 23, 42, 0.10),
-            0 2px 4px rgba(15, 23, 42, 0.06),
-            inset 0 1px 0 rgba(255, 255, 255, 1) !important;
-        padding: 2px !important;
-        transition: all 0.2s ease !important;
-    }
-
-    /* Hover */
-    .main [data-testid="stTextInput"] [data-baseweb="input"]:hover,
-    .main [data-testid="stNumberInput"] [data-baseweb="input"]:hover,
-    .main [data-testid="stTextInput"] [data-baseweb="base-input"]:hover,
-    .main [data-testid="stNumberInput"] [data-baseweb="base-input"]:hover {
-        border-color: #334155 !important;
-        box-shadow:
-            0 6px 16px rgba(15, 23, 42, 0.14),
-            0 3px 6px rgba(15, 23, 42, 0.08) !important;
-        transform: translateY(-1px) !important;
-    }
-
-    /* Focus */
-    .main [data-testid="stTextInput"] [data-baseweb="input"]:focus-within,
-    .main [data-testid="stNumberInput"] [data-baseweb="input"]:focus-within,
-    .main [data-testid="stTextInput"] [data-baseweb="base-input"]:focus-within,
-    .main [data-testid="stNumberInput"] [data-baseweb="base-input"]:focus-within {
-        background: #ffffff !important;
-        border-color: #2563eb !important;
-        box-shadow:
-            0 0 0 4px rgba(37, 99, 235, 0.15),
-            0 6px 16px rgba(37, 99, 235, 0.12) !important;
-        transform: translateY(-1px) !important;
-    }
-
-    /* Input text di dalam */
-    .main [data-testid="stTextInput"] input,
-    .main [data-testid="stNumberInput"] input {
-        background: #ffffff !important;
-        background-color: #ffffff !important;
-        color: #0f172a !important;
-        font-size: 0.92rem !important;
-        font-weight: 600 !important;
-        padding: 10px 14px !important;
-        border: none !important;
-        outline: none !important;
-        box-shadow: none !important;
-    }
-
-    .main [data-testid="stTextInput"] input::placeholder,
-    .main [data-testid="stNumberInput"] input::placeholder {
-        color: #94a3b8 !important;
-        font-weight: 400 !important;
-    }
-
-    /* Text area */
-    .main .stTextArea textarea {
-        background: #ffffff !important;
-        color: #0f172a !important;
-        border: 2px solid #64748b !important;
-        border-radius: 10px !important;
-        box-shadow:
-            0 4px 12px rgba(15, 23, 42, 0.10),
-            0 2px 4px rgba(15, 23, 42, 0.06) !important;
-        font-size: 0.92rem !important;
-        font-weight: 600 !important;
-        padding: 10px 14px !important;
-    }
-
-    .main .stTextArea textarea:focus {
-        border-color: #2563eb !important;
-        box-shadow:
-            0 0 0 4px rgba(37, 99, 235, 0.15) !important;
-        outline: none !important;
-    }
-
-    /* Selectbox */
-    .main [data-testid="stSelectbox"] [data-baseweb="select"] > div {
-        background: #ffffff !important;
-        border: 2px solid #64748b !important;
-        border-radius: 10px !important;
-        box-shadow:
-            0 4px 12px rgba(15, 23, 42, 0.10),
-            0 2px 4px rgba(15, 23, 42, 0.06) !important;
-    }
-
-    .main [data-testid="stSelectbox"] [data-baseweb="select"] > div:hover {
-        border-color: #334155 !important;
-    }
-
-    /* ============ HILANGKAN TOMBOL +/- NUMBER INPUT ============ */
-    button[data-testid="stNumberInputStepDown"],
-    button[data-testid="stNumberInputStepUp"] {
-        display: none !important;
-        visibility: hidden !important;
-        width: 0 !important;
-        min-width: 0 !important;
-        height: 0 !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        border: none !important;
-        pointer-events: none !important;
-    }
-
-    [data-testid="stNumberInput"] > div {
-        gap: 0 !important;
     }
 
     /* ============ METRIC ============ */
@@ -485,15 +315,6 @@ CSS_GLOBAL = """
         color: #374151 !important;
     }
 
-    /* ============ CHECKBOX ============ */
-    .main .stCheckbox label {
-        background: #ffffff !important;
-        padding: 8px 12px !important;
-        border: 1.5px solid #cbd5e1 !important;
-        border-radius: 8px !important;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
-    }
-
     /* ============ DIVIDER ============ */
     .main hr {
         border: none !important;
@@ -583,9 +404,7 @@ CSS_GLOBAL = """
         to   { opacity: 1; transform: translateX(0); }
     }
 
-    /* =====================================================
-       LOGIN CARD
-       ===================================================== */
+    /* ============ LOGIN CARD ============ */
     .login-wrapper {
         display: flex;
         flex-direction: column;
@@ -630,6 +449,134 @@ CSS_GLOBAL = """
     }
 </style>
 """
+
+
+CSS_INPUT_TIMBUL = """
+<style>
+/* INPUT PUTIH TIMBUL — VERSI INLINE PER HALAMAN */
+[data-baseweb="input"],
+[data-baseweb="base-input"] {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    border: 2px solid #64748b !important;
+    border-radius: 10px !important;
+    box-shadow:
+        0 4px 12px rgba(15, 23, 42, 0.10),
+        0 2px 4px rgba(15, 23, 42, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+    padding: 2px !important;
+    transition: all 0.2s ease !important;
+}
+
+[data-baseweb="input"]:hover,
+[data-baseweb="base-input"]:hover {
+    border-color: #334155 !important;
+    box-shadow:
+        0 6px 16px rgba(15, 23, 42, 0.14),
+        0 3px 6px rgba(15, 23, 42, 0.08) !important;
+    transform: translateY(-1px) !important;
+}
+
+[data-baseweb="input"]:focus-within,
+[data-baseweb="base-input"]:focus-within {
+    background: #ffffff !important;
+    border-color: #2563eb !important;
+    box-shadow:
+        0 0 0 4px rgba(37, 99, 235, 0.15),
+        0 6px 16px rgba(37, 99, 235, 0.12) !important;
+}
+
+[data-baseweb="input"] input,
+[data-baseweb="base-input"] input {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 0.92rem !important;
+    font-weight: 600 !important;
+    padding: 10px 14px !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+[data-baseweb="input"] input::placeholder,
+[data-baseweb="base-input"] input::placeholder {
+    color: #94a3b8 !important;
+    font-weight: 400 !important;
+}
+
+/* Selectbox */
+[data-testid="stSelectbox"] [data-baseweb="select"] > div {
+    background: #ffffff !important;
+    border: 2px solid #64748b !important;
+    border-radius: 10px !important;
+    box-shadow:
+        0 4px 12px rgba(15, 23, 42, 0.10),
+        0 2px 4px rgba(15, 23, 42, 0.06) !important;
+}
+
+/* Text area */
+.stTextArea textarea {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 2px solid #64748b !important;
+    border-radius: 10px !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.10) !important;
+    font-size: 0.92rem !important;
+    font-weight: 600 !important;
+    padding: 10px 14px !important;
+}
+
+/* Hilangkan tombol +/- */
+button[data-testid="stNumberInputStepDown"],
+button[data-testid="stNumberInputStepUp"] {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    pointer-events: none !important;
+}
+
+[data-testid="stNumberInput"] > div {
+    gap: 0 !important;
+}
+
+/* TOMBOL HIDE SIDEBAR — SELALU TERLIHAT */
+[data-testid="stSidebar"] button[kind="header"],
+[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] {
+    background: rgba(255,255,255,0.25) !important;
+    border: 2px solid rgba(255,255,255,0.50) !important;
+    border-radius: 8px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+[data-testid="stSidebar"] button[kind="header"] svg *,
+[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] svg * {
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
+}
+
+[data-testid="collapsedControl"],
+[data-testid="stSidebarCollapsedControl"] {
+    background: #ffffff !important;
+    border: 2px solid #475569 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+[data-testid="collapsedControl"] svg *,
+[data-testid="stSidebarCollapsedControl"] svg * {
+    fill: #0f172a !important;
+    stroke: #0f172a !important;
+}
+</style>
+"""
+
 
 CSS_WELCOME = """
 <style>
@@ -755,125 +702,11 @@ def inject_css():
     st.markdown(CSS_GLOBAL, unsafe_allow_html=True)
 
 
+def inject_input_style():
+    import streamlit as st
+    st.markdown(CSS_INPUT_TIMBUL, unsafe_allow_html=True)
+
+
 def inject_welcome_css():
     import streamlit as st
     st.markdown(CSS_WELCOME, unsafe_allow_html=True)
-
-CSS_INPUT_TIMBUL = """
-<style>
-/* INPUT PUTIH TIMBUL — VERSI INLINE PER HALAMAN */
-[data-baseweb="input"],
-[data-baseweb="base-input"] {
-    background: #ffffff !important;
-    background-color: #ffffff !important;
-    border: 2px solid #64748b !important;
-    border-radius: 10px !important;
-    box-shadow:
-        0 4px 12px rgba(15, 23, 42, 0.10),
-        0 2px 4px rgba(15, 23, 42, 0.06),
-        inset 0 1px 0 rgba(255, 255, 255, 1) !important;
-    padding: 2px !important;
-    transition: all 0.2s ease !important;
-}
-
-[data-baseweb="input"]:hover,
-[data-baseweb="base-input"]:hover {
-    border-color: #334155 !important;
-    box-shadow:
-        0 6px 16px rgba(15, 23, 42, 0.14),
-        0 3px 6px rgba(15, 23, 42, 0.08) !important;
-    transform: translateY(-1px) !important;
-}
-
-[data-baseweb="input"]:focus-within,
-[data-baseweb="base-input"]:focus-within {
-    background: #ffffff !important;
-    border-color: #2563eb !important;
-    box-shadow:
-        0 0 0 4px rgba(37, 99, 235, 0.15),
-        0 6px 16px rgba(37, 99, 235, 0.12) !important;
-}
-
-[data-baseweb="input"] input,
-[data-baseweb="base-input"] input {
-    background: #ffffff !important;
-    color: #0f172a !important;
-    font-size: 0.92rem !important;
-    font-weight: 600 !important;
-    padding: 10px 14px !important;
-    border: none !important;
-    outline: none !important;
-    box-shadow: none !important;
-}
-
-[data-baseweb="input"] input::placeholder,
-[data-baseweb="base-input"] input::placeholder {
-    color: #94a3b8 !important;
-    font-weight: 400 !important;
-}
-
-/* Selectbox */
-[data-testid="stSelectbox"] [data-baseweb="select"] > div {
-    background: #ffffff !important;
-    border: 2px solid #64748b !important;
-    border-radius: 10px !important;
-    box-shadow:
-        0 4px 12px rgba(15, 23, 42, 0.10),
-        0 2px 4px rgba(15, 23, 42, 0.06) !important;
-}
-
-/* Text area */
-.stTextArea textarea {
-    background: #ffffff !important;
-    color: #0f172a !important;
-    border: 2px solid #64748b !important;
-    border-radius: 10px !important;
-    box-shadow:
-        0 4px 12px rgba(15, 23, 42, 0.10) !important;
-    font-size: 0.92rem !important;
-    font-weight: 600 !important;
-    padding: 10px 14px !important;
-}
-
-/* Hilangkan tombol +/- */
-button[data-testid="stNumberInputStepDown"],
-button[data-testid="stNumberInputStepUp"] {
-    display: none !important;
-}
-
-/* TOMBOL HIDE SIDEBAR — SELALU TERLIHAT */
-[data-testid="stSidebar"] button[kind="header"],
-[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] {
-    background: rgba(255,255,255,0.25) !important;
-    border: 2px solid rgba(255,255,255,0.50) !important;
-    border-radius: 8px !important;
-    opacity: 1 !important;
-}
-
-[data-testid="stSidebar"] button[kind="header"] svg *,
-[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] svg * {
-    fill: #ffffff !important;
-    stroke: #ffffff !important;
-}
-
-[data-testid="collapsedControl"],
-[data-testid="stSidebarCollapsedControl"] {
-    background: #ffffff !important;
-    border: 2px solid #475569 !important;
-    border-radius: 8px !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
-}
-
-[data-testid="collapsedControl"] svg *,
-[data-testid="stSidebarCollapsedControl"] svg * {
-    fill: #0f172a !important;
-    stroke: #0f172a !important;
-}
-</style>
-"""
-
-
-def inject_input_style():
-    """Inject CSS khusus input — dipanggil di tiap page"""
-    import streamlit as st
-    st.markdown(CSS_INPUT_TIMBUL, unsafe_allow_html=True)
