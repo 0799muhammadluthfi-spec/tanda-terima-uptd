@@ -541,6 +541,23 @@ button[data-testid="stNumberInputStepUp"] {
 
 [data-testid="stNumberInput"] > div {
     gap: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Hilangkan kotak kurung [ ] di number input */
+[data-testid="stNumberInput"] [data-baseweb="input"] > div:first-child,
+[data-testid="stNumberInput"] [data-baseweb="input"] > div:last-child {
+    display: none !important;
+}
+
+[data-testid="stNumberInput"] [data-baseweb="input"] {
+    background: #ffffff !important;
+    border: 2px solid #64748b !important;
+    border-radius: 10px !important;
+    box-shadow:
+        0 4px 12px rgba(15, 23, 42, 0.10),
+        0 2px 4px rgba(15, 23, 42, 0.06) !important;
 }
 
 /* TOMBOL HIDE SIDEBAR — SELALU TERLIHAT */
