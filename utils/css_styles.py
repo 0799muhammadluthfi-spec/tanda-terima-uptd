@@ -483,33 +483,67 @@ CSS_INPUT_TIMBUL = """
     outline: none !important;
 }
 
-/* ============ NUMBER INPUT — ABU CLEAN ============ */
-.main [data-testid="stNumberInput"] [data-baseweb="input"] {
+CSS_INPUT_TIMBUL = """
+<style>
+/* ============ INPUT — PAKSA SEMUA JADI ABU CLEAN ============ */
+
+div[data-baseweb="input"],
+div[data-baseweb="base-input"],
+div[data-baseweb="select"] > div {
     background: #f1f5f9 !important;
+    background-color: #f1f5f9 !important;
     border: 1px solid #e2e8f0 !important;
     border-radius: 10px !important;
     box-shadow: none !important;
+    padding: 0 !important;
     transition: all 0.2s ease !important;
 }
 
-.main [data-testid="stNumberInput"] [data-baseweb="input"]:hover {
+div[data-baseweb="input"]:hover,
+div[data-baseweb="base-input"]:hover,
+div[data-baseweb="select"] > div:hover {
     background: #e2e8f0 !important;
+    background-color: #e2e8f0 !important;
     border-color: #cbd5e1 !important;
 }
 
-.main [data-testid="stNumberInput"] [data-baseweb="input"]:focus-within {
+div[data-baseweb="input"]:focus-within,
+div[data-baseweb="base-input"]:focus-within {
     background: #ffffff !important;
+    background-color: #ffffff !important;
     border-color: #2563eb !important;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
 }
 
-.main [data-testid="stNumberInput"] input {
+div[data-baseweb="input"] input,
+div[data-baseweb="base-input"] input {
     background: transparent !important;
+    background-color: transparent !important;
     color: #0f172a !important;
     font-size: 0.95rem !important;
     font-weight: 500 !important;
     padding: 12px 16px !important;
     border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+textarea {
+    background: #f1f5f9 !important;
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+    font-size: 0.95rem !important;
+    font-weight: 500 !important;
+    padding: 12px 16px !important;
+}
+
+textarea:focus {
+    background: #ffffff !important;
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
     outline: none !important;
 }
 
@@ -520,50 +554,15 @@ button[data-testid="stNumberInputStepUp"] {
 }
 
 /* ============ LABEL ============ */
-.main [data-testid="stTextInput"] label,
-.main [data-testid="stNumberInput"] label,
-.main .stSelectbox label,
-.main .stTextArea label {
+label[data-testid="stWidgetLabel"] p {
     font-size: 0.85rem !important;
     font-weight: 600 !important;
     color: #0f172a !important;
-    margin-bottom: 8px !important;
     text-transform: uppercase !important;
     letter-spacing: 0.02em !important;
 }
 
-/* ============ SELECTBOX ============ */
-.main [data-testid="stSelectbox"] [data-baseweb="select"] > div {
-    background: #f1f5f9 !important;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 10px !important;
-    box-shadow: none !important;
-}
-
-.main [data-testid="stSelectbox"] [data-baseweb="select"] > div:hover {
-    background: #e2e8f0 !important;
-    border-color: #cbd5e1 !important;
-}
-
-/* ============ TEXT AREA ============ */
-.main .stTextArea textarea {
-    background: #f1f5f9 !important;
-    color: #0f172a !important;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 10px !important;
-    box-shadow: none !important;
-    font-size: 0.95rem !important;
-    font-weight: 500 !important;
-    padding: 12px 16px !important;
-}
-
-.main .stTextArea textarea:focus {
-    background: #ffffff !important;
-    border-color: #2563eb !important;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
-}
-
-/* ============ TOMBOL HIDE SIDEBAR ============ */
+/* ============ SIDEBAR HIDE BUTTON ============ */
 [data-testid="stSidebar"] button[kind="header"] {
     background: rgba(255,255,255,0.25) !important;
     border: 2px solid rgba(255,255,255,0.50) !important;
