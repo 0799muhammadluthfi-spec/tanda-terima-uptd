@@ -441,6 +441,20 @@ CSS_GLOBAL = """
 
 CSS_INPUT_TIMBUL = """
 <style>
+/* Paksa kolom checkbox punya lebar sama */
+.main [data-testid="stHorizontalBlock"] [data-testid="column"] {
+    width: 100% !important;
+}
+
+.main [data-testid="stHorizontalBlock"] [data-testid="column"] [data-testid="stCheckbox"] {
+    width: 100% !important;
+}
+
+.main [data-testid="stHorizontalBlock"] [data-testid="column"] [data-testid="stCheckbox"] > label {
+    width: 100% !important;
+    min-width: 100% !important;
+    box-sizing: border-box !important;
+}
 /* ============ INPUT — PUTIH BERSIH ============ */
 
 div[data-baseweb="input"],
