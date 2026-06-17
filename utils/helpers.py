@@ -15,9 +15,9 @@ def today_wita():
 # ==========================================
 # NAMA WORKSHEET
 # ==========================================
-WS_SK = "DATA_PERPANJANG_SK"
+WS_SK = "DATA_PERPANJANGAN_SK"
 WS_PARKIR = "DATA_PARKIR"
-WS_KAS = "DATA_KAS_UPTD"
+WS_KAS = "DATA_KAS"
 
 # ==========================================
 # KOLOM STANDAR
