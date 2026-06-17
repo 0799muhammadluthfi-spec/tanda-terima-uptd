@@ -441,13 +441,13 @@ CSS_GLOBAL = """
 
 CSS_INPUT_TIMBUL = """
 <style>
-/* ============ INPUT — ABU CLEAN MINIMALIST ============ */
+/* ============ INPUT — PUTIH BERSIH ============ */
 
 div[data-baseweb="input"],
 div[data-baseweb="base-input"] {
-    background: #f1f5f9 !important;
-    background-color: #f1f5f9 !important;
-    border: 1px solid #e2e8f0 !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
     border-radius: 10px !important;
     box-shadow: none !important;
     padding: 0 !important;
@@ -456,23 +456,21 @@ div[data-baseweb="base-input"] {
 
 div[data-baseweb="input"]:hover,
 div[data-baseweb="base-input"]:hover {
-    background: #e2e8f0 !important;
-    background-color: #e2e8f0 !important;
-    border-color: #cbd5e1 !important;
+    background: #ffffff !important;
+    border-color: #94a3b8 !important;
 }
 
 div[data-baseweb="input"]:focus-within,
 div[data-baseweb="base-input"]:focus-within {
     background: #ffffff !important;
-    background-color: #ffffff !important;
     border-color: #2563eb !important;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
 }
 
 div[data-baseweb="input"] input,
 div[data-baseweb="base-input"] input {
-    background: transparent !important;
-    background-color: transparent !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
     color: #0f172a !important;
     font-size: 0.95rem !important;
     font-weight: 500 !important;
@@ -490,25 +488,24 @@ div[data-baseweb="base-input"] input::placeholder {
 
 /* ============ SELECTBOX ============ */
 div[data-baseweb="select"] > div {
-    background: #f1f5f9 !important;
-    background-color: #f1f5f9 !important;
-    border: 1px solid #e2e8f0 !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
     border-radius: 10px !important;
     box-shadow: none !important;
 }
 
 div[data-baseweb="select"] > div:hover {
-    background: #e2e8f0 !important;
-    background-color: #e2e8f0 !important;
-    border-color: #cbd5e1 !important;
+    background: #ffffff !important;
+    border-color: #94a3b8 !important;
 }
 
 /* ============ TEXT AREA ============ */
 textarea {
-    background: #f1f5f9 !important;
-    background-color: #f1f5f9 !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
     color: #0f172a !important;
-    border: 1px solid #e2e8f0 !important;
+    border: 1.5px solid #cbd5e1 !important;
     border-radius: 10px !important;
     box-shadow: none !important;
     font-size: 0.95rem !important;
@@ -518,13 +515,12 @@ textarea {
 
 textarea:focus {
     background: #ffffff !important;
-    background-color: #ffffff !important;
     border-color: #2563eb !important;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
     outline: none !important;
 }
 
-/* ============ HILANGKAN TOMBOL +/- NUMBER INPUT ============ */
+/* ============ HILANGKAN TOMBOL +/- ============ */
 button[data-testid="stNumberInputStepDown"],
 button[data-testid="stNumberInputStepUp"] {
     display: none !important;
