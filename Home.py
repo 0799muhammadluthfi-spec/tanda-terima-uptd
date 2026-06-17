@@ -7,6 +7,7 @@ import base64
 import urllib.request
 
 from utils.css_styles import inject_css, inject_welcome_css
+from utils.auth import is_logged_in, login_form, logout, get_current_user
 
 # ==========================================
 # KONFIGURASI HALAMAN
@@ -52,7 +53,14 @@ inject_css()
 inject_welcome_css()
 
 # ==========================================
-# SIDEBAR
+# CEK LOGIN — TAMPILKAN FORM LOGIN KALAU BELUM LOGIN
+# ==========================================
+if not is_logged_in():
+    login_form()
+    st.stop()
+
+# ==========================================
+# SIDEBAR (HANYA TAMPIL KALAU SUDAH LOGIN)
 # ==========================================
 with st.sidebar:
     logo_b64 = st.session_state.get("logo_b64")
@@ -96,6 +104,35 @@ with st.sidebar:
                       letter-spacing:0.04em;
                       margin:0; line-height:1.4;">
                 KABUPATEN HULU SUNGAI SELATAN
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # USER INFO
+    user_login = get_current_user()
+    st.markdown(
+        f"""
+        <div style="background: rgba(96,165,250,0.10);
+                    border: 1px solid rgba(96,165,250,0.20);
+                    border-radius: 10px;
+                    padding: 10px 12px;
+                    margin-bottom: 14px;
+                    text-align: center;">
+            <p style="font-family:'Inter',sans-serif;
+                      font-size:0.62rem; font-weight:600;
+                      color:#94a3b8 !important;
+                      text-transform:uppercase;
+                      letter-spacing:0.05em;
+                      margin:0 0 4px 0;">
+                Login Sebagai
+            </p>
+            <p style="font-family:'Inter',sans-serif;
+                      font-size:0.85rem; font-weight:700;
+                      color:#60a5fa !important;
+                      margin:0;">
+                {user_login}
             </p>
         </div>
         """,
@@ -154,6 +191,31 @@ with st.sidebar:
 
     st.markdown(
         """
+        <div style="padding: 16px 4px 4px 4px;">
+            <p style="font-family:'Inter',sans-serif;
+                      font-size:0.7rem; font-weight:600;
+                      color:#64748b !important;
+                      text-transform:uppercase;
+                      letter-spacing:0.06em;
+                      margin:0 0 6px 0;">
+                SISTEM
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.page_link(
+        "pages/4_⚙️_Pengaturan.py",
+        label="⚙️  Pengaturan",
+        use_container_width=True
+    )
+
+    if st.button("🚪  Logout", use_container_width=True, key="btn_logout"):
+        logout()
+
+    st.markdown(
+        """
         <div style="text-align:center; padding:24px 0 8px 0;
                     border-top:1px solid rgba(255,255,255,0.06);
                     margin-top:40px;">
@@ -199,7 +261,7 @@ st.markdown(
         </p>
         <div class="welcome-line"></div>
         <p class="welcome-hint">
-            Silakan pilih modul pada menu di sebelah kiri untuk memulai
+            Selamat datang, <b>{user_login}</b>. Silakan pilih modul pada menu di sebelah kiri untuk memulai.
         </p>
         <div class="welcome-credit">
             <p class="welcome-credit-label">Developed by</p>
