@@ -25,7 +25,7 @@ from utils.helpers import (
 from utils.auth import wajib_login
 
 # ==========================================
-# KONFIGURASI
+# KONFIGURASI HALAMAN
 # ==========================================
 st.set_page_config(
     page_title="Kas UPTD | UPTD Pasar Kandangan",
