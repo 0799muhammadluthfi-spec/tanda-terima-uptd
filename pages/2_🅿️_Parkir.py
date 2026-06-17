@@ -479,14 +479,20 @@ with tab1:
             judul_form = "✏️ EDIT REKAP" if sudah_diisi else "📝 INPUT REKAP"
             st.subheader(judul_form)
 
-            mr2 = st.number_input("MPP RODA R2", min_value=0, value=val_mr2, key="nr_mr2")
-            mr4 = st.number_input("MPP RODA R4", min_value=0, value=val_mr4, key="nr_mr4")
+            def to_int(val, default=0):
+                try:
+                    return int(val)
+                except:
+                    return default
 
-            tr2 = st.number_input("TOTAL KARCIS R2", min_value=0, value=val_tr2, key="nr_tr2")
-            tr4 = st.number_input("TOTAL KARCIS R4", min_value=0, value=val_tr4, key="nr_tr4")
+            mr2 = to_int(st.text_input("MPP RODA R2", value=str(val_mr2), key="nr_mr2"))
+            mr4 = to_int(st.text_input("MPP RODA R4", value=str(val_mr4), key="nr_mr4"))
 
-            pk2_input = st.number_input("PENGAMBILAN KARCIS R2", min_value=0, value=val_pk2, key="nr_pk2")
-            pk4_input = st.number_input("PENGAMBILAN KARCIS R4", min_value=0, value=val_pk4, key="nr_pk4")
+            tr2 = to_int(st.text_input("TOTAL KARCIS R2", value=str(val_tr2), key="nr_tr2"))
+            tr4 = to_int(st.text_input("TOTAL KARCIS R4", value=str(val_tr4), key="nr_tr4"))
+
+            pk2_input = to_int(st.text_input("PENGAMBILAN KARCIS R2", value=str(val_pk2), key="nr_pk2"))
+            pk4_input = to_int(st.text_input("PENGAMBILAN KARCIS R4", value=str(val_pk4), key="nr_pk4")))
 
             st.divider()
 
