@@ -10,25 +10,38 @@ from utils.helpers import (
     urutkan_no, tampilkan_n_terakhir, tombol_refresh
 )
 from utils.pdf_generator import buat_pdf_full, cetak_overprint
+from utils.auth import wajib_login
 
+# ==========================================
+# KONFIGURASI HALAMAN
+# ==========================================
 st.set_page_config(
     page_title="SK Toko | UPTD Pasar Kandangan",
-    page_icon="📋", layout="wide",
+    page_icon="📋",
+    layout="wide",
     initial_sidebar_state="collapsed"
 )
 
 inject_css()
+wajib_login()
 
+# ==========================================
+# KONEKSI
+# ==========================================
 conn_sk = st.connection("gsheets_sk", type=GSheetsConnection)
 
-# ── RESET COUNTER ──
+# ==========================================
+# RESET COUNTER
+# ==========================================
 if "sk_rc" not in st.session_state:
     st.session_state["sk_rc"] = 0
 
 def reset_form_sk():
     st.session_state["sk_rc"] += 1
 
-# ── SIDEBAR ──
+# ==========================================
+# SIDEBAR
+# ==========================================
 with st.sidebar:
     logo_b64 = st.session_state.get("logo_b64")
     if logo_b64:
@@ -36,28 +49,66 @@ with st.sidebar:
             f'<div style="text-align:center; padding:18px 0 6px 0;">'
             f'<img src="data:image/png;base64,{logo_b64}" width="78" height="auto" '
             f'style="display:inline-block; filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4));">'
-            f'</div>', unsafe_allow_html=True)
+            f'</div>',
+            unsafe_allow_html=True
+        )
     else:
-        st.markdown('<div style="text-align:center; padding:18px 0 6px 0;"><div style="font-size:3rem;">🏛️</div></div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div style="text-align:center; padding:18px 0 6px 0;">'
+            '<div style="font-size:3rem;">🏛️</div></div>',
+            unsafe_allow_html=True
+        )
 
     st.markdown("""
-    <div style="text-align:center; padding:4px 0 14px 0; border-bottom:1px solid rgba(255,255,255,0.08); margin-bottom:14px;">
-        <p style="font-family:'Inter',sans-serif; font-size:1.05rem; font-weight:800; color:#f1f5f9 !important; margin:0 0 4px 0;">UPTD PASAR KANDANGAN</p>
-        <p style="font-family:'Inter',sans-serif; font-size:0.78rem; font-weight:600; color:#94a3b8 !important; margin:0;">KABUPATEN HULU SUNGAI SELATAN</p>
-    </div>""", unsafe_allow_html=True)
+    <div style="text-align:center; padding:4px 0 14px 0;
+                border-bottom:1px solid rgba(255,255,255,0.08);
+                margin-bottom:14px;">
+        <p style="font-family:'Inter',sans-serif; font-size:1.05rem; font-weight:800;
+                  color:#f1f5f9 !important; margin:0 0 4px 0;">
+            UPTD PASAR KANDANGAN</p>
+        <p style="font-family:'Inter',sans-serif; font-size:0.78rem; font-weight:600;
+                  color:#94a3b8 !important; margin:0;">
+            KABUPATEN HULU SUNGAI SELATAN</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-    st.page_link("app_web.py", label="🏠  Beranda", use_container_width=True)
+    st.page_link("Home.py", label="🏠  Beranda", use_container_width=True)
+
+    st.markdown(
+        '<div style="padding: 8px 4px 4px 4px;">'
+        '<p style="font-family:\'Inter\',sans-serif; font-size:0.7rem; font-weight:600;'
+        'color:#64748b !important; text-transform:uppercase; letter-spacing:0.06em;'
+        'margin:0 0 6px 0;">MODUL</p></div>',
+        unsafe_allow_html=True
+    )
+
     st.page_link("pages/1_📋_SK_Toko.py", label="📋  SK TOKO", use_container_width=True)
     st.page_link("pages/2_🅿️_Parkir.py", label="🅿️  PARKIR", use_container_width=True)
     st.page_link("pages/3_💰_Kas.py", label="💰  KAS UPTD", use_container_width=True)
 
-    st.markdown("""
-    <div style="text-align:center; padding:24px 0 8px 0; border-top:1px solid rgba(255,255,255,0.06); margin-top:40px;">
-        <p style="font-family:'Inter',sans-serif; font-size:0.56rem; color:#64748b !important; margin:0;">Developed by</p>
-        <p style="font-family:'Inter',sans-serif; font-size:0.68rem; font-weight:700; color:#94a3b8 !important; margin:2px 0 0 0;">M. Luthfi Renaldi</p>
-    </div>""", unsafe_allow_html=True)
+    st.markdown(
+        '<div style="padding: 16px 4px 4px 4px;">'
+        '<p style="font-family:\'Inter\',sans-serif; font-size:0.7rem; font-weight:600;'
+        'color:#64748b !important; text-transform:uppercase; letter-spacing:0.06em;'
+        'margin:0 0 6px 0;">SISTEM</p></div>',
+        unsafe_allow_html=True
+    )
 
-# ── TABS ──
+    st.page_link("pages/4_⚙️_Pengaturan.py", label="⚙️  PENGATURAN", use_container_width=True)
+
+    st.markdown("""
+    <div style="text-align:center; padding:24px 0 8px 0;
+                border-top:1px solid rgba(255,255,255,0.06); margin-top:40px;">
+        <p style="font-family:'Inter',sans-serif; font-size:0.56rem;
+                  color:#64748b !important; margin:0;">Developed by</p>
+        <p style="font-family:'Inter',sans-serif; font-size:0.68rem; font-weight:700;
+                  color:#94a3b8 !important; margin:2px 0 0 0;">M. Luthfi Renaldi</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# ==========================================
+# TABS
+# ==========================================
 tab1, tab2 = st.tabs(["📝 PENGANTARAN", "📤 PENGAMBILAN"])
 
 # ==========================================
@@ -74,11 +125,10 @@ with tab1:
     col_stat1, col_stat2, col_stat3 = st.columns(3)
     total = len(df_sk[df_sk["No"] != "-"]) if not df_sk.empty else 0
     sudah_ambil = len(df_sk[df_sk["Tanggal_Pengambilan"] != "-"]) if not df_sk.empty else 0
-    col_stat1.metric("📦 Total Berkas", total)
-    col_stat2.metric("✅ Sudah Diambil", sudah_ambil)
-    col_stat3.metric("⏳ Belum Diambil", total - sudah_ambil)
+    col_stat1.metric("Total Berkas", total)
+    col_stat2.metric("Sudah Diambil", sudah_ambil)
+    col_stat3.metric("Belum Diambil", total - sudah_ambil)
 
-    # ── BERKAS ──
     SEMUA_BERKAS = [
         "SK ASLI MENEMPATI",
         "PAS FOTO 3X4 (2 LBR)",
@@ -91,7 +141,7 @@ with tab1:
 
     rc = st.session_state["sk_rc"]
 
-    st.subheader("☑️ Pilih Berkas yang Dibawa:")
+    st.subheader("Pilih Berkas yang Dibawa:")
     cols_berkas = st.columns(3)
     sel_berkas = []
     for i, item in enumerate(SEMUA_BERKAS):
@@ -101,12 +151,9 @@ with tab1:
 
     st.divider()
 
-    # ── CEK NO YANG SUDAH ADA ──
     next_no = get_next_no(df_sk)
-
     no_urut = st.text_input("NOMOR URUT *", value=str(next_no), key=f"sk_{rc}_no")
 
-    # Cek apakah no sudah ada → isi otomatis ke session state
     data_lama = None
     key_prefix = f"sk_{rc}"
 
@@ -115,9 +162,8 @@ with tab1:
         mask = df_sk["No"].apply(normalisasi_no) == no_norm
         if mask.any():
             data_lama = df_sk[mask].iloc[0]
-            st.info("📋 Nomor ini sudah ada. Data lama dimuat ke form untuk diedit.")
+            st.info("Nomor ini sudah ada. Data lama dimuat ke form untuk diedit.")
 
-            # Set session state agar form terisi otomatis
             def set_if_empty(key, val):
                 if key not in st.session_state or st.session_state.get(f"_loaded_{rc}") != no_norm:
                     st.session_state[key] = str(val) if str(val) != "-" else ""
@@ -135,9 +181,8 @@ with tab1:
 
     st.divider()
 
-    # ── FORM ──
     with st.form("form_pengantaran", clear_on_submit=False):
-        st.subheader("📋 Data Pengantaran")
+        st.subheader("Data Pengantaran")
         col1, col2 = st.columns(2)
         with col1:
             tgl_terima = st.text_input("TANGGAL TERIMA *", value=datetime.now().strftime("%d-%m-%Y"), key=f"sk_{rc}_tgl")
@@ -153,9 +198,9 @@ with tab1:
 
         b1, b2 = st.columns(2)
         with b1:
-            submit_sk = st.form_submit_button("💾 SIMPAN DATA", type="primary", use_container_width=True)
+            submit_sk = st.form_submit_button("SIMPAN DATA", type="primary", use_container_width=True)
         with b2:
-            reset_sk = st.form_submit_button("🔄 RESET FORM", use_container_width=True)
+            reset_sk = st.form_submit_button("RESET FORM", use_container_width=True)
 
         if reset_sk:
             reset_form_sk()
@@ -163,7 +208,7 @@ with tab1:
 
         if submit_sk:
             if not no_urut.strip() or not nama_toko or not nama_pemilik:
-                st.error("❌ Data Wajib Diisi!")
+                st.error("Data Wajib Diisi!")
             else:
                 is_exist = not df_sk.empty and normalisasi_no(no_urut) in df_sk["No"].apply(normalisasi_no).values
                 new_row = {
@@ -187,14 +232,14 @@ with tab1:
                     if safe_update(conn_sk, WS_SK, df_baru):
                         st.session_state["last_sk"] = new_row
                         st.session_state["last_berkas"] = sel_berkas
-                        st.success("✅ Berhasil!")
+                        st.success("Berhasil!")
                         reset_form_sk()
                         st.rerun()
 
     if st.session_state.get("show_confirm_sk"):
-        st.warning("⚠️ Nomor sudah ada! Timpa data lama?")
+        st.warning("Nomor sudah ada! Timpa data lama?")
         col_c1, col_c2 = st.columns(2)
-        if col_c1.button("✅ YA, TIMPA", type="primary", key="timpa_sk"):
+        if col_c1.button("YA, TIMPA", type="primary", key="timpa_sk"):
             d = st.session_state["pending_sk"]
             df_sk = df_sk[df_sk["No"] != d["No"]]
             df_final = pd.concat([df_sk, pd.DataFrame([d])], ignore_index=True)
@@ -204,11 +249,10 @@ with tab1:
                 st.session_state["show_confirm_sk"] = False
                 reset_form_sk()
                 st.rerun()
-        if col_c2.button("❌ BATAL", key="batal_sk"):
+        if col_c2.button("BATAL", key="batal_sk"):
             st.session_state["show_confirm_sk"] = False
             st.rerun()
 
-    # ── DOWNLOAD PDF ──
     if "last_sk" in st.session_state:
         st.divider()
         l = st.session_state["last_sk"]
@@ -217,14 +261,14 @@ with tab1:
         nama_file = f"{no_urut_pdf}_{nama_pengantar_pdf}_PERPANJANG_SK.pdf"
 
         st.download_button(
-            "📥 DOWNLOAD PDF TANDA TERIMA",
+            "DOWNLOAD PDF TANDA TERIMA",
             data=buat_pdf_full(l, st.session_state.get("last_berkas", [])),
             file_name=nama_file,
             mime="application/pdf"
         )
 
     st.divider()
-    st.subheader("📊 DATA TERAKHIR (30 Data)")
+    st.subheader("DATA TERAKHIR (30 Data)")
     if not df_sk.empty:
         df_tampil = df_sk[df_sk["No"] != "-"].copy()
         st.dataframe(tampilkan_n_terakhir(df_tampil, 30), use_container_width=True, hide_index=True)
@@ -243,11 +287,15 @@ with tab2:
     df_m = load_data(conn_sk, WS_SK)
 
     if df_m.empty:
-        st.warning("⚠️ Data kosong.")
+        st.warning("Data kosong.")
     else:
         df_b = df_m[(df_m["Tanggal_Pengambilan"] == "-") & (df_m["No"] != "-")]
 
-        no_cari = st.text_input("🔍 CARI NOMOR URUT:", key="cari_no_sk", placeholder="Misal: 1").strip()
+        no_cari = st.text_input(
+            "CARI NOMOR URUT:",
+            key="cari_no_sk",
+            placeholder="Misal: 1"
+        ).strip()
 
         if no_cari:
             no_cari_norm = normalisasi_no(no_cari)
@@ -259,23 +307,30 @@ with tab2:
                 sudah = data["Tanggal_Pengambilan"] != "-"
 
                 if sudah:
-                    st.success(f"✅ Sudah diambil: {format_tgl_hari_indo(data['Tanggal_Pengambilan'])}")
-                    st.download_button("🖨️ PRINT ULANG", data=cetak_overprint(data["Tanggal_Pengambilan"]),
-                                       file_name=f"AMBIL_{no_cari_norm}.pdf")
+                    st.success(f"Sudah diambil: {format_tgl_hari_indo(data['Tanggal_Pengambilan'])}")
+                    st.download_button(
+                        "PRINT ULANG",
+                        data=cetak_overprint(data["Tanggal_Pengambilan"]),
+                        file_name=f"AMBIL_{no_cari_norm}.pdf"
+                    )
                 else:
-                    st.warning(f"👤 {data['Nama_Pemilik_Asli']}")
-                    tgl_a = st.text_input("📅 TANGGAL AMBIL:", value=datetime.now().strftime("%d-%m-%Y"), key="tgl_ambil_sk")
-                    if st.button("✅ KONFIRMASI PENGAMBILAN", type="primary"):
+                    st.warning(f"{data['Nama_Pemilik_Asli']}")
+                    tgl_a = st.text_input(
+                        "TANGGAL AMBIL:",
+                        value=datetime.now().strftime("%d-%m-%Y"),
+                        key="tgl_ambil_sk"
+                    )
+                    if st.button("KONFIRMASI PENGAMBILAN", type="primary"):
                         df_m.loc[mask_no, "Tanggal_Pengambilan"] = tgl_a
                         if safe_update(conn_sk, WS_SK, df_m):
-                            st.success("✅ Berhasil!")
+                            st.success("Berhasil!")
                             st.rerun()
             else:
-                st.error("❌ Tidak terdaftar.")
+                st.error("Tidak terdaftar.")
 
         st.divider()
-        st.subheader(f"📊 BELUM DIAMBIL ({len(df_b)})")
+        st.subheader(f"BELUM DIAMBIL ({len(df_b)})")
         if not df_b.empty:
             st.dataframe(urutkan_no(df_b, ascending=True), use_container_width=True, hide_index=True)
         else:
-            st.info("✅ Semua sudah diambil.")
+            st.info("Semua sudah diambil.")
