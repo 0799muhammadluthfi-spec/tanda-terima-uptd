@@ -15,9 +15,9 @@ def today_wita():
 # ==========================================
 # NAMA WORKSHEET
 # ==========================================
-WS_SK = "DATA_PERPANJANGAN_SK"
+WS_SK = "DATA_PERPANJANG_SK"
 WS_PARKIR = "DATA_PARKIR"
-WS_KAS = "DATA_KAS"
+WS_KAS = "DATA_KAS_UPTD"
 
 # ==========================================
 # KOLOM STANDAR
@@ -38,7 +38,8 @@ KOLOM_PARKIR = [
     "Status_MPP",
     "Sisa_Stok_R2",
     "Sisa_Stok_R4",
-    "Status_Cetak"
+    "Status_Cetak",
+    "Status_Libur"
 ]
 
 KOLOM_SK = [
@@ -272,7 +273,6 @@ def cari_tanggal_belum_input_parkir(df_p):
         df["Belum_R2"] = df["Total_Karcis_R2"].apply(is_belum_input)
         df["Belum_R4"] = df["Total_Karcis_R4"].apply(is_belum_input)
 
-        # Cek kolom Status_Libur
         if "Status_Libur" in df.columns:
             df["Is_Libur"] = df["Status_Libur"].apply(is_libur)
         else:
@@ -402,6 +402,7 @@ def daftar_tanggal_belum_konfirmasi_bulan_ini(df_p):
         return hasil.sort_values("Tgl_Cek")[["Tanggal", "Nama_Petugas", "Status_Khusus", "Status_MPP", "Status_Cetak"]]
     except:
         return pd.DataFrame(columns=["Tanggal", "Nama_Petugas", "Status_Khusus", "Status_MPP", "Status_Cetak"])
+
 # ==========================================
 # KAS UPTD
 # ==========================================
