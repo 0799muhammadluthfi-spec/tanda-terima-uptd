@@ -19,6 +19,7 @@ from utils.helpers import (
     today_wita
 )
 from utils.pdf_generator import cetak_tanda_terima_parkir
+from utils.auth import wajib_login
 
 # ==========================================
 # KONFIGURASI HALAMAN
@@ -31,6 +32,7 @@ st.set_page_config(
 )
 
 inject_css()
+wajib_login()
 
 # ==========================================
 # KONEKSI
@@ -57,25 +59,20 @@ with st.sidebar:
             unsafe_allow_html=True
         )
 
-    st.markdown(
-        """
-        <div style="text-align:center; padding:4px 0 14px 0;
-                    border-bottom:1px solid rgba(255,255,255,0.08);
-                    margin-bottom:14px;">
-            <p style="font-family:'Inter',sans-serif; font-size:1.05rem; font-weight:800;
-                      color:#f1f5f9 !important; letter-spacing:-0.02em;
-                      margin:0 0 4px 0; line-height:1.3;">
-                UPTD PASAR KANDANGAN</p>
-            <p style="font-family:'Inter',sans-serif; font-size:0.78rem; font-weight:600;
-                      color:#94a3b8 !important; letter-spacing:0.04em;
-                      margin:0; line-height:1.4;">
-                KABUPATEN HULU SUNGAI SELATAN</p>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    st.markdown("""
+    <div style="text-align:center; padding:4px 0 14px 0;
+                border-bottom:1px solid rgba(255,255,255,0.08);
+                margin-bottom:14px;">
+        <p style="font-family:'Inter',sans-serif; font-size:1.05rem; font-weight:800;
+                  color:#f1f5f9 !important; margin:0 0 4px 0;">
+            UPTD PASAR KANDANGAN</p>
+        <p style="font-family:'Inter',sans-serif; font-size:0.78rem; font-weight:600;
+                  color:#94a3b8 !important; margin:0;">
+            KABUPATEN HULU SUNGAI SELATAN</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-    st.page_link("app_web.py", label="🏠  Beranda", use_container_width=True)
+    st.page_link("Home.py", label="🏠  Beranda", use_container_width=True)
 
     st.markdown(
         '<div style="padding: 8px 4px 4px 4px;">'
@@ -90,17 +87,24 @@ with st.sidebar:
     st.page_link("pages/3_💰_Kas.py", label="💰  KAS UPTD", use_container_width=True)
 
     st.markdown(
-        """
-        <div style="text-align:center; padding:24px 0 8px 0;
-                    border-top:1px solid rgba(255,255,255,0.06); margin-top:40px;">
-            <p style="font-family:'Inter',sans-serif; font-size:0.56rem;
-                      color:#64748b !important; margin:0; line-height:1.7;">Developed by</p>
-            <p style="font-family:'Inter',sans-serif; font-size:0.68rem; font-weight:700;
-                      color:#94a3b8 !important; margin:2px 0 0 0;">M. Luthfi Renaldi</p>
-        </div>
-        """,
+        '<div style="padding: 16px 4px 4px 4px;">'
+        '<p style="font-family:\'Inter\',sans-serif; font-size:0.7rem; font-weight:600;'
+        'color:#64748b !important; text-transform:uppercase; letter-spacing:0.06em;'
+        'margin:0 0 6px 0;">SISTEM</p></div>',
         unsafe_allow_html=True
     )
+
+    st.page_link("pages/4_⚙️_Pengaturan.py", label="⚙️  PENGATURAN", use_container_width=True)
+
+    st.markdown("""
+    <div style="text-align:center; padding:24px 0 8px 0;
+                border-top:1px solid rgba(255,255,255,0.06); margin-top:40px;">
+        <p style="font-family:'Inter',sans-serif; font-size:0.56rem;
+                  color:#64748b !important; margin:0;">Developed by</p>
+        <p style="font-family:'Inter',sans-serif; font-size:0.68rem; font-weight:700;
+                  color:#94a3b8 !important; margin:2px 0 0 0;">M. Luthfi Renaldi</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 # ==========================================
 # HELPER LOKAL
@@ -166,7 +170,7 @@ def ambil_info_tanggal_parkir(df_p, tgl_input_user):
 
 
 def render_log_rekap(df_p, dt_user):
-    with st.expander("📊 LOG INPUT & STATUS BULAN INI", expanded=False):
+    with st.expander("LOG INPUT & STATUS BULAN INI", expanded=False):
         if df_p.empty or "Tanggal" not in df_p.columns:
             st.info("Belum ada data.")
             return
@@ -205,7 +209,7 @@ def render_log_rekap(df_p, dt_user):
                 df_kosong["Status_Libur"].astype(str).str.strip().str.upper() != "LIBUR"
             ]
 
-        st.subheader("📋 Input Terakhir")
+        st.subheader("Input Terakhir")
         if not df_sudah.empty:
             last = df_sudah.sort_values(by="Tgl_Sort", ascending=False).head(1)
             kolom = ["Tanggal", "Nama_Petugas", "Total_Karcis_R2", "Total_Karcis_R4", "MPP_Roda_R2", "MPP_Roda_R4"]
@@ -215,7 +219,7 @@ def render_log_rekap(df_p, dt_user):
             st.info("Belum ada data yang diinput.")
 
         st.divider()
-        st.subheader("📅 Tanggal Belum Diinput (Awal Bulan s/d Hari Ini)")
+        st.subheader("Tanggal Belum Diinput (Awal Bulan s/d Hari Ini)")
         if not df_kosong.empty:
             st.dataframe(
                 df_kosong.sort_values("Tgl_Sort")[["Tanggal", "Nama_Petugas"]],
@@ -223,7 +227,7 @@ def render_log_rekap(df_p, dt_user):
                 use_container_width=True
             )
         else:
-            st.success("✅ Tidak ada tanggal kosong bulan ini.")
+            st.success("Tidak ada tanggal kosong bulan ini.")
 
 
 def render_log_stok(df_p, pakai_expander=True):
@@ -289,27 +293,27 @@ def render_log_stok(df_p, pakai_expander=True):
                 if tgl_terakhir.lower() in ["-", "nan", "", "none"]:
                     tgl_terakhir = "-"
 
-                st.markdown(f"### 👤 {petugas}")
+                st.markdown(f"### {petugas}")
                 st.caption(f"Data stok terakhir: {tgl_terakhir}")
 
                 c1, c2 = st.columns(2)
 
                 if sisa_r2 < 0:
-                    c1.error(f"Sisa Karcis R2: **{sisa_r2}** ❌ MINUS")
+                    c1.error(f"Sisa Karcis R2: **{sisa_r2}** MINUS")
                 elif sisa_r2 == 0:
-                    c1.warning(f"Sisa Karcis R2: **{sisa_r2}** ⚠️ HABIS")
+                    c1.warning(f"Sisa Karcis R2: **{sisa_r2}** HABIS")
                 else:
                     c1.metric("Sisa Karcis R2", sisa_r2)
 
                 if sisa_r4 < 0:
-                    c2.error(f"Sisa Karcis R4: **{sisa_r4}** ❌ MINUS")
+                    c2.error(f"Sisa Karcis R4: **{sisa_r4}** MINUS")
                 elif sisa_r4 == 0:
-                    c2.warning(f"Sisa Karcis R4: **{sisa_r4}** ⚠️ HABIS")
+                    c2.warning(f"Sisa Karcis R4: **{sisa_r4}** HABIS")
                 else:
                     c2.metric("Sisa Karcis R4", sisa_r4)
 
             else:
-                st.markdown(f"### 👤 {petugas}")
+                st.markdown(f"### {petugas}")
                 st.caption("Belum ada data stok")
                 c1, c2 = st.columns(2)
                 c1.metric("Sisa Karcis R2", 0)
@@ -322,7 +326,7 @@ def render_log_stok(df_p, pakai_expander=True):
             st.info("Belum ada data petugas.")
 
     if pakai_expander:
-        with st.expander("📊 SISA STOK KARCIS PER PETUGAS", expanded=False):
+        with st.expander("SISA STOK KARCIS PER PETUGAS", expanded=False):
             _isi()
     else:
         _isi()
@@ -356,21 +360,21 @@ def render_log_konfirmasi(df_p, pakai_expander=True):
             last = df_isi.sort_values(by="Tgl_Sort", ascending=False).head(1)
             kolom = ["Tanggal", "Nama_Petugas", "Status_Khusus", "Status_MPP", "Status_Cetak"]
             kolom_ada = [k for k in kolom if k in last.columns]
-            st.subheader("📋 Konfirmasi Terakhir")
+            st.subheader("Konfirmasi Terakhir")
             st.dataframe(last[kolom_ada], hide_index=True, use_container_width=True)
         else:
             st.info("Belum ada data yang diinput.")
 
         st.divider()
-        st.subheader("⏳ Tanggal Belum Selesai Konfirmasi (Awal Bulan s/d Hari Ini)")
+        st.subheader("Tanggal Belum Selesai Konfirmasi (Awal Bulan s/d Hari Ini)")
         df_blm = daftar_tanggal_belum_konfirmasi_bulan_ini(df_p)
         if not df_blm.empty:
             st.dataframe(df_blm, hide_index=True, use_container_width=True)
         else:
-            st.success("✅ Semua konfirmasi bulan ini sudah selesai.")
+            st.success("Semua konfirmasi bulan ini sudah selesai.")
 
     if pakai_expander:
-        with st.expander("📊 LOG KONFIRMASI BULAN INI", expanded=False):
+        with st.expander("LOG KONFIRMASI BULAN INI", expanded=False):
             _isi()
     else:
         _isi()
@@ -381,33 +385,33 @@ def render_log_konfirmasi(df_p, pakai_expander=True):
 # ==========================================
 df_p = load_data(conn_parkir, WS_PARKIR)
 
-st.title("🅿️ MODUL PARKIR")
+st.title("MODUL PARKIR")
 
 if df_p.empty:
-    st.warning("⚠️ Data PARKIR kosong atau worksheet tidak ditemukan.")
+    st.warning("Data PARKIR kosong atau worksheet tidak ditemukan.")
     st.stop()
 
 hari_ini = today_wita()
 
-tab1, tab2, tab3 = st.tabs(["📝 INPUT & EDIT REKAP", "📊 SISA STOK", "✅ KONFIRMASI"])
+tab1, tab2, tab3 = st.tabs(["INPUT & EDIT REKAP", "SISA STOK", "KONFIRMASI"])
 
 # ==========================================
 # TAB 1 - INPUT & EDIT REKAP
 # ==========================================
 with tab1:
     c_head, c_btn = st.columns([0.88, 0.12])
-    c_head.subheader("📝 INPUT & EDIT REKAP HARIAN")
+    c_head.subheader("INPUT & EDIT REKAP HARIAN")
     with c_btn:
         tombol_refresh("ref_parkir_rekap")
 
     tgl_belum, df_belum = cari_tanggal_belum_input_parkir(df_p)
     if tgl_belum:
-        st.warning(f"⚠️ Input parkir belum terisi mulai: **{tgl_belum.strftime('%d-%m-%Y')}**")
+        st.warning(f"Input parkir belum terisi mulai: **{tgl_belum.strftime('%d-%m-%Y')}**")
     else:
-        st.success("✅ Semua data parkir sampai hari ini sudah terinput.")
+        st.success("Semua data parkir sampai hari ini sudah terinput.")
 
     tgl_input_user = st.text_input(
-        "🔍 MASUKKAN TANGGAL",
+        "MASUKKAN TANGGAL",
         value=datetime.now().strftime("%d-%m-%Y"),
         key="tgl_input_parkir_rekap"
     )
@@ -415,7 +419,7 @@ with tab1:
     dt_user, baris, idx, nama_p, sisa_r2, sisa_r4 = ambil_info_tanggal_parkir(df_p, tgl_input_user)
 
     if baris.empty or idx is None:
-        st.warning("⚠️ Tanggal belum ada di jadwal Sheet.")
+        st.warning("Tanggal belum ada di jadwal Sheet.")
     else:
         status_libur_skrg = ""
         if "Status_Libur" in df_p.columns:
@@ -423,28 +427,28 @@ with tab1:
 
         is_libur = status_libur_skrg == "LIBUR"
 
-        st.success(f"👤 PETUGAS: **{nama_p}** | 📅 **{format_tgl_hari_indo(tgl_input_user)}**")
+        st.success(f"PETUGAS: **{nama_p}** | **{format_tgl_hari_indo(tgl_input_user)}**")
 
         lib1, lib2 = st.columns(2)
         with lib1:
             if is_libur:
-                st.warning("🏖️ Tanggal ini ditandai **LIBUR**")
-                if st.button("❌ BATAL LIBUR", key="btn_batal_libur", use_container_width=True):
+                st.warning("Tanggal ini ditandai **LIBUR**")
+                if st.button("BATAL LIBUR", key="btn_batal_libur", use_container_width=True):
                     df_u = df_p.copy()
                     df_u.loc[idx, "Status_Libur"] = "-"
                     if safe_update(conn_parkir, WS_PARKIR, df_u):
-                        st.success("✅ Status libur dibatalkan!")
+                        st.success("Status libur dibatalkan!")
                         st.rerun()
             else:
-                if st.button("🏖️ TANDAI LIBUR", key="btn_tandai_libur", use_container_width=True):
+                if st.button("TANDAI LIBUR", key="btn_tandai_libur", use_container_width=True):
                     df_u = df_p.copy()
                     df_u.loc[idx, "Status_Libur"] = "LIBUR"
                     if safe_update(conn_parkir, WS_PARKIR, df_u):
-                        st.success("✅ Tanggal ditandai LIBUR!")
+                        st.success("Tanggal ditandai LIBUR!")
                         st.rerun()
 
         if is_libur:
-            st.info("📋 Tanggal ini LIBUR. Tidak perlu input rekap. Sisa stok tetap terbawa ke hari berikutnya.")
+            st.info("Tanggal ini LIBUR. Tidak perlu input rekap. Sisa stok tetap terbawa ke hari berikutnya.")
         else:
             karcis_skrg = str(df_p.loc[idx, "Total_Karcis_R2"]).strip()
             sudah_diisi = karcis_skrg not in ["-", "nan", ""]
@@ -473,10 +477,9 @@ with tab1:
 
             st.divider()
 
-            judul_form = "✏️ EDIT REKAP" if sudah_diisi else "📝 INPUT REKAP"
+            judul_form = "EDIT REKAP" if sudah_diisi else "INPUT REKAP"
             st.subheader(judul_form)
 
-            # INPUT ANGKA DIGANTI JADI TEXT INPUT
             mr2 = to_int_input(st.text_input("MPP RODA R2", value=str(val_mr2), key="txt_mr2"))
             mr4 = to_int_input(st.text_input("MPP RODA R4", value=str(val_mr4), key="txt_mr4"))
 
@@ -489,7 +492,7 @@ with tab1:
             st.divider()
 
             btn_hitung = st.button(
-                "🔢 HITUNG",
+                "HITUNG",
                 use_container_width=True,
                 key="btn_hitung_parkir"
             )
@@ -511,23 +514,23 @@ with tab1:
             if "hasil_hitung" in st.session_state:
                 h = st.session_state["hasil_hitung"]
 
-                st.subheader("📋 Hasil Perhitungan")
+                st.subheader("Hasil Perhitungan")
                 st.metric("Khusus R2", h["kh2"])
                 st.metric("Khusus R4", h["kh4"])
 
                 if h["sn2"] < 0:
-                    st.error(f"Sisa Stok R2: **{h['sn2']}** ❌ MINUS")
+                    st.error(f"Sisa Stok R2: **{h['sn2']}** MINUS")
                 else:
                     st.metric("Sisa Stok R2", h["sn2"])
 
                 if h["sn4"] < 0:
-                    st.error(f"Sisa Stok R4: **{h['sn4']}** ❌ MINUS")
+                    st.error(f"Sisa Stok R4: **{h['sn4']}** MINUS")
                 else:
                     st.metric("Sisa Stok R4", h["sn4"])
 
                 st.divider()
 
-                label_simpan = "💾 SIMPAN EDIT" if sudah_diisi else "💾 SIMPAN REKAP"
+                label_simpan = "SIMPAN EDIT" if sudah_diisi else "SIMPAN REKAP"
                 btn_simpan = st.button(
                     label_simpan,
                     type="primary",
@@ -536,7 +539,7 @@ with tab1:
                 )
 
                 btn_batal = st.button(
-                    "❌ BATAL",
+                    "BATAL",
                     use_container_width=True,
                     key="btn_batal_hitung"
                 )
@@ -559,9 +562,9 @@ with tab1:
                     if safe_update(conn_parkir, WS_PARKIR, df_u):
                         del st.session_state["hasil_hitung"]
                         if sudah_diisi:
-                            st.success("✅ Data berhasil diedit!")
+                            st.success("Data berhasil diedit!")
                         else:
-                            st.success("✅ Rekap berhasil disimpan!")
+                            st.success("Rekap berhasil disimpan!")
                         st.rerun()
 
                 if btn_batal:
@@ -575,7 +578,7 @@ with tab1:
 # ==========================================
 with tab2:
     c_head2, c_btn2 = st.columns([0.88, 0.12])
-    c_head2.subheader("📊 SISA STOK KARCIS PER PETUGAS")
+    c_head2.subheader("SISA STOK KARCIS PER PETUGAS")
     with c_btn2:
         tombol_refresh("ref_parkir_stok")
 
@@ -586,12 +589,12 @@ with tab2:
 # ==========================================
 with tab3:
     c_head3, c_btn3 = st.columns([0.88, 0.12])
-    c_head3.subheader("✅ KONFIRMASI SETORAN")
+    c_head3.subheader("KONFIRMASI SETORAN")
     with c_btn3:
         tombol_refresh("ref_parkir_konfirmasi")
 
     if "Total_Karcis_R2" not in df_p.columns or "Total_Karcis_R4" not in df_p.columns:
-        st.error("❌ Kolom tidak ditemukan.")
+        st.error("Kolom tidak ditemukan.")
     else:
         angka_r2 = df_p["Total_Karcis_R2"].astype(str).str.strip().str.isnumeric()
         angka_r4 = df_p["Total_Karcis_R4"].astype(str).str.strip().str.isnumeric()
@@ -620,14 +623,14 @@ with tab3:
                     sm = str(row.get("Status_MPP", "BELUM")).strip()
                     sc = str(row.get("Status_Cetak", "BELUM")).strip()
                     lunas = (sk == "SUDAH") and (sm == "SUDAH") and (sc == "SUDAH")
-                    ikon = "✅ [SELESAI]" if lunas else "📦 [BELUM]"
+                    ikon = "[SELESAI]" if lunas else "[BELUM]"
 
                     with st.expander(
                         f"{ikon} {row['Tanggal']} - {row['Nama_Petugas']}",
                         expanded=not lunas
                     ):
                         if lunas:
-                            st.success("✨ SELESAI")
+                            st.success("SELESAI")
 
                         ck, cm_col = st.columns(2)
 
@@ -648,7 +651,7 @@ with tab3:
                                     if safe_update(conn_parkir, WS_PARKIR, df_u):
                                         st.rerun()
                             else:
-                                st.success("✅ Diterima")
+                                st.success("Diterima")
 
                         with cm_col:
                             st.write(
@@ -669,7 +672,7 @@ with tab3:
                                         st.rerun()
                             else:
                                 st.download_button(
-                                    "🖨️ CETAK PDF MPP",
+                                    "CETAK PDF MPP",
                                     data=cetak_tanda_terima_parkir(row.to_dict()),
                                     file_name=f"MPP_{row['Tanggal']}.pdf",
                                     key=f"p_{i}",
@@ -677,7 +680,7 @@ with tab3:
                                 )
                                 if sc != "SUDAH":
                                     if st.button(
-                                        "✅ SUDAH CETAK",
+                                        "SUDAH CETAK",
                                         key=f"c_{i}",
                                         use_container_width=True
                                     ):
@@ -686,6 +689,6 @@ with tab3:
                                         if safe_update(conn_parkir, WS_PARKIR, df_u):
                                             st.rerun()
                                 else:
-                                    st.success("✅ Dicetak")
+                                    st.success("Dicetak")
 
     render_log_konfirmasi(df_p, pakai_expander=False)
