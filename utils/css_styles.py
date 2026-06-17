@@ -194,105 +194,110 @@ CSS_GLOBAL = """
         color: #1e293b !important;
     }
 
-    /* ============ LABEL INPUT ============ */
-    .main .stTextInput label,
-    .main .stNumberInput label,
+    /* =====================================================
+       INPUT PUTIH BERSIH & TIMBUL TEGAS
+       ===================================================== */
+
+    .main [data-testid="stTextInput"],
+    .main [data-testid="stNumberInput"] {
+        margin-bottom: 8px !important;
+    }
+
+    /* Label */
+    .main [data-testid="stTextInput"] label,
+    .main [data-testid="stNumberInput"] label,
     .main .stSelectbox label,
     .main .stCheckbox label,
     .main .stTextArea label {
-        font-size: 0.78rem !important;
-        font-weight: 600 !important;
-        color: #374151 !important;
+        font-size: 0.8rem !important;
+        font-weight: 700 !important;
+        color: #1e293b !important;
+        margin-bottom: 4px !important;
     }
 
-    /* =====================================================
-       INPUT PUTIH & TIMBUL - SUPER TEGAS
-       ===================================================== */
-
-    /* Semua wrapper input utama */
-    .main [data-testid="stTextInput"] > div,
-    .main [data-testid="stNumberInput"] > div,
-    .main [data-testid="stTextInput"] > div > div,
-    .main [data-testid="stNumberInput"] > div > div,
-    .main [data-baseweb="base-input"],
-    .main [data-baseweb="input"] {
+    /* Kotak input - PALING DOMINAN */
+    .main [data-testid="stTextInput"] [data-baseweb="input"],
+    .main [data-testid="stNumberInput"] [data-baseweb="input"],
+    .main [data-testid="stTextInput"] [data-baseweb="base-input"],
+    .main [data-testid="stNumberInput"] [data-baseweb="base-input"] {
         background: #ffffff !important;
         background-color: #ffffff !important;
-        border: 2px solid #94a3b8 !important;
-        border-radius: 12px !important;
-        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12) !important;
-    }
-
-    /* Fokus input wrapper */
-    .main [data-testid="stTextInput"] > div:focus-within,
-    .main [data-testid="stNumberInput"] > div:focus-within,
-    .main [data-testid="stTextInput"] > div > div:focus-within,
-    .main [data-testid="stNumberInput"] > div > div:focus-within,
-    .main [data-baseweb="base-input"]:focus-within,
-    .main [data-baseweb="input"]:focus-within {
-        background: #ffffff !important;
-        background-color: #ffffff !important;
-        border: 2px solid #2563eb !important;
+        border: 2px solid #475569 !important;
+        border-radius: 10px !important;
         box-shadow:
-            0 0 0 4px rgba(37, 99, 235, 0.14),
-            0 8px 20px rgba(15, 23, 42, 0.14) !important;
+            0 4px 12px rgba(0, 0, 0, 0.12),
+            0 2px 4px rgba(0, 0, 0, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+        padding: 2px !important;
+        transition: all 0.2s ease !important;
     }
 
-    /* Hover wrapper */
-    .main [data-testid="stTextInput"] > div:hover,
-    .main [data-testid="stNumberInput"] > div:hover,
-    .main [data-testid="stTextInput"] > div > div:hover,
-    .main [data-testid="stNumberInput"] > div > div:hover,
-    .main [data-baseweb="base-input"]:hover,
-    .main [data-baseweb="input"]:hover {
+    /* Hover */
+    .main [data-testid="stTextInput"] [data-baseweb="input"]:hover,
+    .main [data-testid="stNumberInput"] [data-baseweb="input"]:hover,
+    .main [data-testid="stTextInput"] [data-baseweb="base-input"]:hover,
+    .main [data-testid="stNumberInput"] [data-baseweb="base-input"]:hover {
+        border-color: #1e293b !important;
+        box-shadow:
+            0 6px 16px rgba(0, 0, 0, 0.16),
+            0 3px 6px rgba(0, 0, 0, 0.10) !important;
+        transform: translateY(-1px) !important;
+    }
+
+    /* Focus */
+    .main [data-testid="stTextInput"] [data-baseweb="input"]:focus-within,
+    .main [data-testid="stNumberInput"] [data-baseweb="input"]:focus-within,
+    .main [data-testid="stTextInput"] [data-baseweb="base-input"]:focus-within,
+    .main [data-testid="stNumberInput"] [data-baseweb="base-input"]:focus-within {
+        background: #ffffff !important;
+        border-color: #2563eb !important;
+        box-shadow:
+            0 0 0 4px rgba(37, 99, 235, 0.18),
+            0 6px 16px rgba(37, 99, 235, 0.15) !important;
+        transform: translateY(-1px) !important;
+    }
+
+    /* Input text di dalam */
+    .main [data-testid="stTextInput"] input,
+    .main [data-testid="stNumberInput"] input {
         background: #ffffff !important;
         background-color: #ffffff !important;
-        border-color: #64748b !important;
-    }
-
-    /* Area input di dalam */
-    .main .stTextInput input,
-    .main .stNumberInput input {
-        background: transparent !important;
-        background-color: transparent !important;
-        color: #111827 !important;
-        border: none !important;
-        box-shadow: none !important;
-        font-size: 0.88rem !important;
-        font-weight: 500 !important;
+        color: #0f172a !important;
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
         padding: 10px 14px !important;
-    }
-
-    .main .stTextInput input:focus,
-    .main .stNumberInput input:focus {
-        outline: none !important;
         border: none !important;
+        outline: none !important;
         box-shadow: none !important;
     }
 
-    .main .stTextInput input::placeholder,
-    .main .stNumberInput input::placeholder {
+    .main [data-testid="stTextInput"] input::placeholder,
+    .main [data-testid="stNumberInput"] input::placeholder {
         color: #94a3b8 !important;
+        font-weight: 400 !important;
     }
 
     /* Text area */
     .main .stTextArea textarea {
         background: #ffffff !important;
         background-color: #ffffff !important;
-        color: #111827 !important;
-        border: 2px solid #94a3b8 !important;
-        border-radius: 12px !important;
-        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12) !important;
-        font-size: 0.88rem !important;
-        font-weight: 500 !important;
+        color: #0f172a !important;
+        border: 2px solid #475569 !important;
+        border-radius: 10px !important;
+        box-shadow:
+            0 4px 12px rgba(0, 0, 0, 0.12),
+            0 2px 4px rgba(0, 0, 0, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
         padding: 10px 14px !important;
     }
 
     .main .stTextArea textarea:focus {
         border-color: #2563eb !important;
         box-shadow:
-            0 0 0 4px rgba(37, 99, 235, 0.14),
-            0 8px 20px rgba(15, 23, 42, 0.14) !important;
+            0 0 0 4px rgba(37, 99, 235, 0.18),
+            0 6px 16px rgba(37, 99, 235, 0.15) !important;
         outline: none !important;
     }
 
