@@ -6,7 +6,7 @@ import os
 import base64
 import urllib.request
 
-from utils.css_styles import inject_css, inject_welcome_css
+from utils.css_styles import inject_css, inject_input_style, inject_welcome_css
 from utils.auth import is_logged_in, login_form, logout, get_current_user
 
 # ==========================================
