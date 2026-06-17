@@ -142,7 +142,7 @@ with tab1:
 
     rc = st.session_state["sk_rc"]
 
-    st.subheader("Pilih Berkas yang Dibawa:")
+    st.subheader("Kelengkapan Berkas")
     cols_berkas = st.columns(3)
     sel_berkas = []
     for i, item in enumerate(SEMUA_BERKAS):
