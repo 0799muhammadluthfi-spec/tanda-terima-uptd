@@ -141,18 +141,6 @@ CSS_GLOBAL = """
         color: #1e293b !important;
     }
 
-    /* ============ LABEL INPUT ============ */
-    .main [data-testid="stTextInput"] label,
-    .main [data-testid="stNumberInput"] label,
-    .main .stSelectbox label,
-    .main .stCheckbox label,
-    .main .stTextArea label {
-        font-size: 0.8rem !important;
-        font-weight: 700 !important;
-        color: #1e293b !important;
-        margin-bottom: 6px !important;
-    }
-
     /* ============ METRIC ============ */
     [data-testid="stMetric"] {
         background: #ffffff !important;
@@ -450,46 +438,13 @@ CSS_GLOBAL = """
 </style>
 """
 
-CSS_INPUT_TIMBUL = """
-<style>
-/* ============ TEXT INPUT — ABU CLEAN ============ */
-.main [data-testid="stTextInput"] [data-baseweb="input"] {
-    background: #f1f5f9 !important;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 10px !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    transition: all 0.2s ease !important;
-}
-
-.main [data-testid="stTextInput"] [data-baseweb="input"]:hover {
-    background: #e2e8f0 !important;
-    border-color: #cbd5e1 !important;
-}
-
-.main [data-testid="stTextInput"] [data-baseweb="input"]:focus-within {
-    background: #ffffff !important;
-    border-color: #2563eb !important;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
-}
-
-.main [data-testid="stTextInput"] input {
-    background: transparent !important;
-    color: #0f172a !important;
-    font-size: 0.95rem !important;
-    font-weight: 500 !important;
-    padding: 12px 16px !important;
-    border: none !important;
-    outline: none !important;
-}
 
 CSS_INPUT_TIMBUL = """
 <style>
-/* ============ INPUT — PAKSA SEMUA JADI ABU CLEAN ============ */
+/* ============ INPUT — ABU CLEAN MINIMALIST ============ */
 
 div[data-baseweb="input"],
-div[data-baseweb="base-input"],
-div[data-baseweb="select"] > div {
+div[data-baseweb="base-input"] {
     background: #f1f5f9 !important;
     background-color: #f1f5f9 !important;
     border: 1px solid #e2e8f0 !important;
@@ -500,8 +455,7 @@ div[data-baseweb="select"] > div {
 }
 
 div[data-baseweb="input"]:hover,
-div[data-baseweb="base-input"]:hover,
-div[data-baseweb="select"] > div:hover {
+div[data-baseweb="base-input"]:hover {
     background: #e2e8f0 !important;
     background-color: #e2e8f0 !important;
     border-color: #cbd5e1 !important;
@@ -528,6 +482,28 @@ div[data-baseweb="base-input"] input {
     box-shadow: none !important;
 }
 
+div[data-baseweb="input"] input::placeholder,
+div[data-baseweb="base-input"] input::placeholder {
+    color: #94a3b8 !important;
+    font-weight: 400 !important;
+}
+
+/* ============ SELECTBOX ============ */
+div[data-baseweb="select"] > div {
+    background: #f1f5f9 !important;
+    background-color: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+}
+
+div[data-baseweb="select"] > div:hover {
+    background: #e2e8f0 !important;
+    background-color: #e2e8f0 !important;
+    border-color: #cbd5e1 !important;
+}
+
+/* ============ TEXT AREA ============ */
 textarea {
     background: #f1f5f9 !important;
     background-color: #f1f5f9 !important;
@@ -542,32 +518,42 @@ textarea {
 
 textarea:focus {
     background: #ffffff !important;
+    background-color: #ffffff !important;
     border-color: #2563eb !important;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
     outline: none !important;
 }
 
-/* Hilangkan tombol +/- */
+/* ============ HILANGKAN TOMBOL +/- NUMBER INPUT ============ */
 button[data-testid="stNumberInputStepDown"],
 button[data-testid="stNumberInputStepUp"] {
     display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    pointer-events: none !important;
 }
 
-/* ============ LABEL ============ */
+/* ============ LABEL INPUT ============ */
 label[data-testid="stWidgetLabel"] p {
     font-size: 0.85rem !important;
     font-weight: 600 !important;
     color: #0f172a !important;
     text-transform: uppercase !important;
     letter-spacing: 0.02em !important;
+    margin-bottom: 8px !important;
 }
 
-/* ============ SIDEBAR HIDE BUTTON ============ */
+/* ============ TOMBOL HIDE SIDEBAR ============ */
 [data-testid="stSidebar"] button[kind="header"] {
     background: rgba(255,255,255,0.25) !important;
     border: 2px solid rgba(255,255,255,0.50) !important;
     border-radius: 8px !important;
     opacity: 1 !important;
+    visibility: visible !important;
 }
 
 [data-testid="stSidebar"] button[kind="header"] svg * {
@@ -575,20 +561,25 @@ label[data-testid="stWidgetLabel"] p {
     stroke: #ffffff !important;
 }
 
-[data-testid="collapsedControl"] {
+[data-testid="collapsedControl"],
+[data-testid="stSidebarCollapsedControl"] {
     background: #ffffff !important;
     border: 2px solid #475569 !important;
     border-radius: 8px !important;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
     opacity: 1 !important;
+    visibility: visible !important;
 }
 
-[data-testid="collapsedControl"] svg * {
+[data-testid="collapsedControl"] svg *,
+[data-testid="stSidebarCollapsedControl"] svg * {
     fill: #0f172a !important;
     stroke: #0f172a !important;
 }
 </style>
 """
+
+
 CSS_WELCOME = """
 <style>
     .welcome-wrapper {
