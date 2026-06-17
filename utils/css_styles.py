@@ -200,7 +200,7 @@ CSS_GLOBAL = """
         color: #1e293b !important;
     }
 
-    /* ============ INPUT FIELDS ============ */
+    /* ============ INPUT LABELS ============ */
     .main .stTextInput label,
     .main .stNumberInput label,
     .main .stSelectbox label,
@@ -210,41 +210,57 @@ CSS_GLOBAL = """
         color: #374151 !important;
     }
 
+    /* ============ INPUT BOX LUAR - LEBIH TIMBUL ============ */
+    .main .stTextInput [data-baseweb="input"],
+    .main .stNumberInput [data-baseweb="input"] {
+        background: #ffffff !important;
+        border: 2px solid #64748b !important;
+        border-radius: 10px !important;
+        box-shadow:
+            0 3px 10px rgba(15, 23, 42, 0.10),
+            inset 0 1px 2px rgba(255,255,255,0.65) !important;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease !important;
+    }
+
+    .main .stTextInput [data-baseweb="input"]:hover,
+    .main .stNumberInput [data-baseweb="input"]:hover {
+        border-color: #475569 !important;
+        box-shadow:
+            0 4px 14px rgba(15, 23, 42, 0.12),
+            inset 0 1px 2px rgba(255,255,255,0.7) !important;
+    }
+
+    .main .stTextInput [data-baseweb="input"]:focus-within,
+    .main .stNumberInput [data-baseweb="input"]:focus-within {
+        border-color: #2563eb !important;
+        box-shadow:
+            0 0 0 4px rgba(37, 99, 235, 0.15),
+            0 4px 14px rgba(37, 99, 235, 0.10) !important;
+        transform: translateY(-1px) !important;
+    }
+
+    /* ============ INPUT DALAMNYA ============ */
     .main .stTextInput input,
     .main .stNumberInput input {
         font-size: 0.88rem !important;
         font-weight: 500 !important;
-        color: #1e293b !important;
-        background: #ffffff !important;
-        border: 1.5px solid #d1d5db !important;
-        border-radius: 8px !important;
+        color: #111827 !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
         padding: 10px 14px !important;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
     }
 
     .main .stTextInput input:focus,
     .main .stNumberInput input:focus {
-        border-color: #3b82f6 !important;
-        box-shadow: 0 0 0 3px rgba(59,130,246,0.1) !important;
+        outline: none !important;
+        border: none !important;
+        box-shadow: none !important;
     }
 
     .main .stTextInput input::placeholder,
     .main .stNumberInput input::placeholder {
-        color: #9ca3af !important;
-    }
-        /* KOLOM INPUT LEBIH TIMBUL */
-    .main .stTextInput input,
-    .main .stNumberInput input {
-        background: #ffffff !important;
-        border: 2px solid #94a3b8 !important;
-        border-radius: 8px !important;
-        box-shadow: inset 0 2px 4px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.08) !important;
-    }
-
-    .main .stTextInput input:focus,
-    .main .stNumberInput input:focus {
-        border-color: #3b82f6 !important;
-        box-shadow: inset 0 2px 4px rgba(0,0,0,0.06), 0 0 0 3px rgba(59,130,246,0.15) !important;
+        color: #94a3b8 !important;
     }
 
     /* ============ HILANGKAN TOMBOL +/- NUMBER INPUT ============ */
@@ -441,8 +457,14 @@ CSS_GLOBAL = """
     }
 
     @keyframes pageEnter {
-        from { opacity: 0; transform: translateY(10px); }
-        to   { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     @media (max-width: 768px) {
@@ -612,7 +634,6 @@ CSS_WELCOME = """
         from { opacity: 0; transform: translateY(14px); }
         to   { opacity: 1; transform: translateY(0); }
     }
-
 </style>
 """
 
