@@ -232,6 +232,20 @@ CSS_GLOBAL = """
     .main .stNumberInput input::placeholder {
         color: #9ca3af !important;
     }
+        /* KOLOM INPUT LEBIH TIMBUL */
+    .main .stTextInput input,
+    .main .stNumberInput input {
+        background: #ffffff !important;
+        border: 2px solid #94a3b8 !important;
+        border-radius: 8px !important;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.08) !important;
+    }
+
+    .main .stTextInput input:focus,
+    .main .stNumberInput input:focus {
+        border-color: #3b82f6 !important;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.06), 0 0 0 3px rgba(59,130,246,0.15) !important;
+    }
 
     /* ============ HILANGKAN TOMBOL +/- NUMBER INPUT ============ */
     button[data-testid="stNumberInputStepDown"],
