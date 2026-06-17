@@ -26,12 +26,7 @@ CSS_GLOBAL = """
 
     /* ============ SIDEBAR ============ */
     [data-testid="stSidebar"] {
-        background: linear-gradient(
-            180deg,
-            #0f172a 0%,
-            #1e293b 50%,
-            #0f172a 100%
-        ) !important;
+        background: linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #0f172a 100%) !important;
         border-right: 1px solid rgba(255,255,255,0.05) !important;
     }
 
@@ -210,81 +205,95 @@ CSS_GLOBAL = """
         color: #374151 !important;
     }
 
-    /* ============ BOX INPUT LUAR - PUTIH & TIMBUL ============ */
-    .main .stTextInput [data-baseweb="input"],
-    .main .stNumberInput [data-baseweb="input"],
-    .main .stTextArea textarea,
-    .main [data-testid="stTextInput"] [data-baseweb="base-input"],
-    .main [data-testid="stNumberInput"] [data-baseweb="base-input"] {
+    /* =====================================================
+       INPUT PUTIH & TIMBUL - SUPER TEGAS
+       ===================================================== */
+
+    /* Semua wrapper input utama */
+    .main [data-testid="stTextInput"] > div,
+    .main [data-testid="stNumberInput"] > div,
+    .main [data-testid="stTextInput"] > div > div,
+    .main [data-testid="stNumberInput"] > div > div,
+    .main [data-baseweb="base-input"],
+    .main [data-baseweb="input"] {
         background: #ffffff !important;
-        border: 2px solid #cbd5e1 !important;
+        background-color: #ffffff !important;
+        border: 2px solid #94a3b8 !important;
         border-radius: 12px !important;
-        box-shadow:
-            0 4px 14px rgba(15, 23, 42, 0.10),
-            inset 0 1px 0 rgba(255,255,255,0.9) !important;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease !important;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12) !important;
     }
 
-    .main .stTextInput [data-baseweb="input"]:hover,
-    .main .stNumberInput [data-baseweb="input"]:hover,
-    .main .stTextArea textarea:hover,
-    .main [data-testid="stTextInput"] [data-baseweb="base-input"]:hover,
-    .main [data-testid="stNumberInput"] [data-baseweb="base-input"]:hover {
-        border-color: #94a3b8 !important;
-        box-shadow:
-            0 6px 18px rgba(15, 23, 42, 0.13),
-            inset 0 1px 0 rgba(255,255,255,0.95) !important;
-    }
-
-    .main .stTextInput [data-baseweb="input"]:focus-within,
-    .main .stNumberInput [data-baseweb="input"]:focus-within,
-    .main .stTextArea textarea:focus,
-    .main [data-testid="stTextInput"] [data-baseweb="base-input"]:focus-within,
-    .main [data-testid="stNumberInput"] [data-baseweb="base-input"]:focus-within {
+    /* Fokus input wrapper */
+    .main [data-testid="stTextInput"] > div:focus-within,
+    .main [data-testid="stNumberInput"] > div:focus-within,
+    .main [data-testid="stTextInput"] > div > div:focus-within,
+    .main [data-testid="stNumberInput"] > div > div:focus-within,
+    .main [data-baseweb="base-input"]:focus-within,
+    .main [data-baseweb="input"]:focus-within {
         background: #ffffff !important;
-        border-color: #3b82f6 !important;
+        background-color: #ffffff !important;
+        border: 2px solid #2563eb !important;
         box-shadow:
-            0 0 0 4px rgba(59,130,246,0.14),
-            0 6px 18px rgba(15, 23, 42, 0.13) !important;
-        transform: translateY(-1px) !important;
+            0 0 0 4px rgba(37, 99, 235, 0.14),
+            0 8px 20px rgba(15, 23, 42, 0.14) !important;
     }
 
-    /* ============ ELEMEN INPUT DALAM ============ */
+    /* Hover wrapper */
+    .main [data-testid="stTextInput"] > div:hover,
+    .main [data-testid="stNumberInput"] > div:hover,
+    .main [data-testid="stTextInput"] > div > div:hover,
+    .main [data-testid="stNumberInput"] > div > div:hover,
+    .main [data-baseweb="base-input"]:hover,
+    .main [data-baseweb="input"]:hover {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        border-color: #64748b !important;
+    }
+
+    /* Area input di dalam */
     .main .stTextInput input,
     .main .stNumberInput input {
-        font-size: 0.88rem !important;
-        font-weight: 500 !important;
-        color: #111827 !important;
         background: transparent !important;
+        background-color: transparent !important;
+        color: #111827 !important;
         border: none !important;
         box-shadow: none !important;
-        padding: 10px 14px !important;
-    }
-
-    .main .stTextArea textarea {
         font-size: 0.88rem !important;
         font-weight: 500 !important;
-        color: #111827 !important;
-        background: #ffffff !important;
-        border: 2px solid #cbd5e1 !important;
-        border-radius: 12px !important;
-        box-shadow:
-            0 4px 14px rgba(15, 23, 42, 0.10),
-            inset 0 1px 0 rgba(255,255,255,0.9) !important;
         padding: 10px 14px !important;
     }
 
     .main .stTextInput input:focus,
-    .main .stNumberInput input:focus,
-    .main .stTextArea textarea:focus {
+    .main .stNumberInput input:focus {
         outline: none !important;
+        border: none !important;
         box-shadow: none !important;
     }
 
     .main .stTextInput input::placeholder,
-    .main .stNumberInput input::placeholder,
-    .main .stTextArea textarea::placeholder {
+    .main .stNumberInput input::placeholder {
         color: #94a3b8 !important;
+    }
+
+    /* Text area */
+    .main .stTextArea textarea {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        color: #111827 !important;
+        border: 2px solid #94a3b8 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12) !important;
+        font-size: 0.88rem !important;
+        font-weight: 500 !important;
+        padding: 10px 14px !important;
+    }
+
+    .main .stTextArea textarea:focus {
+        border-color: #2563eb !important;
+        box-shadow:
+            0 0 0 4px rgba(37, 99, 235, 0.14),
+            0 8px 20px rgba(15, 23, 42, 0.14) !important;
+        outline: none !important;
     }
 
     /* ============ HILANGKAN TOMBOL +/- NUMBER INPUT ============ */
