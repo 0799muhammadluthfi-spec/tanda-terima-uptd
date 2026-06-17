@@ -3,7 +3,7 @@ import pandas as pd
 from datetime import datetime
 from streamlit_gsheets import GSheetsConnection
 
-from utils.css_styles import inject_css
+from utils.css_styles import inject_css, inject_input_style
 from utils.helpers import (
     WS_SK, load_data, safe_update, get_next_no,
     normalisasi_no, format_tgl_hari_indo,
