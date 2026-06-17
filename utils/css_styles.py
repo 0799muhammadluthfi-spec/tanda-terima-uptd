@@ -76,19 +76,21 @@ CSS_GLOBAL = """
         stroke: #ffffff !important;
     }
 
-    /* ============ SIDEBAR BUTTONS ============ */
-    [data-testid="stSidebar"] .stButton {
-        margin-bottom: 0 !important;
+    /* ============ SIDEBAR BUTTONS & LINKS ============ */
+    [data-testid="stSidebar"] .stButton,
+    [data-testid="stSidebar"] [data-testid="stPageLink"] {
+        margin-bottom: 2px !important;
         margin-top: 0 !important;
     }
 
-    [data-testid="stSidebar"] .stButton > button {
+    [data-testid="stSidebar"] .stButton > button,
+    [data-testid="stSidebar"] [data-testid="stPageLink"] > a {
         width: 100% !important;
         font-family: 'Inter', sans-serif !important;
-        font-size: 0.72rem !important;
+        font-size: 0.78rem !important;
         font-weight: 600 !important;
-        padding: 8px 12px !important;
-        margin: 1px 0 !important;
+        padding: 10px 14px !important;
+        margin: 0 !important;
         border-radius: 8px !important;
         text-align: left !important;
         justify-content: flex-start !important;
@@ -96,18 +98,16 @@ CSS_GLOBAL = """
         overflow: hidden !important;
         text-overflow: ellipsis !important;
         transition: background 0.2s ease, color 0.2s ease, transform 0.18s ease !important;
-        will-change: transform !important;
-    }
-
-    [data-testid="stSidebar"] .stButton > button[kind="secondary"] {
         background: transparent !important;
         border: 1px solid rgba(255,255,255,0.06) !important;
-        color: #94a3b8 !important;
+        color: #cbd5e1 !important;
+        text-decoration: none !important;
     }
 
-    [data-testid="stSidebar"] .stButton > button[kind="secondary"]:hover {
+    [data-testid="stSidebar"] .stButton > button:hover,
+    [data-testid="stSidebar"] [data-testid="stPageLink"] > a:hover {
         background: rgba(255,255,255,0.08) !important;
-        color: #e2e8f0 !important;
+        color: #f1f5f9 !important;
         border-color: rgba(255,255,255,0.12) !important;
         transform: translateX(3px) !important;
     }
@@ -121,28 +121,6 @@ CSS_GLOBAL = """
     [data-testid="stSidebar"] .stButton > button[kind="primary"]:hover {
         background: rgba(96,165,250,0.22) !important;
         color: #93c5fd !important;
-        transform: translateX(3px) !important;
-    }
-
-    /* ============ SUBMENU ANIMASI ============ */
-    .submenu-container {
-        overflow: hidden;
-        animation: submenuSlide 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        transform-origin: top;
-        will-change: transform, opacity;
-    }
-
-    @keyframes submenuSlide {
-        from {
-            max-height: 0;
-            opacity: 0;
-            transform: translateY(-6px) scaleY(0.96);
-        }
-        to {
-            max-height: 320px;
-            opacity: 1;
-            transform: translateY(0) scaleY(1);
-        }
     }
 
     /* ============ MAIN TYPOGRAPHY ============ */
@@ -161,7 +139,7 @@ CSS_GLOBAL = """
     }
 
     .main h1 {
-        font-size: 1.55rem !important;
+        font-size: 1.6rem !important;
         font-weight: 800 !important;
         color: #0f172a !important;
         letter-spacing: -0.03em !important;
@@ -169,21 +147,21 @@ CSS_GLOBAL = """
     }
 
     .main h2 {
-        font-size: 1.15rem !important;
+        font-size: 1.2rem !important;
         font-weight: 700 !important;
         color: #1e293b !important;
         letter-spacing: -0.02em !important;
     }
 
     .main h3 {
-        font-size: 0.98rem !important;
+        font-size: 1rem !important;
         font-weight: 600 !important;
         color: #334155 !important;
     }
 
     .main p,
     .main [data-testid="stMarkdownContainer"] p {
-        font-size: 0.88rem !important;
+        font-size: 0.9rem !important;
         font-weight: 400 !important;
         line-height: 1.6 !important;
         color: #374151 !important;
@@ -195,12 +173,13 @@ CSS_GLOBAL = """
     }
 
     /* =====================================================
-       INPUT PUTIH BERSIH & TIMBUL TEGAS
+       INPUT PUTIH BERSIH & TIMBUL (LEBIH HALUS)
        ===================================================== */
 
     .main [data-testid="stTextInput"],
-    .main [data-testid="stNumberInput"] {
-        margin-bottom: 8px !important;
+    .main [data-testid="stNumberInput"],
+    .main [data-testid="stSelectbox"] {
+        margin-bottom: 10px !important;
     }
 
     /* Label */
@@ -212,22 +191,21 @@ CSS_GLOBAL = """
         font-size: 0.8rem !important;
         font-weight: 700 !important;
         color: #1e293b !important;
-        margin-bottom: 4px !important;
+        margin-bottom: 6px !important;
     }
 
-    /* Kotak input - PALING DOMINAN */
+    /* Kotak input */
     .main [data-testid="stTextInput"] [data-baseweb="input"],
     .main [data-testid="stNumberInput"] [data-baseweb="input"],
     .main [data-testid="stTextInput"] [data-baseweb="base-input"],
     .main [data-testid="stNumberInput"] [data-baseweb="base-input"] {
         background: #ffffff !important;
         background-color: #ffffff !important;
-        border: 2px solid #475569 !important;
+        border: 1.5px solid #cbd5e1 !important;
         border-radius: 10px !important;
         box-shadow:
-            0 4px 12px rgba(0, 0, 0, 0.12),
-            0 2px 4px rgba(0, 0, 0, 0.08),
-            inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+            0 2px 6px rgba(15, 23, 42, 0.06),
+            0 1px 2px rgba(15, 23, 42, 0.04) !important;
         padding: 2px !important;
         transition: all 0.2s ease !important;
     }
@@ -237,11 +215,10 @@ CSS_GLOBAL = """
     .main [data-testid="stNumberInput"] [data-baseweb="input"]:hover,
     .main [data-testid="stTextInput"] [data-baseweb="base-input"]:hover,
     .main [data-testid="stNumberInput"] [data-baseweb="base-input"]:hover {
-        border-color: #1e293b !important;
+        border-color: #94a3b8 !important;
         box-shadow:
-            0 6px 16px rgba(0, 0, 0, 0.16),
-            0 3px 6px rgba(0, 0, 0, 0.10) !important;
-        transform: translateY(-1px) !important;
+            0 4px 10px rgba(15, 23, 42, 0.10),
+            0 2px 4px rgba(15, 23, 42, 0.06) !important;
     }
 
     /* Focus */
@@ -250,11 +227,10 @@ CSS_GLOBAL = """
     .main [data-testid="stTextInput"] [data-baseweb="base-input"]:focus-within,
     .main [data-testid="stNumberInput"] [data-baseweb="base-input"]:focus-within {
         background: #ffffff !important;
-        border-color: #2563eb !important;
+        border-color: #3b82f6 !important;
         box-shadow:
-            0 0 0 4px rgba(37, 99, 235, 0.18),
-            0 6px 16px rgba(37, 99, 235, 0.15) !important;
-        transform: translateY(-1px) !important;
+            0 0 0 3px rgba(59, 130, 246, 0.15),
+            0 4px 10px rgba(59, 130, 246, 0.10) !important;
     }
 
     /* Input text di dalam */
@@ -263,8 +239,8 @@ CSS_GLOBAL = """
         background: #ffffff !important;
         background-color: #ffffff !important;
         color: #0f172a !important;
-        font-size: 0.95rem !important;
-        font-weight: 600 !important;
+        font-size: 0.92rem !important;
+        font-weight: 500 !important;
         padding: 10px 14px !important;
         border: none !important;
         outline: none !important;
@@ -280,25 +256,33 @@ CSS_GLOBAL = """
     /* Text area */
     .main .stTextArea textarea {
         background: #ffffff !important;
-        background-color: #ffffff !important;
         color: #0f172a !important;
-        border: 2px solid #475569 !important;
+        border: 1.5px solid #cbd5e1 !important;
         border-radius: 10px !important;
         box-shadow:
-            0 4px 12px rgba(0, 0, 0, 0.12),
-            0 2px 4px rgba(0, 0, 0, 0.08),
-            inset 0 1px 0 rgba(255, 255, 255, 1) !important;
-        font-size: 0.95rem !important;
-        font-weight: 600 !important;
+            0 2px 6px rgba(15, 23, 42, 0.06) !important;
+        font-size: 0.92rem !important;
+        font-weight: 500 !important;
         padding: 10px 14px !important;
     }
 
     .main .stTextArea textarea:focus {
-        border-color: #2563eb !important;
+        border-color: #3b82f6 !important;
         box-shadow:
-            0 0 0 4px rgba(37, 99, 235, 0.18),
-            0 6px 16px rgba(37, 99, 235, 0.15) !important;
+            0 0 0 3px rgba(59, 130, 246, 0.15) !important;
         outline: none !important;
+    }
+
+    /* Selectbox */
+    .main [data-testid="stSelectbox"] [data-baseweb="select"] > div {
+        background: #ffffff !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 10px !important;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06) !important;
+    }
+
+    .main [data-testid="stSelectbox"] [data-baseweb="select"] > div:hover {
+        border-color: #94a3b8 !important;
     }
 
     /* ============ HILANGKAN TOMBOL +/- NUMBER INPUT ============ */
@@ -323,11 +307,10 @@ CSS_GLOBAL = """
     [data-testid="stMetric"] {
         background: #ffffff !important;
         border: 1px solid #e5e7eb !important;
-        border-radius: 10px !important;
-        padding: 14px 18px !important;
+        border-radius: 12px !important;
+        padding: 16px 20px !important;
         box-shadow: 0 1px 4px rgba(0,0,0,0.04) !important;
         transition: box-shadow 0.22s ease, transform 0.22s ease !important;
-        will-change: transform !important;
     }
 
     [data-testid="stMetric"]:hover {
@@ -339,28 +322,28 @@ CSS_GLOBAL = """
         font-size: 0.7rem !important;
         font-weight: 600 !important;
         text-transform: uppercase !important;
-        letter-spacing: 0.03em !important;
+        letter-spacing: 0.05em !important;
         color: #6b7280 !important;
     }
 
     [data-testid="stMetricValue"] {
         font-family: 'JetBrains Mono', monospace !important;
-        font-size: 1.5rem !important;
+        font-size: 1.55rem !important;
         font-weight: 700 !important;
         color: #111827 !important;
     }
 
     /* ============ BUTTONS ============ */
     .main .stButton > button {
-        font-size: 0.82rem !important;
+        font-size: 0.85rem !important;
         font-weight: 600 !important;
-        border-radius: 8px !important;
+        border-radius: 10px !important;
         color: #374151 !important;
         border: 1.5px solid #d1d5db !important;
         background: #ffffff !important;
         transition: background 0.2s ease, box-shadow 0.2s ease,
                     transform 0.18s ease !important;
-        will-change: transform !important;
+        padding: 10px 16px !important;
     }
 
     .main .stButton > button:hover {
@@ -389,17 +372,15 @@ CSS_GLOBAL = """
 
     /* ============ DOWNLOAD BUTTON ============ */
     .main .stDownloadButton > button {
-        font-size: 0.82rem !important;
+        font-size: 0.85rem !important;
         font-weight: 600 !important;
-        border-radius: 8px !important;
+        border-radius: 10px !important;
         background: linear-gradient(135deg, #10b981, #059669) !important;
         color: #ffffff !important;
         border: none !important;
-        padding: 8px 16px !important;
-        min-height: 40px !important;
-        transition: background 0.2s ease, box-shadow 0.2s ease,
-                    transform 0.18s ease !important;
-        will-change: transform !important;
+        padding: 10px 16px !important;
+        min-height: 42px !important;
+        transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.18s ease !important;
     }
 
     .main .stDownloadButton > button:hover {
@@ -411,24 +392,26 @@ CSS_GLOBAL = """
     .main .stDownloadButton > button p,
     .main .stDownloadButton > button span {
         color: #ffffff !important;
-        font-size: 0.82rem !important;
+        font-size: 0.85rem !important;
     }
 
     /* ============ FORM ============ */
     [data-testid="stForm"] {
         background: #ffffff !important;
         border: 1px solid #e5e7eb !important;
-        border-radius: 12px !important;
-        padding: 20px !important;
+        border-radius: 14px !important;
+        padding: 24px !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
     }
 
     /* ============ EXPANDER ============ */
     [data-testid="stExpander"] {
         border: 1px solid #e5e7eb !important;
-        border-radius: 10px !important;
+        border-radius: 12px !important;
         background: #ffffff !important;
-        margin-bottom: 6px !important;
+        margin-bottom: 8px !important;
         transition: box-shadow 0.22s ease !important;
+        overflow: hidden !important;
     }
 
     [data-testid="stExpander"]:hover {
@@ -437,49 +420,79 @@ CSS_GLOBAL = """
 
     [data-testid="stExpander"] summary > span > div > p {
         font-family: 'Inter', sans-serif !important;
-        font-size: 0.86rem !important;
+        font-size: 0.88rem !important;
         font-weight: 600 !important;
         color: #1e293b !important;
     }
 
     /* ============ DATAFRAME ============ */
     [data-testid="stDataFrame"] {
-        border-radius: 10px !important;
+        border-radius: 12px !important;
         border: 1px solid #e5e7eb !important;
+        overflow: hidden !important;
     }
 
     [data-testid="stDataFrame"] th {
         font-family: 'Inter', sans-serif !important;
-        font-size: 0.7rem !important;
+        font-size: 0.72rem !important;
         font-weight: 700 !important;
         text-transform: uppercase !important;
         color: #4b5563 !important;
         background: #f9fafb !important;
+        letter-spacing: 0.04em !important;
     }
 
     [data-testid="stDataFrame"] td {
         font-family: 'JetBrains Mono', monospace !important;
-        font-size: 0.78rem !important;
+        font-size: 0.8rem !important;
         color: #374151 !important;
     }
 
     /* ============ ALERT ============ */
+    .main [data-testid="stAlert"] {
+        border-radius: 10px !important;
+        padding: 12px 16px !important;
+    }
+
     .main [data-testid="stAlert"] p {
-        font-size: 0.84rem !important;
+        font-size: 0.86rem !important;
         font-weight: 500 !important;
+    }
+
+    /* ============ TOGGLE ============ */
+    .main .stToggle label p {
+        font-size: 0.85rem !important;
+        font-weight: 600 !important;
+        color: #374151 !important;
     }
 
     /* ============ DIVIDER ============ */
     .main hr {
         border: none !important;
         border-top: 1px solid #e5e7eb !important;
+        margin: 16px 0 !important;
+    }
+
+    /* ============ TABS ============ */
+    .main [data-testid="stTabs"] [role="tab"] {
+        font-family: 'Inter', sans-serif !important;
+        font-size: 0.85rem !important;
+        font-weight: 600 !important;
+        color: #64748b !important;
+    }
+
+    .main [data-testid="stTabs"] [role="tab"][aria-selected="true"] {
+        color: #2563eb !important;
     }
 
     /* ============ SCROLLBAR ============ */
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-thumb {
         background: #cbd5e1;
-        border-radius: 3px;
+        border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
     }
     ::-webkit-scrollbar-track {
         background: transparent;
@@ -491,18 +504,11 @@ CSS_GLOBAL = """
         margin: 0 auto;
         padding-top: 1.5rem !important;
         animation: pageEnter 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
-        will-change: opacity, transform;
     }
 
     @keyframes pageEnter {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: translateY(0); }
     }
 
     @media (max-width: 768px) {
@@ -515,28 +521,23 @@ CSS_GLOBAL = """
 
     /* ============ ANIMASI KONTEN ============ */
     [data-testid="stMetric"] {
-        animation: fadeUp 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
-        will-change: opacity, transform;
+        animation: fadeUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
 
     [data-testid="stForm"] {
-        animation: fadeUp 0.38s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both;
-        will-change: opacity, transform;
+        animation: fadeUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both;
     }
 
     [data-testid="stAlert"] {
         animation: fadeDown 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
-        will-change: opacity, transform;
     }
 
     [data-testid="stExpander"] {
         animation: fadeLeft 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
-        will-change: opacity, transform;
     }
 
     [data-testid="stDataFrame"] {
-        animation: fadeUp 0.36s cubic-bezier(0.22, 1, 0.36, 1) 0.04s both;
-        will-change: opacity, transform;
+        animation: fadeUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both;
     }
 
     @keyframes fadeUp {
@@ -554,6 +555,51 @@ CSS_GLOBAL = """
         to   { opacity: 1; transform: translateX(0); }
     }
 
+    /* =====================================================
+       LOGIN CARD
+       ===================================================== */
+    .login-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 80vh;
+        animation: pageEnter 0.5s ease-out;
+    }
+
+    .login-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 40px 36px;
+        box-shadow:
+            0 10px 30px rgba(15, 23, 42, 0.08),
+            0 4px 12px rgba(15, 23, 42, 0.04);
+        width: 100%;
+        max-width: 420px;
+        text-align: center;
+    }
+
+    .login-logo {
+        margin-bottom: 16px;
+    }
+
+    .login-title {
+        font-family: 'Inter', sans-serif;
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #0f172a;
+        letter-spacing: -0.02em;
+        margin: 0 0 4px 0;
+    }
+
+    .login-subtitle {
+        font-family: 'Inter', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #64748b;
+        margin: 0 0 28px 0;
+    }
 </style>
 """
 
@@ -633,7 +679,7 @@ CSS_WELCOME = """
         animation: textUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.75s forwards;
         opacity: 0;
         font-family: 'Inter', sans-serif;
-        font-size: 0.88rem;
+        font-size: 0.9rem;
         font-weight: 400;
         color: #94a3b8;
         margin: 8px 0 0 0;
