@@ -758,3 +758,122 @@ def inject_css():
 def inject_welcome_css():
     import streamlit as st
     st.markdown(CSS_WELCOME, unsafe_allow_html=True)
+
+CSS_INPUT_TIMBUL = """
+<style>
+/* INPUT PUTIH TIMBUL — VERSI INLINE PER HALAMAN */
+[data-baseweb="input"],
+[data-baseweb="base-input"] {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    border: 2px solid #64748b !important;
+    border-radius: 10px !important;
+    box-shadow:
+        0 4px 12px rgba(15, 23, 42, 0.10),
+        0 2px 4px rgba(15, 23, 42, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+    padding: 2px !important;
+    transition: all 0.2s ease !important;
+}
+
+[data-baseweb="input"]:hover,
+[data-baseweb="base-input"]:hover {
+    border-color: #334155 !important;
+    box-shadow:
+        0 6px 16px rgba(15, 23, 42, 0.14),
+        0 3px 6px rgba(15, 23, 42, 0.08) !important;
+    transform: translateY(-1px) !important;
+}
+
+[data-baseweb="input"]:focus-within,
+[data-baseweb="base-input"]:focus-within {
+    background: #ffffff !important;
+    border-color: #2563eb !important;
+    box-shadow:
+        0 0 0 4px rgba(37, 99, 235, 0.15),
+        0 6px 16px rgba(37, 99, 235, 0.12) !important;
+}
+
+[data-baseweb="input"] input,
+[data-baseweb="base-input"] input {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 0.92rem !important;
+    font-weight: 600 !important;
+    padding: 10px 14px !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+[data-baseweb="input"] input::placeholder,
+[data-baseweb="base-input"] input::placeholder {
+    color: #94a3b8 !important;
+    font-weight: 400 !important;
+}
+
+/* Selectbox */
+[data-testid="stSelectbox"] [data-baseweb="select"] > div {
+    background: #ffffff !important;
+    border: 2px solid #64748b !important;
+    border-radius: 10px !important;
+    box-shadow:
+        0 4px 12px rgba(15, 23, 42, 0.10),
+        0 2px 4px rgba(15, 23, 42, 0.06) !important;
+}
+
+/* Text area */
+.stTextArea textarea {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 2px solid #64748b !important;
+    border-radius: 10px !important;
+    box-shadow:
+        0 4px 12px rgba(15, 23, 42, 0.10) !important;
+    font-size: 0.92rem !important;
+    font-weight: 600 !important;
+    padding: 10px 14px !important;
+}
+
+/* Hilangkan tombol +/- */
+button[data-testid="stNumberInputStepDown"],
+button[data-testid="stNumberInputStepUp"] {
+    display: none !important;
+}
+
+/* TOMBOL HIDE SIDEBAR — SELALU TERLIHAT */
+[data-testid="stSidebar"] button[kind="header"],
+[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] {
+    background: rgba(255,255,255,0.25) !important;
+    border: 2px solid rgba(255,255,255,0.50) !important;
+    border-radius: 8px !important;
+    opacity: 1 !important;
+}
+
+[data-testid="stSidebar"] button[kind="header"] svg *,
+[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] svg * {
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
+}
+
+[data-testid="collapsedControl"],
+[data-testid="stSidebarCollapsedControl"] {
+    background: #ffffff !important;
+    border: 2px solid #475569 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+}
+
+[data-testid="collapsedControl"] svg *,
+[data-testid="stSidebarCollapsedControl"] svg * {
+    fill: #0f172a !important;
+    stroke: #0f172a !important;
+}
+</style>
+"""
+
+
+def inject_input_style():
+    """Inject CSS khusus input — dipanggil di tiap page"""
+    import streamlit as st
+    st.markdown(CSS_INPUT_TIMBUL, unsafe_allow_html=True)
