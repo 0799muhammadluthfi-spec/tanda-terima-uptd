@@ -50,6 +50,7 @@ if "logo_b64" not in st.session_state:
 # INJECT CSS
 # ==========================================
 inject_css()
+inject_input_style()
 inject_welcome_css()
 
 # ==========================================
