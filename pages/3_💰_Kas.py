@@ -35,6 +35,7 @@ st.set_page_config(
 )
 
 inject_css()
+inject_input_style()
 wajib_login()
 
 # ==========================================
