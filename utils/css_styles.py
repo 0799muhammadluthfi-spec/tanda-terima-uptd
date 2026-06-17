@@ -453,41 +453,29 @@ CSS_GLOBAL = """
 
 CSS_INPUT_TIMBUL = """
 <style>
-/* INPUT PUTIH TIMBUL — VERSI INLINE PER HALAMAN */
-[data-baseweb="input"],
-[data-baseweb="base-input"] {
+/* ============ TEXT INPUT — PUTIH TIMBUL ============ */
+.main [data-testid="stTextInput"] [data-baseweb="input"] {
     background: #ffffff !important;
-    background-color: #ffffff !important;
     border: 2px solid #64748b !important;
     border-radius: 10px !important;
     box-shadow:
         0 4px 12px rgba(15, 23, 42, 0.10),
-        0 2px 4px rgba(15, 23, 42, 0.06),
-        inset 0 1px 0 rgba(255, 255, 255, 1) !important;
-    padding: 2px !important;
+        0 2px 4px rgba(15, 23, 42, 0.06) !important;
+    padding: 0 !important;
     transition: all 0.2s ease !important;
 }
 
-[data-baseweb="input"]:hover,
-[data-baseweb="base-input"]:hover {
+.main [data-testid="stTextInput"] [data-baseweb="input"]:hover {
     border-color: #334155 !important;
-    box-shadow:
-        0 6px 16px rgba(15, 23, 42, 0.14),
-        0 3px 6px rgba(15, 23, 42, 0.08) !important;
-    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.14) !important;
 }
 
-[data-baseweb="input"]:focus-within,
-[data-baseweb="base-input"]:focus-within {
-    background: #ffffff !important;
+.main [data-testid="stTextInput"] [data-baseweb="input"]:focus-within {
     border-color: #2563eb !important;
-    box-shadow:
-        0 0 0 4px rgba(37, 99, 235, 0.15),
-        0 6px 16px rgba(37, 99, 235, 0.12) !important;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15) !important;
 }
 
-[data-baseweb="input"] input,
-[data-baseweb="base-input"] input {
+.main [data-testid="stTextInput"] input {
     background: #ffffff !important;
     color: #0f172a !important;
     font-size: 0.92rem !important;
@@ -495,156 +483,46 @@ CSS_INPUT_TIMBUL = """
     padding: 10px 14px !important;
     border: none !important;
     outline: none !important;
-    box-shadow: none !important;
 }
 
-[data-baseweb="input"] input::placeholder,
-[data-baseweb="base-input"] input::placeholder {
-    color: #94a3b8 !important;
-    font-weight: 400 !important;
-}
-
-/* Selectbox */
-[data-testid="stSelectbox"] [data-baseweb="select"] > div {
+/* ============ NUMBER INPUT — PUTIH TIMBUL ============ */
+.main [data-testid="stNumberInput"] [data-baseweb="input"] {
     background: #ffffff !important;
     border: 2px solid #64748b !important;
     border-radius: 10px !important;
     box-shadow:
         0 4px 12px rgba(15, 23, 42, 0.10),
         0 2px 4px rgba(15, 23, 42, 0.06) !important;
+    transition: all 0.2s ease !important;
 }
 
-/* Text area */
-.stTextArea textarea {
+.main [data-testid="stNumberInput"] [data-baseweb="input"]:hover {
+    border-color: #334155 !important;
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.14) !important;
+}
+
+.main [data-testid="stNumberInput"] [data-baseweb="input"]:focus-within {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15) !important;
+}
+
+.main [data-testid="stNumberInput"] input {
     background: #ffffff !important;
     color: #0f172a !important;
-    border: 2px solid #64748b !important;
-    border-radius: 10px !important;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.10) !important;
     font-size: 0.92rem !important;
     font-weight: 600 !important;
     padding: 10px 14px !important;
+    border: none !important;
+    outline: none !important;
 }
 
-/* ============ NUMBER INPUT FIX ============ */
-
-/* Hilangkan SEMUA tombol +/- dan div pembungkusnya */
-[data-testid="stNumberInput"] button {
+/* Hilangkan tombol +/- */
+button[data-testid="stNumberInputStepDown"],
+button[data-testid="stNumberInputStepUp"] {
     display: none !important;
 }
 
-[data-testid="stNumberInput"] [data-baseweb="input"] > div:has(button) {
-    display: none !important;
-}
-
-/* Reset semua container number input */
-[data-testid="stNumberInput"] > div,
-[data-testid="stNumberInput"] > div > div {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    gap: 0 !important;
-    padding: 0 !important;
-}
-
-/* Box utama number input — putih timbul */
-[data-testid="stNumberInput"] [data-baseweb="input"] {
-    background: #ffffff !important;
-    border: 2px solid #64748b !important;
-    border-radius: 10px !important;
-    box-shadow:
-        0 4px 12px rgba(15, 23, 42, 0.10),
-        0 2px 4px rgba(15, 23, 42, 0.06) !important;
-    padding: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    min-height: 42px !important;
-}
-
-[data-testid="stNumberInput"] [data-baseweb="input"]:hover {
-    border-color: #334155 !important;
-}
-
-[data-testid="stNumberInput"] [data-baseweb="input"]:focus-within {
-    border-color: #2563eb !important;
-    box-shadow:
-        0 0 0 4px rgba(37, 99, 235, 0.15) !important;
-}
-
-/* Input number — area teks */
-[data-testid="stNumberInput"] input {
-    background: #ffffff !important;
-    color: #0f172a !important;
-    font-size: 0.92rem !important;
-    font-weight: 600 !important;
-    padding: 10px 14px !important;
-    border: none !important;
-    outline: none !important;
-    box-shadow: none !important;
-    width: 100% !important;
-    min-height: 38px !important;
-}
-/* Number input — hilangkan styling kurung */
-[data-testid="stNumberInput"] [data-baseweb="input"] {
-    background: #ffffff !important;
-    border: 2px solid #64748b !important;
-    border-radius: 10px !important;
-    box-shadow:
-        0 4px 12px rgba(15, 23, 42, 0.10),
-        0 2px 4px rgba(15, 23, 42, 0.06) !important;
-    padding: 0 !important;
-}
-
-[data-testid="stNumberInput"] [data-baseweb="input"] > div {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-}
-
-[data-testid="stNumberInput"] [data-baseweb="input"] input {
-    background: #ffffff !important;
-    color: #0f172a !important;
-    font-size: 0.92rem !important;
-    font-weight: 600 !important;
-    padding: 10px 14px !important;
-    border: none !important;
-    outline: none !important;
-    box-shadow: none !important;
-}
-
-/* TOMBOL HIDE SIDEBAR — SELALU TERLIHAT */
-[data-testid="stSidebar"] button[kind="header"],
-[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] {
-    background: rgba(255,255,255,0.25) !important;
-    border: 2px solid rgba(255,255,255,0.50) !important;
-    border-radius: 8px !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-}
-
-[data-testid="stSidebar"] button[kind="header"] svg *,
-[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] svg * {
-    fill: #ffffff !important;
-    stroke: #ffffff !important;
-}
-
-[data-testid="collapsedControl"],
-[data-testid="stSidebarCollapsedControl"] {
-    background: #ffffff !important;
-    border: 2px solid #475569 !important;
-    border-radius: 8px !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-}
-
-[data-testid="collapsedControl"] svg *,
-[data-testid="stSidebarCollapsedControl"] svg * {
-    fill: #0f172a !important;
-    stroke: #0f172a !important;
-}
-</style>
-"""
+/* ============ 
 
 
 CSS_WELCOME = """
