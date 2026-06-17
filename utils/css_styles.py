@@ -545,12 +545,7 @@ button[data-testid="stNumberInputStepUp"] {
     box-shadow: none !important;
 }
 
-/* Hilangkan kotak kurung [ ] di number input */
-[data-testid="stNumberInput"] [data-baseweb="input"] > div:first-child,
-[data-testid="stNumberInput"] [data-baseweb="input"] > div:last-child {
-    display: none !important;
-}
-
+/* Number input — hilangkan styling kurung */
 [data-testid="stNumberInput"] [data-baseweb="input"] {
     background: #ffffff !important;
     border: 2px solid #64748b !important;
@@ -558,6 +553,24 @@ button[data-testid="stNumberInputStepUp"] {
     box-shadow:
         0 4px 12px rgba(15, 23, 42, 0.10),
         0 2px 4px rgba(15, 23, 42, 0.06) !important;
+    padding: 0 !important;
+}
+
+[data-testid="stNumberInput"] [data-baseweb="input"] > div {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+[data-testid="stNumberInput"] [data-baseweb="input"] input {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 0.92rem !important;
+    font-weight: 600 !important;
+    padding: 10px 14px !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 /* TOMBOL HIDE SIDEBAR — SELALU TERLIHAT */
