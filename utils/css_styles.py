@@ -556,12 +556,13 @@ label[data-testid="stWidgetLabel"] p {
     padding: 12px 18px !important;
     cursor: pointer !important;
     transition: all 0.2s ease !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
     box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
     width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
     text-align: center !important;
+    display: block !important;
 }
 
 [data-testid="stCheckbox"] > label:hover {
