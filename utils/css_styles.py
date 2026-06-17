@@ -450,68 +450,65 @@ CSS_GLOBAL = """
 </style>
 """
 
-
 CSS_INPUT_TIMBUL = """
 <style>
-/* ============ TEXT INPUT — PUTIH TIMBUL ============ */
+/* ============ TEXT INPUT — ABU CLEAN ============ */
 .main [data-testid="stTextInput"] [data-baseweb="input"] {
-    background: #ffffff !important;
-    border: 2px solid #64748b !important;
+    background: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
     border-radius: 10px !important;
-    box-shadow:
-        0 4px 12px rgba(15, 23, 42, 0.10),
-        0 2px 4px rgba(15, 23, 42, 0.06) !important;
+    box-shadow: none !important;
     padding: 0 !important;
     transition: all 0.2s ease !important;
 }
 
 .main [data-testid="stTextInput"] [data-baseweb="input"]:hover {
-    border-color: #334155 !important;
-    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.14) !important;
+    background: #e2e8f0 !important;
+    border-color: #cbd5e1 !important;
 }
 
 .main [data-testid="stTextInput"] [data-baseweb="input"]:focus-within {
+    background: #ffffff !important;
     border-color: #2563eb !important;
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15) !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
 }
 
 .main [data-testid="stTextInput"] input {
-    background: #ffffff !important;
+    background: transparent !important;
     color: #0f172a !important;
-    font-size: 0.92rem !important;
-    font-weight: 600 !important;
-    padding: 10px 14px !important;
+    font-size: 0.95rem !important;
+    font-weight: 500 !important;
+    padding: 12px 16px !important;
     border: none !important;
     outline: none !important;
 }
 
-/* ============ NUMBER INPUT — PUTIH TIMBUL ============ */
+/* ============ NUMBER INPUT — ABU CLEAN ============ */
 .main [data-testid="stNumberInput"] [data-baseweb="input"] {
-    background: #ffffff !important;
-    border: 2px solid #64748b !important;
+    background: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
     border-radius: 10px !important;
-    box-shadow:
-        0 4px 12px rgba(15, 23, 42, 0.10),
-        0 2px 4px rgba(15, 23, 42, 0.06) !important;
+    box-shadow: none !important;
     transition: all 0.2s ease !important;
 }
 
 .main [data-testid="stNumberInput"] [data-baseweb="input"]:hover {
-    border-color: #334155 !important;
-    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.14) !important;
+    background: #e2e8f0 !important;
+    border-color: #cbd5e1 !important;
 }
 
 .main [data-testid="stNumberInput"] [data-baseweb="input"]:focus-within {
+    background: #ffffff !important;
     border-color: #2563eb !important;
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15) !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
 }
 
 .main [data-testid="stNumberInput"] input {
-    background: #ffffff !important;
+    background: transparent !important;
     color: #0f172a !important;
-    font-size: 0.92rem !important;
-    font-weight: 600 !important;
-    padding: 10px 14px !important;
+    font-size: 0.95rem !important;
+    font-weight: 500 !important;
+    padding: 12px 16px !important;
     border: none !important;
     outline: none !important;
 }
@@ -522,24 +519,48 @@ button[data-testid="stNumberInputStepUp"] {
     display: none !important;
 }
 
+/* ============ LABEL ============ */
+.main [data-testid="stTextInput"] label,
+.main [data-testid="stNumberInput"] label,
+.main .stSelectbox label,
+.main .stTextArea label {
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    color: #0f172a !important;
+    margin-bottom: 8px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.02em !important;
+}
+
 /* ============ SELECTBOX ============ */
 .main [data-testid="stSelectbox"] [data-baseweb="select"] > div {
-    background: #ffffff !important;
-    border: 2px solid #64748b !important;
+    background: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
     border-radius: 10px !important;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.10) !important;
+    box-shadow: none !important;
+}
+
+.main [data-testid="stSelectbox"] [data-baseweb="select"] > div:hover {
+    background: #e2e8f0 !important;
+    border-color: #cbd5e1 !important;
 }
 
 /* ============ TEXT AREA ============ */
 .main .stTextArea textarea {
-    background: #ffffff !important;
+    background: #f1f5f9 !important;
     color: #0f172a !important;
-    border: 2px solid #64748b !important;
+    border: 1px solid #e2e8f0 !important;
     border-radius: 10px !important;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.10) !important;
-    font-size: 0.92rem !important;
-    font-weight: 600 !important;
-    padding: 10px 14px !important;
+    box-shadow: none !important;
+    font-size: 0.95rem !important;
+    font-weight: 500 !important;
+    padding: 12px 16px !important;
+}
+
+.main .stTextArea textarea:focus {
+    background: #ffffff !important;
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
 }
 
 /* ============ TOMBOL HIDE SIDEBAR ============ */
@@ -569,7 +590,6 @@ button[data-testid="stNumberInputStepUp"] {
 }
 </style>
 """
-
 CSS_WELCOME = """
 <style>
     .welcome-wrapper {
