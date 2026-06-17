@@ -526,25 +526,64 @@ CSS_INPUT_TIMBUL = """
     padding: 10px 14px !important;
 }
 
-/* Hilangkan tombol +/- */
-button[data-testid="stNumberInputStepDown"],
-button[data-testid="stNumberInputStepUp"] {
+/* ============ NUMBER INPUT FIX ============ */
+
+/* Hilangkan SEMUA tombol +/- dan div pembungkusnya */
+[data-testid="stNumberInput"] button {
     display: none !important;
-    visibility: hidden !important;
-    width: 0 !important;
-    height: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border: none !important;
-    pointer-events: none !important;
 }
 
-[data-testid="stNumberInput"] > div {
-    gap: 0 !important;
+[data-testid="stNumberInput"] [data-baseweb="input"] > div:has(button) {
+    display: none !important;
+}
+
+/* Reset semua container number input */
+[data-testid="stNumberInput"] > div,
+[data-testid="stNumberInput"] > div > div {
+    background: transparent !important;
     border: none !important;
     box-shadow: none !important;
+    gap: 0 !important;
+    padding: 0 !important;
 }
 
+/* Box utama number input — putih timbul */
+[data-testid="stNumberInput"] [data-baseweb="input"] {
+    background: #ffffff !important;
+    border: 2px solid #64748b !important;
+    border-radius: 10px !important;
+    box-shadow:
+        0 4px 12px rgba(15, 23, 42, 0.10),
+        0 2px 4px rgba(15, 23, 42, 0.06) !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    min-height: 42px !important;
+}
+
+[data-testid="stNumberInput"] [data-baseweb="input"]:hover {
+    border-color: #334155 !important;
+}
+
+[data-testid="stNumberInput"] [data-baseweb="input"]:focus-within {
+    border-color: #2563eb !important;
+    box-shadow:
+        0 0 0 4px rgba(37, 99, 235, 0.15) !important;
+}
+
+/* Input number — area teks */
+[data-testid="stNumberInput"] input {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 0.92rem !important;
+    font-weight: 600 !important;
+    padding: 10px 14px !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    min-height: 38px !important;
+}
 /* Number input — hilangkan styling kurung */
 [data-testid="stNumberInput"] [data-baseweb="input"] {
     background: #ffffff !important;
